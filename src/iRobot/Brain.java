@@ -1,7 +1,5 @@
 package iRobot;
 
-import java.awt.Point;
-
 /**
  * Where the main computation happens. Contains instances of the map, and the
  * robotData, and uses the mapper, the explorer/solver, and the instruction
@@ -21,8 +19,8 @@ public class Brain {
 	private RobotData robotData;
 	private Map map;
 
-	public Brain() {
-		robotData = new RobotData();
+	public Brain(RobotData robotData) {
+		this.robotData = robotData;
 		map = new Map();
 	}
 
@@ -68,9 +66,5 @@ public class Brain {
 
 	public boolean isFinished() {
 		return (robotData.getPhase() == Phase.FINISHED);
-	}
-
-	public void calibrate(int offset, Point leftLocal, Point rightLocal) {
-		robotData.calibrate(offset, leftLocal, rightLocal);
 	}
 }

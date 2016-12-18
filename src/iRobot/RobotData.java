@@ -1,6 +1,6 @@
 package iRobot;
 
-import java.awt.Point; // Stores ints as coordinates. 
+import java.awt.Point; // Stores two ints as coordinates. 
 // ^Will be quick to implement in C++.
 
 public class RobotData {
@@ -8,7 +8,7 @@ public class RobotData {
 	 * In degrees, from 0 to 360, the orientation relative to the starting
 	 * orientation.
 	 */
-	private int relativeOrientation;
+	private double relativeOrientation;
 
 	/*
 	 * orientationOffset corresponds to the amount of degrees that our robot is
@@ -20,7 +20,7 @@ public class RobotData {
 	 * direction in the maze (north/east/south/west) (where the other directions
 	 * are 90, 180, and 270).
 	 */
-	private int orientationOffset;
+	private double orientationOffset;
 
 	/*
 	 * ^Might need a way to calibrate this at the start of the maze. The robot
@@ -60,11 +60,15 @@ public class RobotData {
 
 	private Node path; // Will be a list of references to nodes in the map.
 
-	public RobotData() {
+	public RobotData(double orientationOffset, Point leftLocal,
+			Point rightLocal) {
+
+		this.orientationOffset = orientationOffset;
+		leftMotorLocal = leftLocal;
+		rightMotorLocal = rightLocal;
+
 		relativeOrientation = 0;
 		currentTile = new Point(0, 0);
-		leftMotorLocal = new Point(0, 0);
-		rightMotorLocal = new Point(0, 0); // Will be changed after calibration.
 
 		goalTile = new Point(7, 7); // Todo: Check that this is correct.
 		phase = Phase.EXPLORING;
@@ -75,23 +79,56 @@ public class RobotData {
 	}
 
 	/*
-	 * Sets the orientation offset, and the motors' local values in the tile.
-	 */
-	public void calibrate(int offset, Point leftLocal, Point rightLocal) {
-		assert (phase == Phase.EXPLORING); // To make sure we don't change this
-											// in a later phase.
-		// ^(not a complete safety check)
-
-		orientationOffset = offset;
-		leftMotorLocal = leftLocal;
-		rightMotorLocal = rightLocal;
-	}
-
-	/*
 	 * Updates the orientation, location, phase, and path of the robot. It only
 	 * alters the path by removing the head if it reached the head's location.
 	 */
 	public void updateData(SensorData sensorData) {
-		// Todo
+		double orientationChange = sensorData.IMU - relativeOrientation;
+		relativeOrientation = sensorData.IMU;
+
+		/*
+		 * In calculating the new local motor points, we need to take into
+		 * account the distance the motors travelled (the tachos), the
+		 * orientation change (which corresponds to rotation), and the front IR
+		 * sensor distance. Note that the left and right IR sensors only give
+		 * 0/1's and thus cannot be used in calculating the location of the
+		 * motors.
+		 * 
+		 * If we have the front IR sensor then using that and the true
+		 * orientation is all that is needed.
+		 */
+
+		if (sensorData.frontIR != -1) {
+			Point frontIRLocation;
+
+			/*
+			 * Todo: Calculate local location of the front IR, then use that to
+			 * find the location of the motors (which should be a quick
+			 * calculation given that they are physically attached).
+			 */
+		} else {
+			/*
+			 * Todo: Use the change in orientation and the tacho lengths to
+			 * calculate the new motor locations by calculating the motor arcs.
+			 * Will require trig.
+			 * 
+			 * Note that to account for slippage, we could assume that the
+			 * larger tacho count is the accurate one, because in turning the
+			 * near motor usually encounters slippage, whereas the far one
+			 * doesn't.
+			 */
+		}
+
+		/*
+		 * Todo: Using the new motor locations, update the current tile that the
+		 * motor is in. Also remove the tile from the path. Note that if the two
+		 * motors are in two different tiles, the current tile doesn't get
+		 * updated.
+		 */
+
+		/*
+		 * Todo: Update the phase of the robot. If the robot reached its goal,
+		 * then it should change to the next phase.
+		 */
 	}
 }
