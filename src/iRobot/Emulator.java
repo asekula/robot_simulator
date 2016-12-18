@@ -29,6 +29,8 @@ public class Emulator implements Environment {
 	}
 
 	public void runMotors(int left, int right) {
-		return;
+	}
+
+	public void resetTachoCounts() {
 	}
 }

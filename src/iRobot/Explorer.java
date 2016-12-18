@@ -8,6 +8,9 @@ public class Explorer {
 	 * the robot should go.
 	 */
 	public static void modifyPath(Map map, RobotData robotData) {
+		// Note: Only looks at robotData's current tile and path.
+		// Only modifies the path.
 
+		// Runs A*
 	}
 }
