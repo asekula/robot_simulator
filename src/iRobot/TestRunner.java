@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.awt.Point;
+
 /**
  * The main of the codebase. Runs the tests. Contains a Brain, Buffer, and
  * Emulator object.
@@ -18,9 +20,9 @@ public class TestRunner {
 		SensorData sensorData;
 		MotorData motorData;
 
-		// Todo: Calibrate orientation. See RobotData.java as for why.
-		int orientationOffset = 0;
-		brain.setOrientationOffset(orientationOffset);
+		// Todo: Calibrate orientation and local motor locations. See
+		// RobotData.java as for why.
+		brain.calibrate(0, new Point(0, 0), new Point(0, 0));
 
 		do {
 			sensorData = buffer.getSensorData(); // SensorData may contain noisy

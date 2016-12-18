@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.awt.Point;
+
 /**
  * Where the main computation happens. Contains instances of the map, and the
  * robotData, and uses the mapper, the explorer/solver, and the instruction
@@ -49,6 +51,11 @@ public class Brain {
 		} else {
 			Solver.modifyPath(map, robotData); // Does nothing if it already
 												// found a path.
+			/*
+			 * Q: Should we even include this? We could alternatively compute
+			 * the solution right after it changes phases in updateData, but
+			 * here it's more explicit.
+			 */
 		}
 
 		/*
@@ -63,7 +70,7 @@ public class Brain {
 		return (robotData.getPhase() == Phase.FINISHED);
 	}
 
-	public void setOrientationOffset(int offset) {
-		robotData.setOrientationOffset(offset);
+	public void calibrate(int offset, Point leftLocal, Point rightLocal) {
+		robotData.calibrate(offset, leftLocal, rightLocal);
 	}
 }

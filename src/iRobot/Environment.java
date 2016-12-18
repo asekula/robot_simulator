@@ -19,4 +19,6 @@ public interface Environment {
 	public int readRightTacho();
 
 	public void runMotors(int left, int right);
+
+	public void resetTachoCounts();
 }

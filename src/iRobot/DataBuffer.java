@@ -9,10 +9,13 @@ public class DataBuffer {
 	}
 
 	public SensorData getSensorData() {
+		int leftTacho = environment.readLeftTacho();
+		int rightTacho = environment.readRightTacho();
+		environment.resetTachoCounts();
+
 		return new SensorData(environment.readLeftIR(),
 				environment.readRightIR(), environment.readFrontIR(),
-				environment.readIMU(), environment.readLeftTacho(),
-				environment.readRightTacho());
+				environment.readIMU(), leftTacho, rightTacho);
 	}
 
 	public void moveRobotMotors(MotorData motorData) {
