@@ -1,10 +1,8 @@
 package iRobot;
 
-/**
+/*
  * The main of the codebase. Runs the tests. Contains a Brain, Buffer, and
  * Emulator object.
- * 
- * @author alex
  */
 
 public class TestRunner {

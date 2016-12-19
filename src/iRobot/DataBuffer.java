@@ -13,7 +13,7 @@ public class DataBuffer {
 	public SensorData getSensorData() {
 		int leftTacho = environment.readLeftTacho();
 		int rightTacho = environment.readRightTacho();
-		environment.resetTachoCounts();
+		environment.resetTachoCounts(); // Note: Resetting tacho counts.
 
 		return new SensorData(environment.readLeftIR(),
 				environment.readRightIR(), environment.readFrontIR(),
@@ -30,6 +30,6 @@ public class DataBuffer {
 		 * Todo: Spin the robot around and find the orientation offset, and the
 		 * local locations of the left and right motors.
 		 */
-		return new RobotData(0, new Point(0, 0), new Point(0, 0));
+		return new RobotData(0, new Point(0, 0));
 	}
 }
