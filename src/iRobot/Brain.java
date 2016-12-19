@@ -1,12 +1,9 @@
 package iRobot;
 
-/**
+/*
  * Where the main computation happens. Contains instances of the map, and the
  * robotData, and uses the mapper, the explorer/solver, and the instruction
  * generator.
- * 
- * @author alex
- *
  */
 public class Brain {
 

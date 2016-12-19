@@ -7,6 +7,6 @@ public class Solver {
 	 * goals.
 	 */
 	public static void modifyPath(Map map, RobotData robotData) {
-
+		// Runs Dijkstra's.
 	}
 }

@@ -19,5 +19,6 @@ public class Mapper {
 		 * tile, and local motor location to figure out if there is a wall on
 		 * it's sides (note that it may not be able to figure that out.
 		 */
+
 	}
 }
