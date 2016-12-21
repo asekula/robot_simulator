@@ -4,13 +4,14 @@ package iRobot;
 // (supposedly something that Steve will do)
 public interface Environment {
 
-	// We shouldn't forget to implement random noise in the sensor data.
+	// Important: Expecting distances in centimeters. We can change this if
+	// necessary.
 
-	public boolean readLeftIR();
+	public int readLeftIR();
 
-	public boolean readRightIR();
+	public int readRightIR();
 
-	public int readFrontIR();
+	public double readFrontIR();
 
 	public long readIMU();
 
