@@ -4,15 +4,15 @@ public class Emulator implements Environment {
 
 	// We shouldn't forget to implement random noise in the sensor data.
 
-	public boolean readLeftIR() {
-		return true;
+	public int readLeftIR() {
+		return -1;
 	}
 
-	public boolean readRightIR() {
-		return true;
+	public int readRightIR() {
+		return -1;
 	}
 
-	public int readFrontIR() {
+	public double readFrontIR() {
 		return 0;
 	}
 

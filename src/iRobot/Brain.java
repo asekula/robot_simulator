@@ -62,6 +62,7 @@ public class Brain {
 	}
 
 	public boolean isFinished() {
-		return (robotData.getPhase() == Phase.FINISHED);
+		return (false); // Todo: Figure out what to do here.
+		// Q: Do we want to stop the robot ever?
 	}
 }
