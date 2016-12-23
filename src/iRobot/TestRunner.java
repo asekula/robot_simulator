@@ -24,6 +24,10 @@ public class TestRunner {
 													// data.
 			motorData = brain.computeMotorData(sensorData);
 			buffer.moveRobotMotors(motorData);
+			// Q: Should wait between iterations to save computation/have more
+			// accurate data? Tacho counts may be too low if we call
+			// getSensorData too quickly.
+			// (maybe arduino is slow anyways, in which case no need)
 		} while (!brain.isFinished());
 	}
 }
