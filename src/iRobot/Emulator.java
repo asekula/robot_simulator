@@ -16,7 +16,7 @@ public class Emulator implements Environment {
 		return 0;
 	}
 
-	public long readIMU() {
+	public int readIMU() {
 		return 0;
 	}
 

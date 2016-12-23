@@ -34,7 +34,7 @@ public class DataBuffer {
 	public RobotData calibrate() {
 		/*
 		 * Todo: Spin the robot around and find the orientation offset, and the
-		 * local locations of the left and right motors.
+		 * location in the current tile.
 		 */
 		return new RobotData(0, new Point<Double>(0.0, 0.0));
 	}

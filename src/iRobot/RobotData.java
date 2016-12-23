@@ -14,9 +14,6 @@ public class RobotData {
 
 	private static final double DISTANCE_BETWEEN_MOTORS = 5;
 
-	// Pertaining the IMU.
-	private static final int ANGLES_PER_ROTATION = 360;
-
 	// The center of the maze is at (CENTER_CELL, CENTER_CELL).
 	private static final int CENTER_CELL = 7;
 
@@ -33,7 +30,12 @@ public class RobotData {
 	/*
 	 * In degrees, from 0 to 360, the orientation relative to the starting true
 	 * orientation, which is 0. It is true because 0, 90, 180, and 270 refer
-	 * exactly to North/East/South/West in the maze.
+	 * exactly to East, North, West, and South respectively.
+	 * 
+	 * Important: The robot starts out at cell (0,0) looking towards (+inf, 0),
+	 * i.e. EAST. 0 degrees is EAST.
+	 * 
+	 * Also important: Angles increase counter-clockwise, like in trig.
 	 */
 	private double trueOrientation;
 
@@ -76,10 +78,6 @@ public class RobotData {
 
 	private Path path; // Will be a list of references to nodes in the map.
 
-	// -1 means no data. 0 is nothing, 1 is something.
-	// Q: Is the L/R IR data precise enough to be useful?
-	private int prevRightIR, prevLeftIR;
-
 	public RobotData(double orientationOffset, Point<Double> location) {
 
 		this.orientationOffset = orientationOffset;
@@ -90,9 +88,6 @@ public class RobotData {
 		currentCell = new Point<Integer>(0, 0);
 		goalCell = new Point<Integer>(CENTER_CELL, CENTER_CELL);
 		phase = Phase.EXPLORING;
-
-		prevRightIR = -1;
-		prevLeftIR = -1;
 	}
 
 	public Phase getPhase() {
@@ -104,17 +99,14 @@ public class RobotData {
 	 */
 	public void updateData(SensorData sensorData) {
 
-		// Updates orientation.
-		double newTrueOrientation = (sensorData.IMU + orientationOffset)
-				% ANGLES_PER_ROTATION;
-		double orientationChange = (newTrueOrientation - trueOrientation)
-				% ANGLES_PER_ROTATION;
+		// Updates orientation. Values will be positive.
+		double newTrueOrientation = ((sensorData.IMU + orientationOffset) + 360)
+				% 360;
+		double orientationChange = ((newTrueOrientation - trueOrientation)
+				+ 360) % 360;
 		trueOrientation = newTrueOrientation;
 
 		updateLocationInCell(sensorData, orientationChange);
-
-		prevLeftIR = sensorData.leftIR;
-		prevRightIR = sensorData.rightIR;
 
 		updateCurrentCell();
 		updatePath();
@@ -122,29 +114,75 @@ public class RobotData {
 	}
 
 	/*
-	 * Uses the change in orientation and the tacho lengths to calculate the new
-	 * locations in cell by calculating the motor arcs. Will require trig.
+	 * In calculating the new location in the cell, we need to take into account
+	 * the distance the motors traveled (the tachos), the orientation change
+	 * (which corresponds to rotation), and the front IR sensor distance. Note
+	 * that the left and right IR sensors only give 0/1's.
 	 * 
-	 * Note that to account for slippage, we could assume that the larger tacho
-	 * count is the accurate one, because in turning the near motor usually
-	 * encounters slippage, whereas the far one doesn't. There might be a better
-	 * way of calculating this.
+	 * If the front IR sensor value isn't -1 then we can figure out one of the
+	 * two coordinates of the motors.
+	 * 
+	 * Tries to rely as little as possible on the previous locationInCell. This
+	 * ensures that if we have to make approximations then small errors won't
+	 * snowball into bigger ones.
 	 * 
 	 * Only modifies locationInCell.
 	 */
 	private void updateLocationInCell(SensorData sensorData,
 			double orientationChange) {
 		/*
-		 * In calculating the new location in the cell, we need to take into
-		 * account the distance the motors traveled (the tachos), the
-		 * orientation change (which corresponds to rotation), and the front IR
-		 * sensor distance. Note that the left and right IR sensors only give
-		 * 0/1's and thus cannot be used in calculating the location of the
-		 * motors.
+		 * Important: For now, using a very simple method. This is just so that
+		 * we can start testing sooner, but eventually we will scrap this code
+		 * and replace it with more feedback-oriented code that will hopefully
+		 * have distance sensors on the sides.
 		 * 
-		 * If we have the front IR sensor then we can figure out one of the two
-		 * coordinates of the motors.
+		 * The simple method is as such: Either the robot is moving in a
+		 * straight line or it is rotating in place.
 		 */
+
+		if (within(orientationChange, 0, 5)) {
+			int tachoAvg = (sensorData.leftTachoCount
+					+ sensorData.rightTachoCount) / 2;
+			double distanceMoved = tachoToCM(tachoAvg);
+
+			// Assuming the robot moved in a straight line.
+			locationInCell.x += (distanceMoved
+					* Math.cos(trueOrientation * Math.PI / 180));
+			locationInCell.y += (distanceMoved
+					* Math.sin(trueOrientation * Math.PI / 180));
+
+			// Not worrying about bounds here, handled in updateCurrentCell.
+		}
+
+		// Assuming that if the orientation changed, it did not move (part of
+		// the simple method).
+	}
+
+	/*
+	 * Assuming that it is aligned with one of the four directions.
+	 */
+	private Direction getDirectionFacing() {
+		int error = 5;
+
+		if (within(trueOrientation, 0, error))
+			return Direction.EAST;
+		if (within(trueOrientation, 90, error))
+			return Direction.NORTH;
+		if (within(trueOrientation, 180, error))
+			return Direction.WEST;
+		if (within(trueOrientation, 270, error))
+			return Direction.SOUTH;
+
+		return Direction.NORTH; // Q: Throw error?
+	}
+
+	private double tachoToCM(int tacho) {
+		double circumference = WHEEL_DIAMETER * Math.PI;
+		return circumference * (((double) tacho) / TACHOS_PER_ROTATION);
+	}
+
+	private boolean within(double a, double b, double error) {
+		return (Math.abs(a - b) <= error);
 	}
 
 	/*
@@ -163,8 +201,8 @@ public class RobotData {
 		if (locationInCell.y >= CELL_WIDTH)
 			setCurrentToAdjacentCell(Direction.NORTH);
 
-		locationInCell.x = locationInCell.x % CELL_WIDTH;
-		locationInCell.y = locationInCell.y % CELL_WIDTH;
+		locationInCell.x = (locationInCell.x + CELL_WIDTH) % CELL_WIDTH;
+		locationInCell.y = (locationInCell.y + CELL_WIDTH) % CELL_WIDTH;
 	}
 
 	/*

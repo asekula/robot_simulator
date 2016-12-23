@@ -14,11 +14,11 @@ public class SensorData {
 	public int rightIR;
 	public double frontIR;
 	public double IMU;
-	public long leftTachoCount;
-	public long rightTachoCount;
+	public int leftTachoCount;
+	public int rightTachoCount;
 
 	public SensorData(int leftIR, int rightIR, double frontIR, double IMU,
-			long leftTacho, long rightTacho) {
+			int leftTacho, int rightTacho) {
 		this.leftIR = leftIR;
 		this.rightIR = rightIR;
 		this.frontIR = frontIR;
