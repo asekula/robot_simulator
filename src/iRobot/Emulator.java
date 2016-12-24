@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.awt.*;
+
 public class Emulator implements Environment {
 
 	// We shouldn't forget to implement random noise in the sensor data.
@@ -28,9 +30,18 @@ public class Emulator implements Environment {
 		return 0;
 	}
 
-	public void runMotors(int left, int right) {
+	// For now, these values are speed.
+	public void setMotors(int left, int right) {
 	}
 
 	public void resetTachoCounts() {
+	}
+
+	public void moveRobot() {
+
+	}
+
+	public void drawEnvironment(Graphics g) {
+
 	}
 }

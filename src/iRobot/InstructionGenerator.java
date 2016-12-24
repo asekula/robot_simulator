@@ -26,7 +26,7 @@ public class InstructionGenerator {
 
 		Point<Integer> nextCell = robotData.nextCell();
 		Point<Integer> current = robotData.getCurrentCell();
-		assert (isNeighbor(nextCell, current));
+		assert (isNeighbor(nextCell, current)); // Maybe remove this.
 		Direction intendedDirection = current.directionTo(nextCell);
 
 		if (robotData.alignedWithMainDirection()

@@ -19,7 +19,7 @@ public class DataBuffer {
 	}
 
 	public void moveRobotMotors(MotorData motorData) {
-		environment.runMotors(motorData.leftMotorValue,
+		environment.setMotors(motorData.leftMotorValue,
 				motorData.rightMotorValue);
 	}
 

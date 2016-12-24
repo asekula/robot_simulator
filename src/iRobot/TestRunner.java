@@ -19,6 +19,12 @@ public class TestRunner {
 		SensorData sensorData;
 		MotorData motorData;
 
+		/*
+		 * Note: The code below doesn't use multithreading. This class is really
+		 * just an outline for what the code will be when we run it on the
+		 * robot.
+		 */
+
 		do {
 			sensorData = buffer.getSensorData(); // SensorData may contain noisy
 													// data.
