@@ -161,7 +161,7 @@ public class RobotData {
 	/*
 	 * Assuming that it is aligned with one of the four directions.
 	 */
-	private Direction getDirectionFacing() {
+	public Direction getDirectionFacing() {
 		int error = 5;
 
 		if (within(trueOrientation, 0, error))
@@ -174,6 +174,14 @@ public class RobotData {
 			return Direction.SOUTH;
 
 		return Direction.NORTH; // Q: Throw error?
+	}
+
+	public boolean alignedWithMainDirection() {
+		double error = 5;
+		return (within(trueOrientation, 0, error)
+				|| within(trueOrientation, 90, error)
+				|| within(trueOrientation, 180, error)
+				|| within(trueOrientation, 270, error));
 	}
 
 	private double tachoToCM(int tacho) {
@@ -278,5 +286,9 @@ public class RobotData {
 				goalCell = new Point<Integer>(CENTER_CELL, CENTER_CELL);
 				break;
 		}
+	}
+
+	public Point<Integer> getCurrentCell() {
+		return currentCell;
 	}
 }
