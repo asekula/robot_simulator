@@ -18,6 +18,7 @@ public class Mapper {
 
 		if (robotData.alignedWithMainDirection()
 				&& map.needsWallData(robotData.getCurrentCell())) {
+
 			Direction facing = robotData.getDirectionFacing();
 			Direction left = facing.left(), right = facing.right();
 			Point<Integer> current = robotData.getCurrentCell();
