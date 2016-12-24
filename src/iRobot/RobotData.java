@@ -291,4 +291,12 @@ public class RobotData {
 	public Point<Integer> getCurrentCell() {
 		return currentCell;
 	}
+
+	public Point<Integer> nextCell() {
+		return path.getNextCell();
+	}
+
+	public double getTrueOrientation() {
+		return trueOrientation;
+	}
 }
