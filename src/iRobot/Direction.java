@@ -15,4 +15,17 @@ public enum Direction {
 	public Direction right() {
 		return Direction.values()[((value / 90) + 3) % 4];
 	}
+
+	// Assuming that orientation is one of 0, 90, 180, 270.
+	public static Direction getDirection(double orientation) {
+		if (orientation == 0) {
+			return Direction.EAST;
+		} else if (orientation == 90) {
+			return Direction.NORTH;
+		} else if (orientation == 180) {
+			return Direction.WEST;
+		} else {
+			return Direction.SOUTH;
+		}
+	}
 }
