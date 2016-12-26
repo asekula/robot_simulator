@@ -23,10 +23,6 @@ public class TestRunner {
 		SensorData sensorData;
 		MotorData motorData;
 
-		/*
-		 * 
-		 */
-
 		do {
 			sensorData = buffer.getSensorData(); // SensorData may contain noisy
 													// data.
