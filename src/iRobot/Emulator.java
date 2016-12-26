@@ -80,6 +80,8 @@ public class Emulator implements Environment {
 	 * Updates a single LR sensor. angle should be either 90 (left) or 270
 	 * (right). This is really just to reuse code instead of having the same
 	 * chunk of code twice in updateIRSensors. Angle is in degrees.
+	 * 
+	 * Maybe clean this code up (and maybe merge into code above).
 	 */
 	private void updateLRSensor(int angle) {
 		Point<Double> sensorLocation;
@@ -99,7 +101,6 @@ public class Emulator implements Environment {
 			} else if (angle == 270) {
 				rightIR = 0;
 			}
-
 		} else {
 			if (angle == 90) {
 				leftIR = 1;
@@ -142,15 +143,115 @@ public class Emulator implements Environment {
 	 * 
 	 * Returns -1 if there is no wall within the maxDist, otherwise returns the
 	 * distance in cm.
+	 * 
+	 * Important: Assuming that maxDist <= 15. This ensures that no matter where
+	 * the sensor is located, there will be a maximum of two walls that will be
+	 * in its line of sight. In other words, we only need to check for the
+	 * existence of two walls, and if neither exist then we know that the sensor
+	 * did not detect a wall.
 	 */
 	private double getDistanceToNearestWall(Point<Double> location,
 			double orientation, double maxDist) {
-		// Todo.
-		return 0;
+		assert (maxDist < Constants.CELL_WIDTH); // See important comment above.
+
+		if (orientation == 0 || orientation == 90 || orientation == 180
+				|| orientation == 270) {
+			// Simpler if we handle these cases seperately.
+
+			double xGridLine = Math.ceil(location.x / Constants.CELL_WIDTH)
+					* Constants.CELL_WIDTH;
+			double yGridLine = Math.ceil(location.y / Constants.CELL_WIDTH)
+					* Constants.CELL_WIDTH;
+
+			if (orientation == 0) {
+				if (map.wallAt(new Point<Double>(xGridLine, location.y))) {
+					return xGridLine - location.x;
+				} else {
+					return -1;
+				}
+			} else if (orientation == 90) {
+				if (map.wallAt(new Point<Double>(location.x, yGridLine))) {
+					return yGridLine - location.y;
+				} else {
+					return -1;
+				}
+			} else {
+				xGridLine = xGridLine - Constants.CELL_WIDTH;
+				yGridLine = yGridLine - Constants.CELL_WIDTH;
+				if (orientation == 180) {
+					if (map.wallAt(new Point<Double>(xGridLine, location.y))) {
+						return location.x - xGridLine;
+					} else {
+						return -1;
+					}
+				} else { // orientation == 270
+					if (map.wallAt(new Point<Double>(location.x, yGridLine))) {
+						return location.y - yGridLine;
+					} else {
+						return -1;
+					}
+				}
+			}
+		} else {
+			// Line along which we're looking: y = mx + b
+			double m = Math.tan(Math.toRadians(orientation));
+			assert (m != 0); // Handled these cases above.
+			double b = location.y - (location.x * m);
+
+			// Want to find intersection of the line with two grid lines.
+			// (grid lines are lines where walls can be located)
+			double xGridLine;
+			double yGridLine;
+
+			if (orientation > 0 && orientation < 180) {
+				yGridLine = Math.ceil(location.y / Constants.CELL_WIDTH)
+						* Constants.CELL_WIDTH;
+			} else {
+				yGridLine = Math.floor(location.y / Constants.CELL_WIDTH)
+						* Constants.CELL_WIDTH;
+			}
+
+			if (orientation < 90 || orientation > 270) {
+				xGridLine = Math.ceil(location.x / Constants.CELL_WIDTH)
+						* Constants.CELL_WIDTH;
+			} else {
+				xGridLine = Math.floor(location.x / Constants.CELL_WIDTH)
+						* Constants.CELL_WIDTH;
+			}
+
+			double yIntercept = xGridLine * m + b;
+			double xGridLineDistance = Math
+					.sqrt(Math.pow((xGridLine - location.x), 2)
+							+ Math.pow(yIntercept - location.y, 2));
+
+			// x = (y - b) / m. Assuming m != 0.
+			double xIntercept = (yGridLine - b) / m;
+			double yGridLineDistance = Math
+					.sqrt(Math.pow(xIntercept - location.x, 2)
+							+ Math.pow(yGridLine - location.y, 2));
+
+			boolean wallAtXGridLine = map
+					.wallAt(new Point<Double>(xGridLine, yIntercept));
+			boolean wallAtYGridLine = map
+					.wallAt(new Point<Double>(xIntercept, yGridLine));
+
+			if (wallAtXGridLine && wallAtYGridLine) {
+				return Math.min(xGridLineDistance, yGridLineDistance);
+			} else if (wallAtXGridLine) {
+				return xGridLineDistance;
+			} else if (wallAtYGridLine) {
+				return yGridLineDistance;
+			} else {
+				return -1;
+			}
+		}
 	}
 
 	private void curveRobot(double theta, double leftArc, double rightArc) {
 		// Todo.
+
+		// Don't forget to check if the robot hit a wall.
+		// Todo: Figure out how to handle these errors.
 	}
 
 	/*

@@ -63,9 +63,12 @@ public class TestApplet extends Applet {
 		}.start();
 	}
 
+	/*
+	 * Delay so that we can actually look at the simulation.
+	 */
 	private void delay() {
 		try {
-			Thread.sleep(10);
+			Thread.sleep(30);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
