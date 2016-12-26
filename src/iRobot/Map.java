@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.awt.*;
+
 public class Map {
 
 	// Todo: Fill this with necessary variables and methods.
@@ -38,5 +40,9 @@ public class Map {
 
 	public boolean wallAt(Point<Double> p) {
 		return false;
+	}
+
+	public void drawMaze(Graphics g) {
+		// Can be recursive.
 	}
 }

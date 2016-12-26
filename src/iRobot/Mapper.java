@@ -16,6 +16,16 @@ public class Mapper {
 		 * main directions.
 		 */
 
+		/*
+		 * Should probably only do mapping if it's within a certain area in the
+		 * current cell, to avoid edge cases where it's moving from one cell to
+		 * another and it detects a cell change but the sensors still see the
+		 * previous wall.
+		 * 
+		 * Todo: Check if the robot locationInCell is within a smaller square
+		 * inside the current cell, and if so, then perform mapping.
+		 */
+
 		if (robotData.alignedWithMainDirection()
 				&& map.needsWallData(robotData.getCurrentCell())) {
 

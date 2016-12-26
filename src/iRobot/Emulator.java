@@ -259,18 +259,51 @@ public class Emulator implements Environment {
 		}
 	}
 
+	/*
+	 * Theta is relative to current orientation.
+	 * 
+	 * Important: Theta is positive if turning left. Negative if turning right.
+	 * Also important: theta is in radians.
+	 */
 	private void curveRobot(double theta, double leftArc, double rightArc) {
-		// Todo.
-
 		// Don't forget to check if the robot hit a wall.
 		// Todo: Figure out how to handle these errors.
+
+		// Todo: Check that method holds in all cases. Also double check math.
+		// Also todo: Test this.
+
+		double phi = (Math.PI - Math.abs(theta)) / 2; // In radians.
+		double radius = Math.abs(Math.max(leftArc, rightArc) / theta);
+		double innerRadius = Math.abs(Math.min(leftArc, rightArc) / theta);
+		double radiusToCenter;
+
+		if (sameSign(leftArc, rightArc) == 1) {
+			double fixedInnerRadius = (radius
+					- Constants.DISTANCE_BETWEEN_MOTORS + innerRadius) / 2;
+			radiusToCenter = fixedInnerRadius
+					+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		} else {
+			// radius is always the larger radius.
+			radiusToCenter = radius - (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		}
+
+		double halfTheta = Math.abs(theta) / 2;
+		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
+		double phiDegrees = (Math.toDegrees(phi) + 360) % 360;
+		double relativeAngle = (450 - phiDegrees) % 360; // Equiv to 90 - phi.
+
+		if (theta > 0) {
+			locationInMaze = getRelativePoint(relativeAngle, hypotenuse);
+		} else {
+			locationInMaze = getRelativePoint(360 - relativeAngle, hypotenuse);
+		}
 	}
 
 	/*
 	 * If a and b are the same sign, then this returns 1, otherwise it returns
 	 * -1. Treats 0 as having both signs.
 	 */
-	private int sameSign(int a, int b) {
+	private int sameSign(double a, double b) {
 		if ((a * b) >= 0)
 			return 1;
 		else
@@ -287,13 +320,26 @@ public class Emulator implements Environment {
 	 * how well the localization code works.
 	 */
 	public void drawEnvironment(Graphics g, RobotData robotData) {
-		Graphics2D g2 = (Graphics2D) g;
-		g2.rotate(Math.toRadians(orientation), locationInMaze.x * 5 + 25,
-				locationInMaze.y * 5 + 25);
-		g2.drawRect((int) (locationInMaze.x * 5), (int) (locationInMaze.y * 5),
-				50, 50); // Saying that robot is a 10cm/10cm rectangle.
 
-		// Todo: Finish.
+		// For now, only drawing robot.
+		int scaleFactor = 10;
+
+		double rotateX = locationInMaze.x
+				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		double rotateY = locationInMaze.y
+				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+
+		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
+
+		Graphics2D g2 = (Graphics2D) g;
+		g2.rotate(Math.toRadians(orientation), rotateX * scaleFactor,
+				rotateY * scaleFactor);
+		g2.drawRect((int) (locationInMaze.x * scaleFactor),
+				(int) (locationInMaze.y * scaleFactor),
+				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
+				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
+
+		map.drawMaze(g);
 	}
 
 	// We shouldn't forget to implement random noise in the sensor data.
