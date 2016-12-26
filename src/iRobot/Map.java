@@ -34,6 +34,9 @@ public class Map {
 	 * Generates random maze for the emulator.
 	 */
 	public void generateRandomMaze() {
+	}
 
+	public boolean wallAt(Point<Double> p) {
+		return false;
 	}
 }
