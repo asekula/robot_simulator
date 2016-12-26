@@ -21,12 +21,21 @@ public class InstructionGenerator {
 
 		/*
 		 * Note: Doing a very simple implementation. Either rotating or moving
-		 * in a straight line.
+		 * in a straight line. Will eventually redo this.
 		 */
 
 		Point<Integer> nextCell = robotData.nextCell();
+
+		// If no next cell, don't move. (i.e. if it hasn't figured out where to
+		// go yet).
+
+		if (nextCell.x == -1)
+			return new MotorData(0, 0);
+
 		Point<Integer> current = robotData.getCurrentCell();
+
 		assert (isNeighbor(nextCell, current)); // Maybe remove this.
+
 		Direction intendedDirection = current.directionTo(nextCell);
 
 		if (robotData.alignedWithMainDirection()
@@ -37,8 +46,8 @@ public class InstructionGenerator {
 					robotData.getTrueOrientation(), intendedDirection);
 			// ^Either 1 or -1
 
-			return new MotorData(ROTATION_VALUE * rotatingMultiplier,
-					ROTATION_VALUE * rotatingMultiplier * (-1));
+			return new MotorData(ROTATION_VALUE * rotatingMultiplier * (-1),
+					ROTATION_VALUE * rotatingMultiplier);
 		}
 	}
 
@@ -48,14 +57,14 @@ public class InstructionGenerator {
 	}
 
 	/*
-	 * Returns 1 if needs to rotate to the right, -1 if left.
+	 * Returns 1 if needs to rotate to the left, -1 if right.
 	 */
 	private static int directionToRotate(double orientation, Direction dir) {
 		double angleInBetween = ((dir.value - orientation) + 360) % 360;
 
 		if (angleInBetween >= 180)
-			return 1;
-		else
 			return -1;
+		else
+			return 1;
 	}
 }

@@ -3,6 +3,10 @@ package iRobot;
 /*
  * The main of the codebase. Runs the tests. Contains a Brain, Buffer, and
  * Emulator object.
+ * 
+ * Note: The code below doesn't use multithreading. This class is really
+ * just an outline for what the code will be when we run it on the
+ * robot.
  */
 
 public class TestRunner {
@@ -20,9 +24,7 @@ public class TestRunner {
 		MotorData motorData;
 
 		/*
-		 * Note: The code below doesn't use multithreading. This class is really
-		 * just an outline for what the code will be when we run it on the
-		 * robot.
+		 * 
 		 */
 
 		do {

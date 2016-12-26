@@ -29,4 +29,11 @@ public class Map {
 	public boolean needsWallData(Point<Integer> cell) {
 		return true;
 	}
+
+	/*
+	 * Generates random maze for the emulator.
+	 */
+	public void generateRandomMaze() {
+
+	}
 }

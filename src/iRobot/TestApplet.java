@@ -10,16 +10,15 @@ import java.awt.*;
  */
 public class TestApplet extends Applet {
 
-	Emulator environment;
+	Emulator emulator;
 	DataBuffer buffer;
 	Brain brain;
 	RobotData robotData;
-	SensorData sensorData;
-	MotorData motorData;
+	boolean spinningRight = false;
 
 	public void init() {
-		environment = new Emulator();
-		buffer = new DataBuffer(environment);
+		emulator = new Emulator();
+		buffer = new DataBuffer(emulator);
 
 		robotData = buffer.calibrate();
 		brain = new Brain(robotData);
@@ -28,7 +27,8 @@ public class TestApplet extends Applet {
 		new Thread() {
 			public void run() {
 				while (true) {
-					environment.moveRobot();
+					emulator.moveRobot();
+					delay();
 				}
 			}
 		}.start();
@@ -36,6 +36,8 @@ public class TestApplet extends Applet {
 		// Thread that runs the brain/buffer.
 		new Thread() {
 			public void run() {
+				SensorData sensorData;
+				MotorData motorData;
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
@@ -44,9 +46,8 @@ public class TestApplet extends Applet {
 					 * Note: Assuming that the robot will not move too much in
 					 * between reading the sensor data and outputting the motor
 					 * data.
-					 * 
-					 * Todo: Figure out where the delays are necessary.
 					 */
+					delay();
 				} while (!brain.isFinished());
 			}
 		}.start();
@@ -56,18 +57,21 @@ public class TestApplet extends Applet {
 			public void run() {
 				while (true) {
 					repaint();
-
-					try {
-						Thread.sleep(30);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					delay();
 				}
 			}
 		}.start();
 	}
 
+	private void delay() {
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void paint(Graphics g) {
-		environment.drawEnvironment(g);
+		emulator.drawEnvironment(g, robotData);
 	}
 }
