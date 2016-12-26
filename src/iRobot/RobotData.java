@@ -1,31 +1,9 @@
 package iRobot;
 
+/*
+ * Important method in here is updateData.
+ */
 public class RobotData {
-
-	/*
-	 * Important: All distance values are doubles with centimeters as units. If
-	 * need be, this can be optimized to save memory. For accuracy and code
-	 * correctness, this code ignores any memory concerns and uses doubles
-	 * generously.
-	 */
-
-	// Distance from front IR to locationInCell.
-	private static final double FRONT_IR_TO_CENTER = 3;
-
-	private static final double DISTANCE_BETWEEN_MOTORS = 5;
-
-	// The center of the maze is at (CENTER_CELL, CENTER_CELL).
-	private static final int CENTER_CELL = 7;
-
-	// The max cell in the maze is at (MAZE_WIDTH - 1, MAZE_WIDTH - 1).
-	private static final int MAZE_WIDTH = 16;
-
-	private static final double CELL_WIDTH = 20;
-
-	// Pertaining the motors.
-	private static final int TACHOS_PER_ROTATION = 1204;
-
-	private static final double WHEEL_DIAMETER = 2;
 
 	/*
 	 * In degrees, from 0 to 360, the orientation relative to the starting true
@@ -72,7 +50,7 @@ public class RobotData {
 	 * which we will say is the point on the line that goes through the two
 	 * motors, and is equidistant to the two motors.
 	 */
-	private Point<Double> locationInCell;
+	protected Point<Double> locationInCell;
 
 	private Phase phase;
 
@@ -86,8 +64,10 @@ public class RobotData {
 		trueOrientation = orientationOffset;
 
 		currentCell = new Point<Integer>(0, 0);
-		goalCell = new Point<Integer>(CENTER_CELL, CENTER_CELL);
+		goalCell = new Point<Integer>(Constants.CENTER_CELL,
+				Constants.CENTER_CELL);
 		phase = Phase.EXPLORING;
+		path = new Path();
 	}
 
 	public Phase getPhase() {
@@ -138,9 +118,13 @@ public class RobotData {
 		 * 
 		 * The simple method is as such: Either the robot is moving in a
 		 * straight line or it is rotating in place.
+		 * 
+		 * Only updates the location in the cell if it moved straight. Doesn't
+		 * if it rotated.
 		 */
 
-		if (within(orientationChange, 0, 5)) {
+		if (within(orientationChange, 0, 5) && sensorData.leftTachoCount > 0
+				&& sensorData.rightTachoCount > 0) {
 			int tachoAvg = (sensorData.leftTachoCount
 					+ sensorData.rightTachoCount) / 2;
 			double distanceMoved = tachoToCM(tachoAvg);
@@ -185,8 +169,9 @@ public class RobotData {
 	}
 
 	private double tachoToCM(int tacho) {
-		double circumference = WHEEL_DIAMETER * Math.PI;
-		return circumference * (((double) tacho) / TACHOS_PER_ROTATION);
+		double circumference = Constants.WHEEL_DIAMETER * Math.PI;
+		return circumference
+				* (((double) tacho) / Constants.TACHOS_PER_ROTATION);
 	}
 
 	private boolean within(double a, double b, double error) {
@@ -202,15 +187,17 @@ public class RobotData {
 	private void updateCurrentCell() {
 		if (locationInCell.x < 0)
 			setCurrentToAdjacentCell(Direction.WEST);
-		if (locationInCell.x >= CELL_WIDTH)
+		if (locationInCell.x >= Constants.CELL_WIDTH)
 			setCurrentToAdjacentCell(Direction.EAST);
 		if (locationInCell.y < 0)
 			setCurrentToAdjacentCell(Direction.SOUTH);
-		if (locationInCell.y >= CELL_WIDTH)
+		if (locationInCell.y >= Constants.CELL_WIDTH)
 			setCurrentToAdjacentCell(Direction.NORTH);
 
-		locationInCell.x = (locationInCell.x + CELL_WIDTH) % CELL_WIDTH;
-		locationInCell.y = (locationInCell.y + CELL_WIDTH) % CELL_WIDTH;
+		locationInCell.x = (locationInCell.x + Constants.CELL_WIDTH)
+				% Constants.CELL_WIDTH;
+		locationInCell.y = (locationInCell.y + Constants.CELL_WIDTH)
+				% Constants.CELL_WIDTH;
 	}
 
 	/*
@@ -277,13 +264,15 @@ public class RobotData {
 	private void updateGoalCell() {
 		switch (phase) {
 			case EXPLORING :
-				goalCell = new Point<Integer>(CENTER_CELL, CENTER_CELL);
+				goalCell = new Point<Integer>(Constants.CENTER_CELL,
+						Constants.CENTER_CELL);
 				break;
 			case RETURNING :
 				goalCell = new Point<Integer>(0, 0);
 				break;
 			case SPEED_RUN :
-				goalCell = new Point<Integer>(CENTER_CELL, CENTER_CELL);
+				goalCell = new Point<Integer>(Constants.CENTER_CELL,
+						Constants.CENTER_CELL);
 				break;
 		}
 	}
@@ -292,6 +281,7 @@ public class RobotData {
 		return currentCell;
 	}
 
+	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
 		return path.getNextCell();
 	}

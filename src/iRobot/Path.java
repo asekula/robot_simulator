@@ -14,7 +14,7 @@ public class Path {
 	 * Equivalent to .head(). Returns the front of the path.
 	 */
 	public Point<Integer> getNextCell() {
-		return new Point<Integer>(0, 0);
+		return new Point<Integer>(-1, -1);
 	}
 
 	/*

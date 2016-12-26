@@ -33,4 +33,8 @@ public class Point<T extends Comparable<T>> {
 		// Todo: Unit test this method. Not 100% sure if the compareTo's are
 		// correct.
 	}
+
+	public String toString() {
+		return "(" + x.toString() + ", " + y.toString() + ")";
+	}
 }

@@ -19,7 +19,7 @@ public class DataBuffer {
 	}
 
 	public void moveRobotMotors(MotorData motorData) {
-		environment.runMotors(motorData.leftMotorValue,
+		environment.setMotors(motorData.leftMotorValue,
 				motorData.rightMotorValue);
 	}
 
@@ -36,6 +36,6 @@ public class DataBuffer {
 		 * Todo: Spin the robot around and find the orientation offset, and the
 		 * location in the current tile.
 		 */
-		return new RobotData(0, new Point<Double>(0.0, 0.0));
+		return new RobotData(0, new Point<Double>(10.0, 10.0));
 	}
 }
