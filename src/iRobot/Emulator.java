@@ -4,22 +4,6 @@ import java.awt.*;
 
 public class Emulator implements Environment {
 
-	/*
-	 * For Tuesday:
-	 * 
-	 * 1. Unit test all methods here, and write more functional-styled code
-	 * (will be easier to unit test).
-	 * 
-	 * 2. Fix curveRobot to handle rotations.
-	 * 
-	 * 3. Write more functional-styled code for robotData.
-	 * 
-	 * 4. Handle edge cases on instructionGenerator.
-	 * 
-	 * (Don't worry about mapping/sensors for now. First try to get movement
-	 * working in the emulator.)
-	 */
-
 	// Todo: Figure out speeds/time and what should go here.
 	private static double TIME_STEP = 0.1; // No idea what to put here.
 
