@@ -5,7 +5,7 @@ import java.awt.*;
 public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
-	private static double TIME_STEP = 0.1; // No idea what to put here.
+	private static double TIME_STEP = 0.03; // No idea what to put here.
 
 	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
@@ -40,14 +40,10 @@ public class Emulator implements Environment {
 
 		// Lengths in cm.
 
-		// 1 if they are the same sign, -1 if opposite signs.
-
 		double leftArcLength = motorLSpeed * TIME_STEP;
 		double rightArcLength = motorRSpeed * TIME_STEP;
-		int sign = sameSign(motorLSpeed, motorRSpeed);
-		// double arcSum = rightArcLength + (sign * (-1) * leftArcLength);
-		double arcSum = rightArcLength - leftArcLength;
-		double orientationChange = arcSum / Constants.DISTANCE_BETWEEN_MOTORS;
+		double arcDiff = leftArcLength - rightArcLength;
+		double orientationChange = arcDiff / Constants.DISTANCE_BETWEEN_MOTORS;
 		orientationChange = Math.toDegrees(orientationChange);
 		orientationChange = (orientationChange + 360) % 360;
 
@@ -76,8 +72,8 @@ public class Emulator implements Environment {
 		}
 	}
 
-	// Todo.
 	private boolean robotHitWall(Point<Double> location, double orientation) {
+		// Todo.
 		return false;
 	}
 
@@ -315,6 +311,8 @@ public class Emulator implements Environment {
 		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
 		double relativeAngle = 90 - phi;
 
+		System.out.println("Relative angle: " + relativeAngle);
+
 		if (orientationChange <= 180) {
 			return getRelativePoint(location, orientationBefore, relativeAngle,
 					hypotenuse);
@@ -322,17 +320,6 @@ public class Emulator implements Environment {
 			return getRelativePoint(location, orientationBefore,
 					360 - relativeAngle, hypotenuse);
 		}
-	}
-
-	/*
-	 * If a and b are the same sign, then this returns 1, otherwise it returns
-	 * -1. Treats 0 as having both signs.
-	 */
-	private int sameSign(double a, double b) {
-		if ((a * b) >= 0)
-			return 1;
-		else
-			return -1;
 	}
 
 	/*
