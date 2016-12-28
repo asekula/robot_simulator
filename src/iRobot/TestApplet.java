@@ -70,7 +70,7 @@ public class TestApplet extends Applet {
 	 */
 	private void delay() {
 		try {
-			Thread.sleep(5);
+			Thread.sleep(20);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
