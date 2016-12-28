@@ -42,18 +42,10 @@ public class Emulator implements Environment {
 
 		double leftArcLength = motorLSpeed * TIME_STEP;
 		double rightArcLength = motorRSpeed * TIME_STEP;
-		double arcDiff = leftArcLength - rightArcLength;
+		double arcDiff = rightArcLength - leftArcLength;
 		double orientationChange = arcDiff / Constants.DISTANCE_BETWEEN_MOTORS;
 		orientationChange = Math.toDegrees(orientationChange);
 		orientationChange = (orientationChange + 360) % 360;
-
-		System.out.println("Location: " + locationInMaze);
-		System.out.println(
-				"MotorSpeeds: (" + motorLSpeed + ", " + motorRSpeed + ")");
-		System.out.println("Orientation: " + orientation);
-		System.out.println("Orientation change: " + orientationChange);
-		System.out.println("Left arc length: " + leftArcLength);
-		System.out.println("Right arc length: " + rightArcLength);
 
 		// CurveRobot has no side effects, uses no other variables other than
 		// those inputted.
@@ -311,8 +303,6 @@ public class Emulator implements Environment {
 		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
 		double relativeAngle = 90 - phi;
 
-		System.out.println("Relative angle: " + relativeAngle);
-
 		if (orientationChange <= 180) {
 			return getRelativePoint(location, orientationBefore, relativeAngle,
 					hypotenuse);
@@ -334,7 +324,7 @@ public class Emulator implements Environment {
 	public void drawEnvironment(Graphics g, RobotData robotData) {
 
 		// For now, only drawing robot.
-		int scaleFactor = 7;
+		int scaleFactor = Constants.SCALE_FACTOR;
 
 		double rotateX = locationInMaze.x
 				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
@@ -344,6 +334,17 @@ public class Emulator implements Environment {
 		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
 
 		Graphics2D g2 = (Graphics2D) g;
+
+		Point<Integer> currentCell = new Point<Integer>(
+				(int) (locationInMaze.x / Constants.CELL_WIDTH),
+				(int) (locationInMaze.y / Constants.CELL_WIDTH));
+
+		g2.drawString(currentCell.toString(), 10, 20);
+		g2.setColor(Color.GREEN);
+		g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
+		g2.setColor(Color.BLACK);
+		map.drawMaze(g);
+
 		g2.rotate(Math.toRadians(orientation), rotateX * scaleFactor,
 				rotateY * scaleFactor);
 		g2.drawRect((int) (locationInMaze.x * scaleFactor),
@@ -351,7 +352,8 @@ public class Emulator implements Environment {
 				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
 				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
 
-		map.drawMaze(g);
+		// Draw orientation line.
+
 	}
 
 	// We shouldn't forget to implement random noise in the sensor data.

@@ -12,7 +12,7 @@ public class Constants {
 	// Distance from front IR to locationInCell.
 	public static final double FRONT_IR_TO_CENTER = 3;
 
-	public static final double DISTANCE_BETWEEN_MOTORS = 5;
+	public static final double DISTANCE_BETWEEN_MOTORS = 7;
 
 	public static final double CELL_WIDTH = 20;
 
@@ -30,5 +30,7 @@ public class Constants {
 	// Todo: Figure these out.
 	public static final double FRONT_MAX_DISTANCE = 15;
 	public static final double LR_MAX_DISTANCE = 15;
+
+	public static final int SCALE_FACTOR = 3;
 
 }

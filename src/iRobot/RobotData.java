@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.awt.*;
+
 /*
  * Important method in here is updateData.
  */
@@ -152,9 +154,10 @@ public class RobotData {
 	 * Assuming that it is aligned with one of the four directions.
 	 */
 	public Direction getDirectionFacing() {
-		int error = 5;
+		int error = 1;
 
-		if (within(trueOrientation, 0, error))
+		if (within(trueOrientation, 0, error)
+				|| within(trueOrientation, 360, error))
 			return Direction.EAST;
 		if (within(trueOrientation, 90, error))
 			return Direction.NORTH;
@@ -167,11 +170,12 @@ public class RobotData {
 	}
 
 	public boolean alignedWithMainDirection() {
-		double error = 5;
+		double error = 1;
 		return (within(trueOrientation, 0, error)
 				|| within(trueOrientation, 90, error)
 				|| within(trueOrientation, 180, error)
-				|| within(trueOrientation, 270, error));
+				|| within(trueOrientation, 270, error)
+				|| within(trueOrientation, 360, error));
 	}
 
 	private double tachoToCM(int tacho) {
@@ -299,10 +303,71 @@ public class RobotData {
 
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
+		// Temporary, for testing purposes:
+		if (currentCell.x == 0 && currentCell.y == 0) {
+			return new Point<Integer>(1, 0);
+		}
+
+		if (currentCell.x == 1 && currentCell.y == 0) {
+			return new Point<Integer>(1, 1);
+		}
+
+		if (currentCell.x == 1 && currentCell.y == 1) {
+			return new Point<Integer>(2, 1);
+		}
+
+		if (currentCell.x == 2 && currentCell.y == 1) {
+			return new Point<Integer>(2, 2);
+		}
+
+		if (currentCell.x == 2 && currentCell.y == 2) {
+			return new Point<Integer>(1, 2);
+		}
+
+		if (currentCell.x == 1 && currentCell.y == 2) {
+			return new Point<Integer>(0, 2);
+		}
+
+		if (currentCell.x == 0 && currentCell.y == 2) {
+			return new Point<Integer>(0, 1);
+		}
+
+		if (currentCell.x == 0 && currentCell.y == 1) {
+			return new Point<Integer>(0, 0);
+		}
+
 		return path.getNextCell();
 	}
 
 	public double getTrueOrientation() {
 		return trueOrientation;
+	}
+
+	public void drawSelf(Graphics g) {
+		// For now, only drawing robot.
+		g.setColor(Color.GREEN);
+		int scaleFactor = Constants.SCALE_FACTOR;
+		Point<Double> locationInMaze = new Point<Double>(
+				currentCell.x * Constants.CELL_WIDTH + locationInCell.x,
+				currentCell.y * Constants.CELL_WIDTH + locationInCell.y);
+
+		double rotateX = locationInMaze.x
+				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		double rotateY = locationInMaze.y
+				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+
+		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
+
+		Graphics2D g2 = (Graphics2D) g;
+		g2.rotate(Math.toRadians(trueOrientation), rotateX * scaleFactor,
+				rotateY * scaleFactor);
+		g2.drawRect((int) (locationInMaze.x * scaleFactor),
+				(int) (locationInMaze.y * scaleFactor),
+				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
+				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
+
+		// Draw orientation line.
+
+		g.setColor(Color.BLACK);
 	}
 }

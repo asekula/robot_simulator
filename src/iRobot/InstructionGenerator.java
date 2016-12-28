@@ -38,6 +38,11 @@ public class InstructionGenerator {
 
 		Direction intendedDirection = current.directionTo(nextCell);
 
+		System.out.println("Current cell: " + current);
+		System.out.println("Next cell: " + nextCell);
+		System.out.println("Orientation: " + robotData.getTrueOrientation());
+		System.out.println("Intended direction: " + intendedDirection);
+
 		if (robotData.alignedWithMainDirection()
 				&& robotData.getDirectionFacing() == intendedDirection) {
 			return new MotorData(STRAIGHT_VALUE, STRAIGHT_VALUE);

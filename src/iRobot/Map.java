@@ -44,5 +44,16 @@ public class Map {
 
 	public void drawMaze(Graphics g) {
 		// Can be recursive.
+		g.setColor(Color.GRAY);
+		int scaleFactor = Constants.SCALE_FACTOR;
+		for (int i = 1; i < 5; i++) {
+			g.drawLine(0, (int) Constants.CELL_WIDTH * i * scaleFactor,
+					(int) Constants.CELL_WIDTH * 5 * scaleFactor,
+					(int) Constants.CELL_WIDTH * i * scaleFactor);
+			g.drawLine((int) Constants.CELL_WIDTH * i * scaleFactor, 0,
+					(int) Constants.CELL_WIDTH * i * scaleFactor,
+					(int) Constants.CELL_WIDTH * 5 * scaleFactor);
+		}
+		g.setColor(Color.BLACK);
 	}
 }
