@@ -335,9 +335,12 @@ public class Emulator implements Environment {
 
 		g.setColor(Color.BLUE);
 
-		drawSensorLine(g, front, frontTheta, frontIR);
-		drawSensorLine(g, left, leftTheta, leftIR);
-		drawSensorLine(g, right, rightTheta, rightIR);
+		if (frontIR != -1)
+			drawSensorLine(g, front, frontTheta, frontIR);
+		if (leftIR != -1)
+			drawSensorLine(g, left, leftTheta, leftIR);
+		if (rightIR != -1)
+			drawSensorLine(g, right, rightTheta, rightIR);
 	}
 
 	private void drawSensorLine(Graphics g, Point<Double> p, double theta,
