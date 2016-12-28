@@ -16,12 +16,11 @@ public interface Environment {
 	 * after we read them.
 	 */
 
-	// For L/R IRs: -1 means no data, 0 is nothing, 1 is something.
-	public int readLeftIR();
-
-	public int readRightIR();
-
 	// -1 if no data, # in cm if data.
+	public double readLeftIR();
+
+	public double readRightIR();
+
 	public double readFrontIR();
 
 	public int readIMU();

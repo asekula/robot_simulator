@@ -28,9 +28,10 @@ public class Constants {
 	public static final int MAZE_WIDTH = 16;
 
 	// Todo: Figure these out.
-	public static final double FRONT_MAX_DISTANCE = 15;
+	public static final double IR_MAX = 15; // In cms.
+
 	public static final double LR_MAX_DISTANCE = 15;
 
-	public static final int SCALE_FACTOR = 3;
+	public static final int SCALE_FACTOR = 10;
 
 }

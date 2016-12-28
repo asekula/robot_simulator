@@ -9,8 +9,7 @@ public class Emulator implements Environment {
 
 	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
-	private int leftIR, rightIR;
-	private double frontIR;
+	private double frontIR, leftIR, rightIR;
 	private int leftTacho;
 	private int rightTacho;
 	private Point<Double> locationInMaze;
@@ -57,7 +56,7 @@ public class Emulator implements Environment {
 		leftTacho += cmToTacho(leftArcLength);
 		rightTacho += cmToTacho(rightArcLength);
 
-		updateIRSensors(); // Todo: Test this (do this later).
+		updateIRSensors();
 
 		if (robotHitWall(locationInMaze, orientation)) {
 			System.out.println("Error: Robot hit wall.");
@@ -73,50 +72,19 @@ public class Emulator implements Environment {
 	 * Updates left/right IR sensors, and the front IR.
 	 */
 	private void updateIRSensors() {
-
-		updateLRSensor(90);
-		updateLRSensor(270);
-
-		Point<Double> sensorLocation = getRelativePoint(0,
-				Constants.FRONT_IR_TO_CENTER);
-		double sensorOrientation = orientation;
-		double distanceToWall = getDistanceToNearestWall(sensorLocation,
-				sensorOrientation, Constants.FRONT_MAX_DISTANCE);
-		frontIR = distanceToWall; // If distance is -1, still set frontIR to -1.
-	}
-
-	/*
-	 * Updates a single LR sensor. angle should be either 90 (left) or 270
-	 * (right). This is really just to reuse code instead of having the same
-	 * chunk of code twice in updateIRSensors. Angle is in degrees.
-	 * 
-	 * Maybe clean this code up (and maybe merge into code above).
-	 */
-	private void updateLRSensor(int angle) {
-		Point<Double> sensorLocation;
-		double sensorOrientation;
-		double distanceToWall;
-
-		sensorLocation = getRelativePoint(angle,
+		Point<Double> front = getRelativePoint(0, Constants.FRONT_IR_TO_CENTER);
+		Point<Double> left = getRelativePoint(90,
 				Constants.DISTANCE_BETWEEN_MOTORS / 2);
-		sensorOrientation = (orientation + angle) % 360;
-		distanceToWall = getDistanceToNearestWall(sensorLocation,
-				sensorOrientation, Constants.LR_MAX_DISTANCE);
+		Point<Double> right = getRelativePoint(270,
+				Constants.DISTANCE_BETWEEN_MOTORS / 2);
 
-		// Distance is -1 if there is no wall within MAX_DISTANCE.
-		if (distanceToWall == -1) {
-			if (angle == 90) {
-				leftIR = 0;
-			} else if (angle == 270) {
-				rightIR = 0;
-			}
-		} else {
-			if (angle == 90) {
-				leftIR = 1;
-			} else if (angle == 270) {
-				rightIR = 1;
-			}
-		}
+		double frontTheta = orientation;
+		double leftTheta = (orientation + 90) % 360;
+		double rightTheta = (orientation + 270) % 360;
+
+		frontIR = getDistanceToNearestWall(front, frontTheta, Constants.IR_MAX);
+		leftIR = getDistanceToNearestWall(left, leftTheta, Constants.IR_MAX);
+		rightIR = getDistanceToNearestWall(right, rightTheta, Constants.IR_MAX);
 	}
 
 	/*
@@ -334,12 +302,12 @@ public class Emulator implements Environment {
 				(int) (locationInMaze.y / Constants.CELL_WIDTH));
 
 		// Draws the goal location as a yellow circle.
-		Point<Double> next = robotData.nextGoalLocation();
-		g2.setColor(Color.YELLOW);
-		g2.fillOval((int) (next.x * Constants.SCALE_FACTOR) - 5,
-				(int) (next.y * Constants.SCALE_FACTOR) - 5, 10, 10);
-
+		drawGoalLocation(g, robotData.nextGoalLocation());
 		map.drawMaze(g);
+
+		drawSensors(g);
+
+		g2.setColor(Color.BLACK);
 		g2.drawString(currentCell.toString(), 10, 20);
 		drawRobot(g2, locationInMaze, orientation);
 
@@ -349,10 +317,48 @@ public class Emulator implements Environment {
 		// Draws the robot's perceived location.
 		drawRobot(g2, robotData.getLocationInMaze(),
 				robotData.getTrueOrientation());
-		g2.setColor(Color.BLACK);
 
 		// Draw orientation line.
 
+	}
+
+	private void drawSensors(Graphics g) {
+		Point<Double> front = getRelativePoint(0, Constants.FRONT_IR_TO_CENTER);
+		Point<Double> left = getRelativePoint(90,
+				Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		Point<Double> right = getRelativePoint(270,
+				Constants.DISTANCE_BETWEEN_MOTORS / 2);
+
+		double frontTheta = orientation;
+		double leftTheta = (orientation + 90) % 360;
+		double rightTheta = (orientation + 270) % 360;
+
+		g.setColor(Color.BLUE);
+
+		drawSensorLine(g, front, frontTheta, frontIR);
+		drawSensorLine(g, left, leftTheta, leftIR);
+		drawSensorLine(g, right, rightTheta, rightIR);
+	}
+
+	private void drawSensorLine(Graphics g, Point<Double> p, double theta,
+			double length) {
+
+		Point<Double> end = new Point<Double>(
+				p.x + (Math.cos(Math.toRadians(theta)) * length),
+				p.y + (Math.sin(Math.toRadians(theta)) * length));
+
+		g.drawLine((int) (p.x * Constants.SCALE_FACTOR),
+				(int) (p.y * Constants.SCALE_FACTOR),
+				(int) (end.x * Constants.SCALE_FACTOR),
+				(int) (end.y * Constants.SCALE_FACTOR));
+	}
+
+	private void drawGoalLocation(Graphics g, Point<Double> goal) {
+		int circSize = 4 * Constants.SCALE_FACTOR;
+		g.setColor(Color.YELLOW);
+		g.fillOval((int) (goal.x * Constants.SCALE_FACTOR) - (circSize / 2),
+				(int) (goal.y * Constants.SCALE_FACTOR) - (circSize / 2),
+				circSize, circSize);
 	}
 
 	/*
@@ -381,11 +387,11 @@ public class Emulator implements Environment {
 	// We shouldn't forget to implement random noise in the sensor data.
 
 	// Java should really have read-only properties...
-	public int readLeftIR() {
+	public double readLeftIR() {
 		return leftIR;
 	}
 
-	public int readRightIR() {
+	public double readRightIR() {
 		return rightIR;
 	}
 
