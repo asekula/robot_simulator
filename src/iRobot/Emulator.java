@@ -4,10 +4,26 @@ import java.awt.*;
 
 public class Emulator implements Environment {
 
-	// Todo: Figure out speeds/time and what should go here.
-	private static double TIME_STEP = 2; // No idea what to put here.
+	/*
+	 * For Tuesday:
+	 * 
+	 * 1. Unit test all methods here, and write more functional-styled code
+	 * (will be easier to unit test).
+	 * 
+	 * 2. Fix curveRobot to handle rotations.
+	 * 
+	 * 3. Write more functional-styled code for robotData.
+	 * 
+	 * 4. Handle edge cases on instructionGenerator.
+	 * 
+	 * (Don't worry about mapping/sensors for now. First try to get movement
+	 * working in the emulator.)
+	 */
 
-	private int orientation;
+	// Todo: Figure out speeds/time and what should go here.
+	private static double TIME_STEP = 0.1; // No idea what to put here.
+
+	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
 	private int leftIR, rightIR;
 	private double frontIR;
@@ -39,25 +55,46 @@ public class Emulator implements Environment {
 	public void moveRobot() {
 
 		// Lengths in cm.
-		double leftArcLength = motorLSpeed * TIME_STEP;
-		double rightArcLength = motorRSpeed * TIME_STEP;
 
 		// 1 if they are the same sign, -1 if opposite signs.
-		int sign = sameSign(motorLSpeed, motorRSpeed);
 
+		double leftArcLength = motorLSpeed * TIME_STEP;
+		double rightArcLength = motorRSpeed * TIME_STEP;
+		int sign = sameSign(motorLSpeed, motorRSpeed);
+		// double arcSum = rightArcLength + (sign * (-1) * leftArcLength);
+		double arcSum = rightArcLength - leftArcLength;
+		double orientationChange = arcSum / Constants.DISTANCE_BETWEEN_MOTORS;
+		orientationChange = Math.toDegrees(orientationChange);
+		orientationChange = (orientationChange + 360) % 360;
+
+		System.out.println("Location: " + locationInMaze);
+		System.out.println(
+				"MotorSpeeds: (" + motorLSpeed + ", " + motorRSpeed + ")");
+		System.out.println("Orientation: " + orientation);
+		System.out.println("Orientation change: " + orientationChange);
+		System.out.println("Left arc length: " + leftArcLength);
+		System.out.println("Right arc length: " + rightArcLength);
+
+		// CurveRobot has no side effects, uses no other variables other than
+		// those inputted.
+		locationInMaze = curveRobot(locationInMaze, orientation,
+				orientationChange, leftArcLength, rightArcLength);
+
+		orientation += orientationChange;
+		orientation = orientation % 360;
 		leftTacho += cmToTacho(leftArcLength);
 		rightTacho += cmToTacho(rightArcLength);
 
-		// theta is positive if turning left, negative if right.
-		double theta = (rightArcLength + (sign * (-1) * leftArcLength))
-				/ Constants.DISTANCE_BETWEEN_MOTORS;
+		updateIRSensors(); // Todo: Test this (do this later).
 
-		// Only changes locationInCell.
-		curveRobot(theta, leftArcLength, rightArcLength);
+		if (robotHitWall(locationInMaze, orientation)) {
+			System.out.println("Error: Robot hit wall.");
+		}
+	}
 
-		orientation += theta;
-
-		updateIRSensors();
+	// Todo.
+	private boolean robotHitWall(Point<Double> location, double orientation) {
+		return false;
 	}
 
 	/*
@@ -116,15 +153,17 @@ public class Emulator implements Environment {
 	 * to it. (If the robot is facing north, theta = 90 would return a point
 	 * exactly west of the robot.)
 	 */
-	private Point<Double> getRelativePoint(double theta, double length) {
-		double locX = locationInMaze.x
-				+ (Math.cos(Math.toRadians((orientation + theta) % 360))
-						* length);
-		double locY = locationInMaze.y
-				+ (Math.sin(Math.toRadians((orientation + theta) % 360))
-						* length);
+	private Point<Double> getRelativePoint(Point<Double> p, double orientation,
+			double theta, double length) {
+		double absRadians = Math.toRadians((orientation + theta + 360) % 360);
+		double locX = p.x + (Math.cos(absRadians) * length);
+		double locY = p.y + (Math.sin(absRadians) * length);
 
 		return new Point<Double>(locX, locY);
+	}
+
+	private Point<Double> getRelativePoint(double theta, double length) {
+		return getRelativePoint(locationInMaze, orientation, theta, length);
 	}
 
 	/*
@@ -260,42 +299,44 @@ public class Emulator implements Environment {
 	}
 
 	/*
-	 * Theta is relative to current orientation.
-	 * 
-	 * Important: Theta is positive if turning left. Negative if turning right.
-	 * Also important: theta is in radians.
+	 * OrientationChange is relative to current orientation, and is positive
+	 * between 0 and 359.
 	 */
-	private void curveRobot(double theta, double leftArc, double rightArc) {
-		// Don't forget to check if the robot hit a wall.
-		// Todo: Figure out how to handle these errors.
+	private Point<Double> curveRobot(Point<Double> location,
+			double orientationBefore, double orientationChange, double leftArc,
+			double rightArc) {
 
-		// Todo: Check that method holds in all cases. Also double check math.
-		// Also todo: Test this.
-
-		double phi = (Math.PI - Math.abs(theta)) / 2; // In radians.
-		double radius = Math.abs(Math.max(leftArc, rightArc) / theta);
-		double innerRadius = Math.abs(Math.min(leftArc, rightArc) / theta);
-		double radiusToCenter;
-
-		if (sameSign(leftArc, rightArc) == 1) {
-			double fixedInnerRadius = (radius
-					- Constants.DISTANCE_BETWEEN_MOTORS + innerRadius) / 2;
-			radiusToCenter = fixedInnerRadius
-					+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-		} else {
-			// radius is always the larger radius.
-			radiusToCenter = radius - (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		if (orientationChange == 0) {
+			return getRelativePoint(location, orientationBefore, 0, leftArc);
 		}
 
-		double halfTheta = Math.abs(theta) / 2;
-		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
-		double phiDegrees = (Math.toDegrees(phi) + 360) % 360;
-		double relativeAngle = (450 - phiDegrees) % 360; // Equiv to 90 - phi.
+		double theta = orientationChange;
+		double phi; // In degrees.
+		if (orientationChange > 180) {
+			theta = 360 - orientationChange;
+		}
 
-		if (theta > 0) {
-			locationInMaze = getRelativePoint(relativeAngle, hypotenuse);
+		phi = (180 - theta) / 2;
+
+		// Theta guaranteed to be <= 180.
+		// Phi guaranteed to be <= 90.
+
+		double longRadius = Math.max(leftArc, rightArc) / Math.toRadians(theta);
+		double radiusToCenter;
+
+		longRadius = Math.abs(longRadius);
+		radiusToCenter = longRadius - (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+
+		double halfTheta = Math.toRadians(theta / 2); // In radians.
+		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
+		double relativeAngle = 90 - phi;
+
+		if (orientationChange <= 180) {
+			return getRelativePoint(location, orientationBefore, relativeAngle,
+					hypotenuse);
 		} else {
-			locationInMaze = getRelativePoint(360 - relativeAngle, hypotenuse);
+			return getRelativePoint(location, orientationBefore,
+					360 - relativeAngle, hypotenuse);
 		}
 	}
 
@@ -322,7 +363,7 @@ public class Emulator implements Environment {
 	public void drawEnvironment(Graphics g, RobotData robotData) {
 
 		// For now, only drawing robot.
-		int scaleFactor = 10;
+		int scaleFactor = 7;
 
 		double rotateX = locationInMaze.x
 				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
@@ -358,7 +399,7 @@ public class Emulator implements Environment {
 	}
 
 	public int readIMU() {
-		return orientation;
+		return (int) orientation;
 	}
 
 	public int readLeftTacho() {

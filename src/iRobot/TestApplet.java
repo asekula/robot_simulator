@@ -41,6 +41,7 @@ public class TestApplet extends Applet {
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
+					motorData = new MotorData(1, 0);
 					buffer.moveRobotMotors(motorData);
 					/*
 					 * Note: Assuming that the robot will not move too much in
@@ -68,7 +69,7 @@ public class TestApplet extends Applet {
 	 */
 	private void delay() {
 		try {
-			Thread.sleep(30);
+			Thread.sleep(50);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
