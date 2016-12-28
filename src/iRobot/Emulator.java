@@ -326,11 +326,6 @@ public class Emulator implements Environment {
 		// For now, only drawing robot.
 		int scaleFactor = Constants.SCALE_FACTOR;
 
-		double rotateX = locationInMaze.x
-				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-		double rotateY = locationInMaze.y
-				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-
 		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
 
 		Graphics2D g2 = (Graphics2D) g;
@@ -345,10 +340,15 @@ public class Emulator implements Environment {
 		g2.setColor(Color.BLACK);
 		map.drawMaze(g);
 
-		g2.rotate(Math.toRadians(orientation), rotateX * scaleFactor,
-				rotateY * scaleFactor);
-		g2.drawRect((int) (locationInMaze.x * scaleFactor),
-				(int) (locationInMaze.y * scaleFactor),
+		g2.rotate(Math.toRadians(orientation), locationInMaze.x * scaleFactor,
+				locationInMaze.y * scaleFactor);
+		g2.drawRect(
+				(int) ((locationInMaze.x
+						- (Constants.DISTANCE_BETWEEN_MOTORS / 2))
+						* scaleFactor),
+				(int) ((locationInMaze.y
+						- (Constants.DISTANCE_BETWEEN_MOTORS / 2))
+						* scaleFactor),
 				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
 				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
 
