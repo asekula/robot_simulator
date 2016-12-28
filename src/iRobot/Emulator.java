@@ -5,7 +5,7 @@ import java.awt.*;
 public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
-	private static double TIME_STEP = 0.1; // No idea what to put here.
+	private static double TIME_STEP = 0.03; // No idea what to put here.
 
 	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
@@ -40,24 +40,12 @@ public class Emulator implements Environment {
 
 		// Lengths in cm.
 
-		// 1 if they are the same sign, -1 if opposite signs.
-
 		double leftArcLength = motorLSpeed * TIME_STEP;
 		double rightArcLength = motorRSpeed * TIME_STEP;
-		int sign = sameSign(motorLSpeed, motorRSpeed);
-		// double arcSum = rightArcLength + (sign * (-1) * leftArcLength);
-		double arcSum = rightArcLength - leftArcLength;
-		double orientationChange = arcSum / Constants.DISTANCE_BETWEEN_MOTORS;
+		double arcDiff = rightArcLength - leftArcLength;
+		double orientationChange = arcDiff / Constants.DISTANCE_BETWEEN_MOTORS;
 		orientationChange = Math.toDegrees(orientationChange);
 		orientationChange = (orientationChange + 360) % 360;
-
-		System.out.println("Location: " + locationInMaze);
-		System.out.println(
-				"MotorSpeeds: (" + motorLSpeed + ", " + motorRSpeed + ")");
-		System.out.println("Orientation: " + orientation);
-		System.out.println("Orientation change: " + orientationChange);
-		System.out.println("Left arc length: " + leftArcLength);
-		System.out.println("Right arc length: " + rightArcLength);
 
 		// CurveRobot has no side effects, uses no other variables other than
 		// those inputted.
@@ -76,8 +64,8 @@ public class Emulator implements Environment {
 		}
 	}
 
-	// Todo.
 	private boolean robotHitWall(Point<Double> location, double orientation) {
+		// Todo.
 		return false;
 	}
 
@@ -325,17 +313,6 @@ public class Emulator implements Environment {
 	}
 
 	/*
-	 * If a and b are the same sign, then this returns 1, otherwise it returns
-	 * -1. Treats 0 as having both signs.
-	 */
-	private int sameSign(double a, double b) {
-		if ((a * b) >= 0)
-			return 1;
-		else
-			return -1;
-	}
-
-	/*
 	 * Draws the map and current location of the robot to the graphics.
 	 * 
 	 * Optional: Make walls green if the robot discovered them, make walls red
@@ -347,24 +324,58 @@ public class Emulator implements Environment {
 	public void drawEnvironment(Graphics g, RobotData robotData) {
 
 		// For now, only drawing robot.
-		int scaleFactor = 7;
-
-		double rotateX = locationInMaze.x
-				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-		double rotateY = locationInMaze.y
-				+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
 
 		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.rotate(Math.toRadians(orientation), rotateX * scaleFactor,
-				rotateY * scaleFactor);
-		g2.drawRect((int) (locationInMaze.x * scaleFactor),
-				(int) (locationInMaze.y * scaleFactor),
+
+		Point<Integer> currentCell = new Point<Integer>(
+				(int) (locationInMaze.x / Constants.CELL_WIDTH),
+				(int) (locationInMaze.y / Constants.CELL_WIDTH));
+
+		// Draws the goal location as a yellow circle.
+		Point<Double> next = robotData.nextGoalLocation();
+		g2.setColor(Color.YELLOW);
+		g2.fillOval((int) (next.x * Constants.SCALE_FACTOR) - 5,
+				(int) (next.y * Constants.SCALE_FACTOR) - 5, 10, 10);
+
+		map.drawMaze(g);
+		g2.drawString(currentCell.toString(), 10, 20);
+		drawRobot(g2, locationInMaze, orientation);
+
+		g2.setColor(Color.GREEN);
+		g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
+
+		// Draws the robot's perceived location.
+		drawRobot(g2, robotData.getLocationInMaze(),
+				robotData.getTrueOrientation());
+		g2.setColor(Color.BLACK);
+
+		// Draw orientation line.
+
+	}
+
+	/*
+	 * Theta is in degrees.
+	 */
+	private void drawRobot(Graphics2D g2, Point<Double> location,
+			double theta) {
+		int scaleFactor = Constants.SCALE_FACTOR;
+		g2.rotate(Math.toRadians(theta), location.x * scaleFactor,
+				location.y * scaleFactor);
+
+		Point<Integer> pixelLoc = new Point<Integer>(0, 0);
+		pixelLoc.x = (int) ((location.x
+				- (Constants.DISTANCE_BETWEEN_MOTORS / 2)) * scaleFactor);
+		pixelLoc.y = (int) ((location.y
+				- (Constants.DISTANCE_BETWEEN_MOTORS / 2)) * scaleFactor);
+
+		g2.drawRect(pixelLoc.x, pixelLoc.y,
 				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
 				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
 
-		map.drawMaze(g);
+		g2.rotate(Math.toRadians(-theta), location.x * scaleFactor,
+				location.y * scaleFactor);
 	}
 
 	// We shouldn't forget to implement random noise in the sensor data.

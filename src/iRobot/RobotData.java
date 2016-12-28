@@ -35,6 +35,8 @@ public class RobotData {
 	// For exploring/speed runs, this will be (CENTER_CELL, CENTER_CELL).
 	private Point<Integer> goalCell;
 
+	private Point<Double> currentGoalLocation;
+
 	/*
 	 * We will need to keep track of the robot location to some accuracy within
 	 * the current cell, in order to figure out when it has moved to a new cell,
@@ -66,6 +68,7 @@ public class RobotData {
 		currentCell = new Point<Integer>(0, 0);
 		goalCell = new Point<Integer>(Constants.CENTER_CELL,
 				Constants.CENTER_CELL);
+		currentGoalLocation = centerOf(currentCell); // Won't move.
 		phase = Phase.EXPLORING;
 		path = new Path();
 	}
@@ -152,9 +155,10 @@ public class RobotData {
 	 * Assuming that it is aligned with one of the four directions.
 	 */
 	public Direction getDirectionFacing() {
-		int error = 5;
+		int error = 1;
 
-		if (within(trueOrientation, 0, error))
+		if (within(trueOrientation, 0, error)
+				|| within(trueOrientation, 360, error))
 			return Direction.EAST;
 		if (within(trueOrientation, 90, error))
 			return Direction.NORTH;
@@ -167,11 +171,12 @@ public class RobotData {
 	}
 
 	public boolean alignedWithMainDirection() {
-		double error = 5;
+		double error = 1;
 		return (within(trueOrientation, 0, error)
 				|| within(trueOrientation, 90, error)
 				|| within(trueOrientation, 180, error)
-				|| within(trueOrientation, 270, error));
+				|| within(trueOrientation, 270, error)
+				|| within(trueOrientation, 360, error));
 	}
 
 	private double tachoToCM(int tacho) {
@@ -299,10 +304,71 @@ public class RobotData {
 
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
+		// Temporary, for testing purposes:
+		if (currentCell.x == 0 && currentCell.y == 0) {
+			return new Point<Integer>(1, 0);
+		}
+
+		if (currentCell.x == 1 && currentCell.y == 0) {
+			return new Point<Integer>(1, 1);
+		}
+
+		if (currentCell.x == 1 && currentCell.y == 1) {
+			return new Point<Integer>(2, 1);
+		}
+
+		if (currentCell.x == 2 && currentCell.y == 1) {
+			return new Point<Integer>(2, 2);
+		}
+
+		if (currentCell.x == 2 && currentCell.y == 2) {
+			return new Point<Integer>(1, 2);
+		}
+
+		if (currentCell.x == 1 && currentCell.y == 2) {
+			return new Point<Integer>(0, 2);
+		}
+
+		if (currentCell.x == 0 && currentCell.y == 2) {
+			return new Point<Integer>(0, 1);
+		}
+
+		if (currentCell.x == 0 && currentCell.y == 1) {
+			return new Point<Integer>(0, 0);
+		}
+
 		return path.getNextCell();
 	}
 
 	public double getTrueOrientation() {
 		return trueOrientation;
+	}
+
+	public Point<Double> getLocationInMaze() {
+		return new Point<Double>(
+				currentCell.x * Constants.CELL_WIDTH + locationInCell.x,
+				currentCell.y * Constants.CELL_WIDTH + locationInCell.y);
+	}
+
+	/*
+	 * Returns a location in the maze (not necessarily a location in cell).
+	 */
+	public Point<Double> nextGoalLocation() {
+		if (closeEnough(currentGoalLocation, getLocationInMaze())) {
+			currentGoalLocation = centerOf(nextCell());
+		}
+
+		return currentGoalLocation;
+	}
+
+	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
+		double error = 0.5; // In cms.
+		return (Math.sqrt(
+				Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= error);
+	}
+
+	public Point<Double> centerOf(Point<Integer> cell) {
+		return new Point<Double>((cell.x + 0.5) * Constants.CELL_WIDTH,
+				(cell.y + 0.5) * Constants.CELL_WIDTH);
 	}
 }
