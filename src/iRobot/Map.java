@@ -39,12 +39,12 @@ public class Map {
 	}
 
 	public boolean wallAt(Point<Double> p) {
-		return false;
+		return true;
 	}
 
 	public void drawMaze(Graphics g) {
 		// Can be recursive.
-		g.setColor(Color.GRAY);
+		g.setColor(Color.LIGHT_GRAY);
 		int scaleFactor = Constants.SCALE_FACTOR;
 		for (int i = 1; i < 5; i++) {
 			g.drawLine(0, (int) Constants.CELL_WIDTH * i * scaleFactor,

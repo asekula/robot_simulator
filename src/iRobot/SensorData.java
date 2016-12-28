@@ -10,14 +10,14 @@ public class SensorData {
 	 * Using ints for left/right IR because the value could be -1 (should really
 	 * be Option<Boolean>'s but we're converting to C++ anyways).
 	 */
-	public int leftIR;
-	public int rightIR;
+	public double leftIR;
+	public double rightIR;
 	public double frontIR;
 	public double IMU;
 	public int leftTachoCount;
 	public int rightTachoCount;
 
-	public SensorData(int leftIR, int rightIR, double frontIR, double IMU,
+	public SensorData(double leftIR, double rightIR, double frontIR, double IMU,
 			int leftTacho, int rightTacho) {
 		this.leftIR = leftIR;
 		this.rightIR = rightIR;
