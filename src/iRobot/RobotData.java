@@ -1,7 +1,5 @@
 package iRobot;
 
-import java.awt.*;
-
 /*
  * Important method in here is updateData.
  */
@@ -37,6 +35,8 @@ public class RobotData {
 	// For exploring/speed runs, this will be (CENTER_CELL, CENTER_CELL).
 	private Point<Integer> goalCell;
 
+	private Point<Double> currentGoalLocation;
+
 	/*
 	 * We will need to keep track of the robot location to some accuracy within
 	 * the current cell, in order to figure out when it has moved to a new cell,
@@ -68,6 +68,7 @@ public class RobotData {
 		currentCell = new Point<Integer>(0, 0);
 		goalCell = new Point<Integer>(Constants.CENTER_CELL,
 				Constants.CENTER_CELL);
+		currentGoalLocation = centerOf(currentCell); // Won't move.
 		phase = Phase.EXPLORING;
 		path = new Path();
 	}
@@ -349,4 +350,25 @@ public class RobotData {
 				currentCell.y * Constants.CELL_WIDTH + locationInCell.y);
 	}
 
+	/*
+	 * Returns a location in the maze (not necessarily a location in cell).
+	 */
+	public Point<Double> nextGoalLocation() {
+		if (closeEnough(currentGoalLocation, getLocationInMaze())) {
+			currentGoalLocation = centerOf(nextCell());
+		}
+
+		return currentGoalLocation;
+	}
+
+	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
+		double error = 0.5; // In cms.
+		return (Math.sqrt(
+				Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= error);
+	}
+
+	public Point<Double> centerOf(Point<Integer> cell) {
+		return new Point<Double>((cell.x + 0.5) * Constants.CELL_WIDTH,
+				(cell.y + 0.5) * Constants.CELL_WIDTH);
+	}
 }

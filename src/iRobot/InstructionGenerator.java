@@ -24,52 +24,64 @@ public class InstructionGenerator {
 		 * in a straight line. Will eventually redo this.
 		 */
 
-		Point<Integer> nextCell = robotData.nextCell();
+		Point<Double> next = robotData.nextGoalLocation();
 
 		// If no next cell, don't move. (i.e. if it hasn't figured out where to
 		// go yet).
 
-		if (nextCell.x == -1)
+		if (next.x == -1)
 			return new MotorData(0, 0);
 
-		Point<Integer> current = robotData.getCurrentCell();
+		Point<Double> current = robotData.getLocationInMaze();
+		double orientation = robotData.getTrueOrientation();
 
-		assert (isNeighbor(nextCell, current)); // Maybe remove this.
+		double rotate = angleToRotate(current, next, orientation);
 
-		Direction intendedDirection = current.directionTo(nextCell);
-
-		System.out.println("Current cell: " + current);
-		System.out.println("Next cell: " + nextCell);
-		System.out.println("Orientation: " + robotData.getTrueOrientation());
-		System.out.println("Intended direction: " + intendedDirection);
-
-		if (robotData.alignedWithMainDirection()
-				&& robotData.getDirectionFacing() == intendedDirection) {
+		if (rotate <= 2 || rotate >= 358) {
 			return new MotorData(STRAIGHT_VALUE, STRAIGHT_VALUE);
 		} else {
-			int rotatingMultiplier = directionToRotate(
-					robotData.getTrueOrientation(), intendedDirection);
-			// ^Either 1 or -1
+			int rotatingMultiplier;// 1 if needs to rotate left, -1 if right.
+
+			if (rotate >= 180) {
+				rotatingMultiplier = -1;
+			} else {
+				rotatingMultiplier = 1;
+			}
 
 			return new MotorData(ROTATION_VALUE * rotatingMultiplier * (-1),
 					ROTATION_VALUE * rotatingMultiplier);
 		}
 	}
 
-	private static boolean isNeighbor(Point<Integer> p1, Point<Integer> p2) {
-		return (Math.abs(p1.x - p2.x) == 1 && (p1.y == p2.y))
-				|| (Math.abs(p1.y - p2.y) == 1 && (p1.x == p2.x));
+	/*
+	 * Returns a positive angle in degrees, between 0 and 360.
+	 */
+	private static double angleToRotate(Point<Double> current,
+			Point<Double> next, double orientation) {
+		Point<Double> diff = new Point<Double>(next.x - current.x,
+				next.y - current.y);
+		double angleToNext = fullTanInverse(diff.x, diff.y);
+
+		return (angleToNext - orientation + 360) % 360;
 	}
 
 	/*
-	 * Returns 1 if needs to rotate to the left, -1 if right.
+	 * Returns angle in degrees between 0 and 360.
 	 */
-	private static int directionToRotate(double orientation, Direction dir) {
-		double angleInBetween = ((dir.value - orientation) + 360) % 360;
+	private static double fullTanInverse(double x, double y) {
+		if (x == 0 && y >= 0)
+			return 90;
+		if (x == 0 && y < 0)
+			return 270;
 
-		if (angleInBetween >= 180)
-			return -1;
-		else
-			return 1;
+		double tanInvDegrees = (Math.toDegrees(Math.atan(y / x)) + 360) % 360;
+
+		if (x < 0 && y < 0)
+			tanInvDegrees += 180;
+		if (x < 0 && y > 0)
+			tanInvDegrees -= 180;
+
+		assert (tanInvDegrees < 360 && tanInvDegrees >= 0);
+		return tanInvDegrees;
 	}
 }

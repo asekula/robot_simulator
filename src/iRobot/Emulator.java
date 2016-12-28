@@ -333,6 +333,12 @@ public class Emulator implements Environment {
 				(int) (locationInMaze.x / Constants.CELL_WIDTH),
 				(int) (locationInMaze.y / Constants.CELL_WIDTH));
 
+		// Draws the goal location as a yellow circle.
+		Point<Double> next = robotData.nextGoalLocation();
+		g2.setColor(Color.YELLOW);
+		g2.fillOval((int) (next.x * Constants.SCALE_FACTOR) - 5,
+				(int) (next.y * Constants.SCALE_FACTOR) - 5, 10, 10);
+
 		map.drawMaze(g);
 		g2.drawString(currentCell.toString(), 10, 20);
 		drawRobot(g2, locationInMaze, orientation);
