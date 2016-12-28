@@ -343,34 +343,10 @@ public class RobotData {
 		return trueOrientation;
 	}
 
-	/*
-	 * Will not be on the actual robot.
-	 */
-	public void drawSelf(Graphics g) {
-		// For now, only drawing robot.
-		g.setColor(Color.GREEN);
-		int scaleFactor = Constants.SCALE_FACTOR;
-		Point<Double> locationInMaze = new Point<Double>(
+	public Point<Double> getLocationInMaze() {
+		return new Point<Double>(
 				currentCell.x * Constants.CELL_WIDTH + locationInCell.x,
 				currentCell.y * Constants.CELL_WIDTH + locationInCell.y);
-
-		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
-
-		Graphics2D g2 = (Graphics2D) g;
-		g2.rotate(Math.toRadians(trueOrientation),
-				locationInMaze.x * scaleFactor, locationInMaze.y * scaleFactor);
-		g2.drawRect(
-				(int) ((locationInMaze.x
-						- (Constants.DISTANCE_BETWEEN_MOTORS / 2))
-						* scaleFactor),
-				(int) ((locationInMaze.y
-						- (Constants.DISTANCE_BETWEEN_MOTORS / 2))
-						* scaleFactor),
-				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
-				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
-
-		// Draw orientation line.
-
-		g.setColor(Color.BLACK);
 	}
+
 }

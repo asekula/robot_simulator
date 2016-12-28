@@ -324,7 +324,6 @@ public class Emulator implements Environment {
 	public void drawEnvironment(Graphics g, RobotData robotData) {
 
 		// For now, only drawing robot.
-		int scaleFactor = Constants.SCALE_FACTOR;
 
 		// Saying that the robot is a square of side length DIST_B/W_MOTORS.
 
@@ -334,26 +333,43 @@ public class Emulator implements Environment {
 				(int) (locationInMaze.x / Constants.CELL_WIDTH),
 				(int) (locationInMaze.y / Constants.CELL_WIDTH));
 
+		map.drawMaze(g);
 		g2.drawString(currentCell.toString(), 10, 20);
+		drawRobot(g2, locationInMaze, orientation);
+
 		g2.setColor(Color.GREEN);
 		g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
-		g2.setColor(Color.BLACK);
-		map.drawMaze(g);
 
-		g2.rotate(Math.toRadians(orientation), locationInMaze.x * scaleFactor,
-				locationInMaze.y * scaleFactor);
-		g2.drawRect(
-				(int) ((locationInMaze.x
-						- (Constants.DISTANCE_BETWEEN_MOTORS / 2))
-						* scaleFactor),
-				(int) ((locationInMaze.y
-						- (Constants.DISTANCE_BETWEEN_MOTORS / 2))
-						* scaleFactor),
-				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
-				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
+		// Draws the robot's perceived location.
+		drawRobot(g2, robotData.getLocationInMaze(),
+				robotData.getTrueOrientation());
+		g2.setColor(Color.BLACK);
 
 		// Draw orientation line.
 
+	}
+
+	/*
+	 * Theta is in degrees.
+	 */
+	private void drawRobot(Graphics2D g2, Point<Double> location,
+			double theta) {
+		int scaleFactor = Constants.SCALE_FACTOR;
+		g2.rotate(Math.toRadians(theta), location.x * scaleFactor,
+				location.y * scaleFactor);
+
+		Point<Integer> pixelLoc = new Point<Integer>(0, 0);
+		pixelLoc.x = (int) ((location.x
+				- (Constants.DISTANCE_BETWEEN_MOTORS / 2)) * scaleFactor);
+		pixelLoc.y = (int) ((location.y
+				- (Constants.DISTANCE_BETWEEN_MOTORS / 2)) * scaleFactor);
+
+		g2.drawRect(pixelLoc.x, pixelLoc.y,
+				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor),
+				(int) (Constants.DISTANCE_BETWEEN_MOTORS * scaleFactor));
+
+		g2.rotate(Math.toRadians(-theta), location.x * scaleFactor,
+				location.y * scaleFactor);
 	}
 
 	// We shouldn't forget to implement random noise in the sensor data.

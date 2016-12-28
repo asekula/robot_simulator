@@ -78,6 +78,5 @@ public class TestApplet extends Applet {
 
 	public void paint(Graphics g) {
 		emulator.drawEnvironment(g, robotData);
-		robotData.drawSelf(g);
 	}
 }
