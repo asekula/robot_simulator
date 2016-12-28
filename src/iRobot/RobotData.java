@@ -84,11 +84,12 @@ public class RobotData {
 				% 360;
 		double orientationChange = ((newTrueOrientation - trueOrientation)
 				+ 360) % 360;
+
 		trueOrientation = newTrueOrientation;
-
-		updateLocationInCell(sensorData, orientationChange);
-
-		updateCurrentCell();
+		locationInCell = getNewLocationInCell(sensorData, locationInCell,
+				trueOrientation, orientationChange);
+		currentCell = getCurrentCell(currentCell, locationInCell);
+		locationInCell = fixLocationBounds(locationInCell);
 		updatePath();
 		updatePhase();
 	}
@@ -106,9 +107,10 @@ public class RobotData {
 	 * ensures that if we have to make approximations then small errors won't
 	 * snowball into bigger ones.
 	 * 
-	 * Only modifies locationInCell.
+	 * No side effects.
 	 */
-	private void updateLocationInCell(SensorData sensorData,
+	private Point<Double> getNewLocationInCell(SensorData sensorData,
+			Point<Double> currentLocation, double trueOrientation,
 			double orientationChange) {
 		/*
 		 * Important: For now, using a very simple method. This is just so that
@@ -129,17 +131,21 @@ public class RobotData {
 					+ sensorData.rightTachoCount) / 2;
 			double distanceMoved = tachoToCM(tachoAvg);
 
+			Point<Double> newLocation = new Point<Double>(0.0, 0.0);
+
 			// Assuming the robot moved in a straight line.
-			locationInCell.x += (distanceMoved
+			newLocation.x = currentLocation.x + (distanceMoved
 					* Math.cos(trueOrientation * Math.PI / 180));
-			locationInCell.y += (distanceMoved
+			newLocation.y = currentLocation.y + (distanceMoved
 					* Math.sin(trueOrientation * Math.PI / 180));
 
-			// Not worrying about bounds here, handled in updateCurrentCell.
+			// Not worrying about bounds here, handled in fixLocationBounds.
+			return newLocation;
+		} else {
+			// Assuming that if the orientation changed, it did not move (part
+			// of the simple method).
+			return currentLocation;
 		}
-
-		// Assuming that if the orientation changed, it did not move (part of
-		// the simple method).
 	}
 
 	/*
@@ -184,42 +190,52 @@ public class RobotData {
 	 * 
 	 * Only modifies currentCell and locationInCell.
 	 */
-	private void updateCurrentCell() {
-		if (locationInCell.x < 0)
-			setCurrentToAdjacentCell(Direction.WEST);
-		if (locationInCell.x >= Constants.CELL_WIDTH)
-			setCurrentToAdjacentCell(Direction.EAST);
-		if (locationInCell.y < 0)
-			setCurrentToAdjacentCell(Direction.SOUTH);
-		if (locationInCell.y >= Constants.CELL_WIDTH)
-			setCurrentToAdjacentCell(Direction.NORTH);
+	private Point<Integer> getCurrentCell(Point<Integer> cell,
+			Point<Double> location) {
 
-		locationInCell.x = (locationInCell.x + Constants.CELL_WIDTH)
-				% Constants.CELL_WIDTH;
-		locationInCell.y = (locationInCell.y + Constants.CELL_WIDTH)
-				% Constants.CELL_WIDTH;
+		Point<Integer> nextCell = new Point<Integer>(cell.x, cell.y);
+
+		if (location.x < 0)
+			nextCell = getAdjacentCell(nextCell, Direction.WEST);
+		if (location.x >= Constants.CELL_WIDTH)
+			nextCell = getAdjacentCell(nextCell, Direction.EAST);
+		if (location.y < 0)
+			nextCell = getAdjacentCell(nextCell, Direction.SOUTH);
+		if (location.y >= Constants.CELL_WIDTH)
+			nextCell = getAdjacentCell(nextCell, Direction.NORTH);
+
+		return nextCell;
+	}
+
+	private Point<Double> fixLocationBounds(Point<Double> location) {
+		Point<Double> fixed = new Point<Double>(0.0, 0.0);
+		fixed.x = (location.x + Constants.CELL_WIDTH) % Constants.CELL_WIDTH;
+		fixed.y = (location.y + Constants.CELL_WIDTH) % Constants.CELL_WIDTH;
+		return fixed;
 	}
 
 	/*
 	 * Moves the current cell to one of its neighboring cells based on the
 	 * direction.
 	 */
-	private void setCurrentToAdjacentCell(Direction dir) {
+	private Point<Integer> getAdjacentCell(Point<Integer> cell, Direction dir) {
+		Point<Integer> adjacent = new Point<Integer>(cell.x, cell.y);
 		switch (dir) {
 			case NORTH :
-				currentCell.y += 1;
+				adjacent.y += 1;
 				break;
 			case SOUTH :
-				currentCell.y -= 1;
+				adjacent.y -= 1;
 				break;
 			case EAST :
-				currentCell.x += 1;
+				adjacent.x += 1;
 				break;
 			case WEST :
-				currentCell.x -= 1;
+				adjacent.x -= 1;
 				break;
 		}
-		// Q: Include error checking? (if out of bounds)
+
+		return adjacent;
 	}
 
 	/*

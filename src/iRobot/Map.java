@@ -29,7 +29,7 @@ public class Map {
 	 * Returns true if there is unknown wall data pertaining the input cell.
 	 */
 	public boolean needsWallData(Point<Integer> cell) {
-		return true;
+		return false;
 	}
 
 	/*
