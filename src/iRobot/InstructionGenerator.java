@@ -3,7 +3,7 @@ package iRobot;
 public class InstructionGenerator {
 
 	public static int STRAIGHT_VALUE = 10; // Q: What to put here?
-	public static int ROTATION_VALUE = 5; // ^Same
+	public static int ROTATION_VALUE = 2; // ^Same
 
 	public static MotorData generateMotorData(RobotData robotData) {
 		/*
@@ -48,8 +48,24 @@ public class InstructionGenerator {
 				rotatingMultiplier = 1;
 			}
 
-			return new MotorData(ROTATION_VALUE * rotatingMultiplier * (-1),
-					ROTATION_VALUE * rotatingMultiplier);
+			if (rotate <= 20 || rotate >= 340) {
+
+				int curveFactor;
+
+				if (rotate <= 20) {
+					curveFactor = (int) rotate;
+				} else {
+					curveFactor = (int) (rotate - 360);
+				}
+
+				curveFactor /= 4;
+
+				return new MotorData(STRAIGHT_VALUE + (curveFactor * -1),
+						STRAIGHT_VALUE + curveFactor);
+			} else {
+				return new MotorData(ROTATION_VALUE * rotatingMultiplier * (-1),
+						ROTATION_VALUE * rotatingMultiplier);
+			}
 		}
 	}
 

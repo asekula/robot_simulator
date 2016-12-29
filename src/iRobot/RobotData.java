@@ -198,66 +198,11 @@ public class RobotData {
 
 		double orientationBefore = (orientationAfter - orientationChange + 360)
 				% 360;
-		double leftArc = tachoToCM(leftTacho);
-		double rightArc = tachoToCM(rightTacho);
+		double leftArc = Geometry.tachoToCM(leftTacho);
+		double rightArc = Geometry.tachoToCM(rightTacho);
 
-		return curveRobot(location, orientationBefore, orientationChange,
-				leftArc, rightArc);
-	}
-
-	/*
-	 * Note: This code was taken directly from the emulator.
-	 * 
-	 * OrientationChange is relative to current orientation, and is positive
-	 * between 0 and 359.
-	 */
-	private Point<Double> curveRobot(Point<Double> location,
-			double orientationBefore, double orientationChange, double leftArc,
-			double rightArc) {
-
-		System.out.println("In robot:" + leftArc + ", " + rightArc);
-
-		if (orientationChange == 0) {
-			return getRelativePoint(location, orientationBefore, 0, leftArc);
-		}
-
-		double theta = orientationChange;
-		double phi; // In degrees.
-		if (orientationChange > 180) {
-			theta = 360 - orientationChange;
-		}
-
-		phi = (180 - theta) / 2;
-
-		// Theta guaranteed to be <= 180.
-		// Phi guaranteed to be <= 90.
-
-		double longRadius = Math.max(leftArc, rightArc) / Math.toRadians(theta);
-		double radiusToCenter;
-
-		longRadius = Math.abs(longRadius);
-		radiusToCenter = longRadius - (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-
-		double halfTheta = Math.toRadians(theta / 2); // In radians.
-		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
-		double relativeAngle = 90 - phi;
-
-		if (orientationChange <= 180) {
-			return getRelativePoint(location, orientationBefore, relativeAngle,
-					hypotenuse);
-		} else {
-			return getRelativePoint(location, orientationBefore,
-					360 - relativeAngle, hypotenuse);
-		}
-	}
-
-	private Point<Double> getRelativePoint(Point<Double> p, double orientation,
-			double theta, double length) {
-		double absRadians = Math.toRadians((orientation + theta + 360) % 360);
-		double locX = p.x + (Math.cos(absRadians) * length);
-		double locY = p.y + (Math.sin(absRadians) * length);
-
-		return new Point<Double>(locX, locY);
+		return Geometry.curveRobot(location, orientationBefore,
+				orientationChange, leftArc, rightArc);
 	}
 
 	/*
@@ -286,12 +231,6 @@ public class RobotData {
 				|| within(trueOrientation, 180, error)
 				|| within(trueOrientation, 270, error)
 				|| within(trueOrientation, 360, error));
-	}
-
-	private double tachoToCM(int tacho) {
-		double circumference = Constants.WHEEL_DIAMETER * Math.PI;
-		return circumference
-				* (((double) tacho) / Constants.TACHOS_PER_ROTATION);
 	}
 
 	private boolean within(double a, double b, double error) {
@@ -471,7 +410,7 @@ public class RobotData {
 	}
 
 	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
-		double error = 0.5; // In cms.
+		double error = 1; // In cms.
 		return (Math.sqrt(
 				Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= error);
 	}

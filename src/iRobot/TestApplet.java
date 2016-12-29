@@ -19,6 +19,7 @@ public class TestApplet extends Applet {
 	boolean spinningRight = false;
 
 	public void init() {
+
 		emulator = new Emulator();
 		buffer = new DataBuffer(emulator);
 
@@ -43,7 +44,6 @@ public class TestApplet extends Applet {
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
-					motorData = new MotorData(4, 6);
 					buffer.moveRobotMotors(motorData);
 					/*
 					 * Note: Assuming that the robot will not move too much in
@@ -58,7 +58,7 @@ public class TestApplet extends Applet {
 					 * (especially if we iterate so quickly) which makes a large
 					 * error. To counteract this, delay is called more times.
 					 */
-					for (int i = 0; i < 7; i++)
+					for (int i = 0; i < 2; i++)
 						delay();
 
 				} while (!brain.isFinished());
@@ -81,7 +81,7 @@ public class TestApplet extends Applet {
 	 */
 	private void delay() {
 		try {
-			Thread.sleep(5);
+			Thread.sleep(20);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
