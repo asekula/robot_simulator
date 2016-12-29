@@ -43,13 +43,24 @@ public class TestApplet extends Applet {
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
+					motorData = new MotorData(4, 6);
 					buffer.moveRobotMotors(motorData);
 					/*
 					 * Note: Assuming that the robot will not move too much in
 					 * between reading the sensor data and outputting the motor
 					 * data.
 					 */
-					delay();
+
+					/*
+					 * Important: If we call getSensorData() too soon after we
+					 * just called it, then the tacho values will be so low that
+					 * they lose a lot of precision. This small error adds up
+					 * (especially if we iterate so quickly) which makes a large
+					 * error. To counteract this, delay is called more times.
+					 */
+					for (int i = 0; i < 7; i++)
+						delay();
+
 				} while (!brain.isFinished());
 			}
 		}.start();
@@ -70,7 +81,7 @@ public class TestApplet extends Applet {
 	 */
 	private void delay() {
 		try {
-			Thread.sleep(20);
+			Thread.sleep(5);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

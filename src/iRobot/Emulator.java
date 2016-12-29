@@ -5,7 +5,7 @@ import java.awt.*;
 public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
-	private static double TIME_STEP = 0.03; // No idea what to put here.
+	private static double TIME_STEP = 0.05; // No idea what to put here.
 
 	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
@@ -88,10 +88,7 @@ public class Emulator implements Environment {
 	}
 
 	/*
-	 * Theta is in degrees. From the locationInMaze it calculates a point
-	 * relative to it that is length distance away, in direction theta relative
-	 * to it. (If the robot is facing north, theta = 90 would return a point
-	 * exactly west of the robot.)
+	 * See comment below. This method is generalized.
 	 */
 	private Point<Double> getRelativePoint(Point<Double> p, double orientation,
 			double theta, double length) {
@@ -102,6 +99,12 @@ public class Emulator implements Environment {
 		return new Point<Double>(locX, locY);
 	}
 
+	/*
+	 * Theta is in degrees. From the locationInMaze it calculates a point
+	 * relative to it that is length distance away, in direction theta relative
+	 * to it. (If the robot is facing north, theta = 90 would return a point
+	 * exactly west of the robot.)
+	 */
 	private Point<Double> getRelativePoint(double theta, double length) {
 		return getRelativePoint(locationInMaze, orientation, theta, length);
 	}
@@ -245,6 +248,8 @@ public class Emulator implements Environment {
 	private Point<Double> curveRobot(Point<Double> location,
 			double orientationBefore, double orientationChange, double leftArc,
 			double rightArc) {
+
+		System.out.println("In emulator:" + leftArc + ", " + rightArc);
 
 		if (orientationChange == 0) {
 			return getRelativePoint(location, orientationBefore, 0, leftArc);

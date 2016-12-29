@@ -113,42 +113,151 @@ public class RobotData {
 	 * No side effects.
 	 */
 	private Point<Double> getNewLocationInCell(SensorData sensorData,
-			Point<Double> currentLocation, double trueOrientation,
+			Point<Double> prevLocation, double orientationAfter,
 			double orientationChange) {
+
 		/*
-		 * Important: For now, using a very simple method. This is just so that
-		 * we can start testing sooner, but eventually we will scrap this code
-		 * and replace it with more feedback-oriented code that will hopefully
-		 * have distance sensors on the sides.
+		 * Uses the following data at first priority: front/left/right ir
+		 * sensors, trueOrientation.
 		 * 
-		 * The simple method is as such: Either the robot is moving in a
-		 * straight line or it is rotating in place.
+		 * Second priority: orientationChange, tacho values, and previous
+		 * location.
 		 * 
-		 * Only updates the location in the cell if it moved straight. Doesn't
-		 * if it rotated.
+		 * Basically it tries to rely on the previous location as little as
+		 * possible, in order to reduce error. If the front IR sensor returns a
+		 * value, and one of the side sensors return a value, then it will know
+		 * exactly where it is.
 		 */
 
-		if (within(orientationChange, 0, 5) && sensorData.leftTachoCount > 0
-				&& sensorData.rightTachoCount > 0) {
-			int tachoAvg = (sensorData.leftTachoCount
-					+ sensorData.rightTachoCount) / 2;
-			double distanceMoved = tachoToCM(tachoAvg);
+		double leftDist = -1.0, rightDist = -1.0, frontDist = -1.0;
 
-			Point<Double> newLocation = new Point<Double>(0.0, 0.0);
-
-			// Assuming the robot moved in a straight line.
-			newLocation.x = currentLocation.x + (distanceMoved
-					* Math.cos(trueOrientation * Math.PI / 180));
-			newLocation.y = currentLocation.y + (distanceMoved
-					* Math.sin(trueOrientation * Math.PI / 180));
-
-			// Not worrying about bounds here, handled in fixLocationBounds.
-			return newLocation;
-		} else {
-			// Assuming that if the orientation changed, it did not move (part
-			// of the simple method).
-			return currentLocation;
+		if (sensorData.leftIR != -1) {
+			leftDist = sensorData.leftIR
+					+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
 		}
+		if (sensorData.rightIR != -1) {
+			rightDist = sensorData.rightIR
+					+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+		}
+		if (sensorData.frontIR != -1) {
+			frontDist = sensorData.frontIR + Constants.FRONT_IR_TO_CENTER;
+		}
+
+		// To optimize (if needed), do this last.
+		Point<Double> newLocation = curveRobot(prevLocation, orientationAfter,
+				orientationChange, sensorData.leftTachoCount,
+				sensorData.rightTachoCount);
+
+		// Important: updateCoordinates uses the map where walls are known.
+		updateCoordinates(newLocation, leftDist, 90, frontDist, 0,
+				orientationAfter);
+
+		// Should be "if different grid line types" where a type is either
+		// vertical or horizontal.
+		if (differentGridLines(leftDist, 90, frontDist, 0, orientationAfter)) {
+			return newLocation;
+		}
+
+		updateCoordinates(newLocation, leftDist, 90, rightDist, 270,
+				orientationAfter);
+
+		if (differentGridLines(leftDist, 90, rightDist, 270,
+				orientationAfter)) {
+			return newLocation;
+		}
+
+		updateCoordinates(newLocation, frontDist, 0, rightDist, 270,
+				orientationAfter);
+
+		return newLocation;
+	}
+
+	private boolean differentGridLines(double length1, double theta1,
+			double length2, double theta2, double orientation) {
+		return true;
+
+		// FINISH.
+	}
+
+	/*
+	 * Modifies location.
+	 */
+	private void updateCoordinates(Point<Double> location, double length1,
+			double theta1, double length2, double theta2, double orientation) {
+
+		if (length1 == -1 && length2 == -1) {
+			return;
+		}
+
+		// FINISH.
+	}
+
+	private Point<Double> curveRobot(Point<Double> location,
+			double orientationAfter, double orientationChange, int leftTacho,
+			int rightTacho) {
+
+		double orientationBefore = (orientationAfter - orientationChange + 360)
+				% 360;
+		double leftArc = tachoToCM(leftTacho);
+		double rightArc = tachoToCM(rightTacho);
+
+		return curveRobot(location, orientationBefore, orientationChange,
+				leftArc, rightArc);
+	}
+
+	/*
+	 * Note: This code was taken directly from the emulator.
+	 * 
+	 * OrientationChange is relative to current orientation, and is positive
+	 * between 0 and 359.
+	 */
+	private Point<Double> curveRobot(Point<Double> location,
+			double orientationBefore, double orientationChange, double leftArc,
+			double rightArc) {
+
+		System.out.println("In robot:" + leftArc + ", " + rightArc);
+
+		if (orientationChange == 0) {
+			return getRelativePoint(location, orientationBefore, 0, leftArc);
+		}
+
+		double theta = orientationChange;
+		double phi; // In degrees.
+		if (orientationChange > 180) {
+			theta = 360 - orientationChange;
+		}
+
+		phi = (180 - theta) / 2;
+
+		// Theta guaranteed to be <= 180.
+		// Phi guaranteed to be <= 90.
+
+		double longRadius = Math.max(leftArc, rightArc) / Math.toRadians(theta);
+		double radiusToCenter;
+
+		longRadius = Math.abs(longRadius);
+		radiusToCenter = longRadius - (Constants.DISTANCE_BETWEEN_MOTORS / 2);
+
+		double halfTheta = Math.toRadians(theta / 2); // In radians.
+		double hypotenuse = Math.sin(halfTheta) * radiusToCenter * 2;
+		double relativeAngle = 90 - phi;
+
+		if (orientationChange <= 180) {
+			return getRelativePoint(location, orientationBefore, relativeAngle,
+					hypotenuse);
+		} else {
+			return getRelativePoint(location, orientationBefore,
+					360 - relativeAngle, hypotenuse);
+		}
+	}
+
+	private Point<Double> getRelativePoint(Point<Double> p, double orientation,
+			double theta, double length) {
+		double absRadians = Math.toRadians((orientation + theta + 360) % 360);
+		double locX = p.x + (Math.cos(absRadians) * length);
+		double locY = p.y + (Math.sin(absRadians) * length);
+
+		return new Point<Double>(locX, locY);
 	}
 
 	/*
