@@ -199,4 +199,24 @@ public class Geometry {
 				* (((double) tacho) / Constants.TACHOS_PER_ROTATION);
 	}
 
+	/*
+	 * Returns angle in degrees between 0 and 360.
+	 */
+	public static double fullTanInverse(double x, double y) {
+		if (x == 0 && y >= 0)
+			return 90;
+		if (x == 0 && y < 0)
+			return 270;
+
+		double tanInvDegrees = (Math.toDegrees(Math.atan(y / x)) + 360) % 360;
+
+		if (x < 0 && y < 0)
+			tanInvDegrees += 180;
+		if (x < 0 && y > 0)
+			tanInvDegrees -= 180;
+
+		assert (tanInvDegrees < 360 && tanInvDegrees >= 0);
+		return tanInvDegrees;
+	}
+
 }

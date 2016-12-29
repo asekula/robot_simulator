@@ -61,6 +61,8 @@ public class Emulator implements Environment {
 		if (robotHitWall(locationInMaze, orientation)) {
 			System.out.println("Error: Robot hit wall.");
 		}
+
+		System.out.println(locationInMaze);
 	}
 
 	private boolean robotHitWall(Point<Double> location, double orientation) {

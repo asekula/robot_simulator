@@ -89,120 +89,12 @@ public class RobotData {
 				+ 360) % 360;
 
 		trueOrientation = newTrueOrientation;
-		locationInCell = getNewLocationInCell(sensorData, locationInCell,
-				trueOrientation, orientationChange);
+		locationInCell = Localizer.getNewLocationInCell(sensorData,
+				locationInCell, trueOrientation, orientationChange);
 		currentCell = getCurrentCell(currentCell, locationInCell);
 		locationInCell = fixLocationBounds(locationInCell);
 		updatePath();
 		updatePhase();
-	}
-
-	/*
-	 * In calculating the new location in the cell, we need to take into account
-	 * the distance the motors traveled (the tachos), the orientation change
-	 * (which corresponds to rotation), and the front IR sensor distance. Note
-	 * that the left and right IR sensors only give 0/1's.
-	 * 
-	 * If the front IR sensor value isn't -1 then we can figure out one of the
-	 * two coordinates of the motors.
-	 * 
-	 * Tries to rely as little as possible on the previous locationInCell. This
-	 * ensures that if we have to make approximations then small errors won't
-	 * snowball into bigger ones.
-	 * 
-	 * No side effects.
-	 */
-	private Point<Double> getNewLocationInCell(SensorData sensorData,
-			Point<Double> prevLocation, double orientationAfter,
-			double orientationChange) {
-
-		/*
-		 * Uses the following data at first priority: front/left/right ir
-		 * sensors, trueOrientation.
-		 * 
-		 * Second priority: orientationChange, tacho values, and previous
-		 * location.
-		 * 
-		 * Basically it tries to rely on the previous location as little as
-		 * possible, in order to reduce error. If the front IR sensor returns a
-		 * value, and one of the side sensors return a value, then it will know
-		 * exactly where it is.
-		 */
-
-		double leftDist = -1.0, rightDist = -1.0, frontDist = -1.0;
-
-		if (sensorData.leftIR != -1) {
-			leftDist = sensorData.leftIR
-					+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-		}
-		if (sensorData.rightIR != -1) {
-			rightDist = sensorData.rightIR
-					+ (Constants.DISTANCE_BETWEEN_MOTORS / 2);
-		}
-		if (sensorData.frontIR != -1) {
-			frontDist = sensorData.frontIR + Constants.FRONT_IR_TO_CENTER;
-		}
-
-		// To optimize (if needed), do this last.
-		Point<Double> newLocation = curveRobot(prevLocation, orientationAfter,
-				orientationChange, sensorData.leftTachoCount,
-				sensorData.rightTachoCount);
-
-		// Important: updateCoordinates uses the map where walls are known.
-		updateCoordinates(newLocation, leftDist, 90, frontDist, 0,
-				orientationAfter);
-
-		// Should be "if different grid line types" where a type is either
-		// vertical or horizontal.
-		if (differentGridLines(leftDist, 90, frontDist, 0, orientationAfter)) {
-			return newLocation;
-		}
-
-		updateCoordinates(newLocation, leftDist, 90, rightDist, 270,
-				orientationAfter);
-
-		if (differentGridLines(leftDist, 90, rightDist, 270,
-				orientationAfter)) {
-			return newLocation;
-		}
-
-		updateCoordinates(newLocation, frontDist, 0, rightDist, 270,
-				orientationAfter);
-
-		return newLocation;
-	}
-
-	private boolean differentGridLines(double length1, double theta1,
-			double length2, double theta2, double orientation) {
-		return true;
-
-		// FINISH.
-	}
-
-	/*
-	 * Modifies location.
-	 */
-	private void updateCoordinates(Point<Double> location, double length1,
-			double theta1, double length2, double theta2, double orientation) {
-
-		if (length1 == -1 && length2 == -1) {
-			return;
-		}
-
-		// FINISH.
-	}
-
-	private Point<Double> curveRobot(Point<Double> location,
-			double orientationAfter, double orientationChange, int leftTacho,
-			int rightTacho) {
-
-		double orientationBefore = (orientationAfter - orientationChange + 360)
-				% 360;
-		double leftArc = Geometry.tachoToCM(leftTacho);
-		double rightArc = Geometry.tachoToCM(rightTacho);
-
-		return Geometry.curveRobot(location, orientationBefore,
-				orientationChange, leftArc, rightArc);
 	}
 
 	/*
