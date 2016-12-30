@@ -35,7 +35,8 @@ public class Brain {
 		 * 
 		 * Important: updateData changes the phases.
 		 */
-		robotData.updateData(sensorData);
+		robotData.updateData(sensorData); // Do this in two parts. before mapper
+											// + after mapper.
 
 		if (robotData.getPhase() == Phase.EXPLORING) {
 			Mapper.updateMap(sensorData, robotData, map);

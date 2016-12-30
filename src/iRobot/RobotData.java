@@ -98,38 +98,6 @@ public class RobotData {
 	}
 
 	/*
-	 * Assuming that it is aligned with one of the four directions.
-	 */
-	public Direction getDirectionFacing() {
-		int error = 1;
-
-		if (within(trueOrientation, 0, error)
-				|| within(trueOrientation, 360, error))
-			return Direction.EAST;
-		if (within(trueOrientation, 90, error))
-			return Direction.NORTH;
-		if (within(trueOrientation, 180, error))
-			return Direction.WEST;
-		if (within(trueOrientation, 270, error))
-			return Direction.SOUTH;
-
-		return Direction.NORTH; // Q: Throw error?
-	}
-
-	public boolean alignedWithMainDirection() {
-		double error = 1;
-		return (within(trueOrientation, 0, error)
-				|| within(trueOrientation, 90, error)
-				|| within(trueOrientation, 180, error)
-				|| within(trueOrientation, 270, error)
-				|| within(trueOrientation, 360, error));
-	}
-
-	private boolean within(double a, double b, double error) {
-		return (Math.abs(a - b) <= error);
-	}
-
-	/*
 	 * Using the new locationInCell, updates the current cell that the robot is
 	 * in.
 	 * 
@@ -187,7 +155,8 @@ public class RobotData {
 	 * Removes the head of the path if it is currently in it.
 	 */
 	private void updatePath() {
-		if (path.getNextCell().equals(currentCell)) {
+		// When path is implemented, remove currentCell.
+		if (path.getNextCell(currentCell).equals(currentCell)) {
 			path.removeHead(); // Removes head from path.
 		}
 	}
@@ -244,40 +213,7 @@ public class RobotData {
 
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
-		// Temporary, for testing purposes:
-		if (currentCell.x == 0 && currentCell.y == 0) {
-			return new Point<Integer>(1, 0);
-		}
-
-		if (currentCell.x == 1 && currentCell.y == 0) {
-			return new Point<Integer>(1, 1);
-		}
-
-		if (currentCell.x == 1 && currentCell.y == 1) {
-			return new Point<Integer>(2, 1);
-		}
-
-		if (currentCell.x == 2 && currentCell.y == 1) {
-			return new Point<Integer>(2, 2);
-		}
-
-		if (currentCell.x == 2 && currentCell.y == 2) {
-			return new Point<Integer>(1, 2);
-		}
-
-		if (currentCell.x == 1 && currentCell.y == 2) {
-			return new Point<Integer>(0, 2);
-		}
-
-		if (currentCell.x == 0 && currentCell.y == 2) {
-			return new Point<Integer>(0, 1);
-		}
-
-		if (currentCell.x == 0 && currentCell.y == 1) {
-			return new Point<Integer>(0, 0);
-		}
-
-		return path.getNextCell();
+		return path.getNextCell(currentCell);
 	}
 
 	public double getTrueOrientation() {
@@ -303,8 +239,7 @@ public class RobotData {
 
 	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
 		double error = 1; // In cms.
-		return (Math.sqrt(
-				Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= error);
+		return (Geometry.distanceBetween(p1, p2) <= error);
 	}
 
 	public Point<Double> centerOf(Point<Integer> cell) {

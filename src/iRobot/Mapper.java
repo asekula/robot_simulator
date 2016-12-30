@@ -26,30 +26,5 @@ public class Mapper {
 		 * inside the current cell, and if so, then perform mapping.
 		 */
 
-		if (robotData.alignedWithMainDirection()
-				&& map.needsWallData(robotData.getCurrentCell())) {
-
-			Direction facing = robotData.getDirectionFacing();
-			Direction left = facing.left(), right = facing.right();
-			Point<Integer> current = robotData.getCurrentCell();
-
-			if (sensorData.leftIR == 1) {
-				map.setWall(current, left);
-			} else if (sensorData.leftIR == 0) {
-				map.setNoWall(current, left);
-			}
-
-			if (sensorData.rightIR == 1) {
-				map.setWall(current, right);
-			} else if (sensorData.rightIR == 0) {
-				map.setNoWall(current, right);
-			}
-
-			if (sensorData.frontIR != -1) {
-				map.setWall(current, facing);
-			} else {
-				map.setNoWall(current, facing);
-			}
-		}
 	}
 }

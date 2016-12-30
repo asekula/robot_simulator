@@ -51,6 +51,28 @@ public class Localizer {
 		// If we need to optimize code, there's a lot of computation in here
 		// that we can cut down on without losing functionality.
 
+		// Writing ugly code for now. Will revise later.
+
+		if (leftDist != -1 && rightDist != -1 && frontDist != -1) {
+
+			if (leftFrontDiffGrid(leftDist, frontDist, orientationAfter)) {
+				if (frontRightDiffGrid(frontDist, rightDist,
+						orientationAfter)) {
+					// Return avg of left/front and front/right.
+				} else {
+					// Return avg of left/front and left/right.
+				}
+			} else {
+				if (leftRightDiffGrid(leftDist, rightDist, orientationAfter)) {
+					// We know that frontRight are on different grid lines.
+					// Return avg of left/right and front/right.
+				} else {
+					// They're all on the same grid line type. Can only use one
+					// coordinate.
+				}
+			}
+		}
+
 		// To optimize (if needed), do this last.
 		Point<Double> newLocation = curveRobot(prevLocation, orientationAfter,
 				orientationChange, sensorData.leftTachoCount,
