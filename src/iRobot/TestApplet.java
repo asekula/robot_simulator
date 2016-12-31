@@ -58,8 +58,8 @@ public class TestApplet extends Applet {
 					 * (especially if we iterate so quickly) which makes a large
 					 * error. To counteract this, delay is called more times.
 					 */
-					// for (int i = 0; i < 2; i++)
-					delay();
+					for (int i = 0; i < Constants.EXTRA_ROBOT_DELAY; i++)
+						delay();
 
 				} while (!brain.isFinished());
 			}
@@ -81,7 +81,7 @@ public class TestApplet extends Applet {
 	 */
 	private void delay() {
 		try {
-			Thread.sleep(20);
+			Thread.sleep(Constants.APPLET_DELAY);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

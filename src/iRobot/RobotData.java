@@ -78,23 +78,38 @@ public class RobotData {
 	}
 
 	/*
-	 * Updates the orientation, location, phase, and path of the robot.
+	 * Alters the location and orientation of the robot. Also changes it's phase
+	 * value (exploring vs. speed run) if it reached its goal. Also removes the
+	 * head of the path if the robot reached the head's location.
 	 */
 	public void updateData(SensorData sensorData) {
 
-		// Updates orientation. Values will be positive.
 		double newTrueOrientation = ((sensorData.IMU + orientationOffset) + 360)
 				% 360;
 		double orientationChange = ((newTrueOrientation - trueOrientation)
 				+ 360) % 360;
 
 		trueOrientation = newTrueOrientation;
-		locationInCell = Localizer.getNewLocationInCell(sensorData,
-				locationInCell, trueOrientation, orientationChange);
+
+		locationInCell = Geometry.curveRobot(locationInCell, sensorData.IMU,
+				orientationChange,
+				Geometry.tachoToCM(sensorData.leftTachoCount),
+				Geometry.tachoToCM(sensorData.rightTachoCount));
+
 		currentCell = getCurrentCell(currentCell, locationInCell);
 		locationInCell = fixLocationBounds(locationInCell);
 		updatePath();
 		updatePhase();
+	}
+
+	/*
+	 * Modifies as many coordinates as possible. If we need to optimize code,
+	 * here's where to do it. (i.e. put this else where to avoid recomputing the
+	 * same values).
+	 */
+	public void fixLocation(SensorData sensorData, Map map) {
+		Localizer.modifyLocationWithMap(locationInCell, currentCell, sensorData,
+				map, trueOrientation);
 	}
 
 	/*

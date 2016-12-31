@@ -3,36 +3,29 @@ package iRobot;
 public class Localizer {
 
 	/*
-	 * In calculating the new location in the cell, we need to take into account
-	 * the distance the motors traveled (the tachos), the orientation change
-	 * (which corresponds to rotation), and the front IR sensor distance. Note
-	 * that the left and right IR sensors only give 0/1's.
-	 * 
-	 * If the front IR sensor value isn't -1 then we can figure out one of the
-	 * two coordinates of the motors.
-	 * 
-	 * Tries to rely as little as possible on the previous locationInCell. This
-	 * ensures that if we have to make approximations then small errors won't
-	 * snowball into bigger ones.
-	 * 
-	 * No side effects.
+	 * Finish.
 	 */
-	public static Point<Double> getNewLocationInCell(SensorData sensorData,
-			Point<Double> prevLocation, double orientationAfter,
-			double orientationChange) {
 
-		/*
-		 * Uses the following data at first priority: front/left/right ir
-		 * sensors, trueOrientation.
-		 * 
-		 * Second priority: orientationChange, tacho values, and previous
-		 * location.
-		 * 
-		 * Basically it tries to rely on the previous location as little as
-		 * possible, in order to reduce error. If the front IR sensor returns a
-		 * value, and one of the side sensors return a value, then it will know
-		 * exactly where it is.
-		 */
+	/*
+	 * Orientation is the true orientation of the robot. This method uses only
+	 * the sensor data to update the robot's location.
+	 * 
+	 * The number of coordinates we can update (0, 1, or 2) depends on which
+	 * values are -1, and which grid line types (horizontal or vertical) the
+	 * sensors are detecting.
+	 * 
+	 * This method is meant to update the small errors that arise from
+	 * curveRobot. If there is enough data, then it won't even use the input
+	 * location, and return the true location (e.g. when all sensors return
+	 * values != -1).
+	 * 
+	 * Returns nothing, modifies location. Does not modify anything else.
+	 * 
+	 * Only public interface of Localizer.
+	 */
+	public static void modifyLocationWithMap(Point<Double> location,
+			Point<Integer> currentCell, SensorData sensorData, Map map,
+			double orientation) {
 
 		double leftDist = -1.0, rightDist = -1.0, frontDist = -1.0;
 
@@ -53,17 +46,19 @@ public class Localizer {
 
 		// Writing ugly code for now. Will revise later.
 
+		// Note: if we have more data than we need, the code below uses all of
+		// the data and averages the values it gets.
+
 		if (leftDist != -1 && rightDist != -1 && frontDist != -1) {
 
-			if (leftFrontDiffGrid(leftDist, frontDist, orientationAfter)) {
-				if (frontRightDiffGrid(frontDist, rightDist,
-						orientationAfter)) {
+			if (leftFrontDiffGrid(leftDist, frontDist, orientation)) {
+				if (frontRightDiffGrid(frontDist, rightDist, orientation)) {
 					// Return avg of left/front and front/right.
 				} else {
 					// Return avg of left/front and left/right.
 				}
 			} else {
-				if (leftRightDiffGrid(leftDist, rightDist, orientationAfter)) {
+				if (leftRightDiffGrid(leftDist, rightDist, orientation)) {
 					// We know that frontRight are on different grid lines.
 					// Return avg of left/right and front/right.
 				} else {
@@ -73,34 +68,7 @@ public class Localizer {
 			}
 		}
 
-		// To optimize (if needed), do this last.
-		Point<Double> newLocation = curveRobot(prevLocation, orientationAfter,
-				orientationChange, sensorData.leftTachoCount,
-				sensorData.rightTachoCount);
-
-		// Important: updateCoordinates uses the map where walls are known.
-		updateCoordinatesLeftFront(newLocation, leftDist, frontDist,
-				orientationAfter);
-
-		// Should be "if different grid line types" where a type is either
-		// vertical or horizontal.
-		if (leftFrontDiffGrid(leftDist, frontDist, orientationAfter)) {
-			return newLocation;
-		}
-
-		updateCoordinatesFrontRight(newLocation, frontDist, rightDist,
-				orientationAfter);
-
-		if (frontRightDiffGrid(frontDist, rightDist, orientationAfter)) {
-			return newLocation;
-		}
-
-		updateCoordinatesLeftRight(newLocation, leftDist, rightDist,
-				orientationAfter);
-
-		// FINISH.
-
-		return newLocation;
+		// Finish.
 	}
 
 	private static boolean leftFrontDiffGrid(double left, double front,
@@ -121,6 +89,12 @@ public class Localizer {
 		double angleToRight = Geometry.fullTanInverse(right, front);
 		double potentialOrientation = (angleToRight + 90) % 360;
 		return !within(potentialOrientation, orientation, 0.5);
+	}
+
+	private static boolean leftRightDiffGrid(double left, double right,
+			double orientation) {
+		// Todo.
+		return true;
 	}
 
 	/*
@@ -197,19 +171,6 @@ public class Localizer {
 			return;
 		}
 
-	}
-
-	private static Point<Double> curveRobot(Point<Double> location,
-			double orientationAfter, double orientationChange, int leftTacho,
-			int rightTacho) {
-
-		double orientationBefore = (orientationAfter - orientationChange + 360)
-				% 360;
-		double leftArc = Geometry.tachoToCM(leftTacho);
-		double rightArc = Geometry.tachoToCM(rightTacho);
-
-		return Geometry.curveRobot(location, orientationBefore,
-				orientationChange, leftArc, rightArc);
 	}
 
 	private static boolean within(double a, double b, double error) {

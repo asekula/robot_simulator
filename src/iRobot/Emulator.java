@@ -5,7 +5,6 @@ import java.awt.*;
 public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
-	private static double TIME_STEP = 0.05; // No idea what to put here.
 
 	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
@@ -39,8 +38,8 @@ public class Emulator implements Environment {
 
 		// Lengths in cm.
 
-		double leftArcLength = motorLSpeed * TIME_STEP;
-		double rightArcLength = motorRSpeed * TIME_STEP;
+		double leftArcLength = motorLSpeed * Constants.TIME_STEP;
+		double rightArcLength = motorRSpeed * Constants.TIME_STEP;
 		double arcDiff = rightArcLength - leftArcLength;
 		double orientationChange = arcDiff / Constants.DISTANCE_BETWEEN_MOTORS;
 		orientationChange = Math.toDegrees(orientationChange);
@@ -61,8 +60,6 @@ public class Emulator implements Environment {
 		if (robotHitWall(locationInMaze, orientation)) {
 			System.out.println("Error: Robot hit wall.");
 		}
-
-		System.out.println(locationInMaze);
 	}
 
 	private boolean robotHitWall(Point<Double> location, double orientation) {
