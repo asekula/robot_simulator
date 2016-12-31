@@ -3,7 +3,7 @@ package iRobot;
 public class InstructionGenerator {
 
 	public static int STRAIGHT_VALUE = 10; // Q: What to put here?
-	public static int ROTATION_VALUE = 5; // ^Same
+	public static int ROTATION_VALUE = 2; // ^Same
 
 	public static MotorData generateMotorData(RobotData robotData) {
 		/*
@@ -48,8 +48,24 @@ public class InstructionGenerator {
 				rotatingMultiplier = 1;
 			}
 
-			return new MotorData(ROTATION_VALUE * rotatingMultiplier * (-1),
-					ROTATION_VALUE * rotatingMultiplier);
+			if (rotate <= 20 || rotate >= 340) {
+
+				int curveFactor;
+
+				if (rotate <= 20) {
+					curveFactor = (int) rotate;
+				} else {
+					curveFactor = (int) (rotate - 360);
+				}
+
+				curveFactor /= 4;
+
+				return new MotorData(STRAIGHT_VALUE + (curveFactor * -1),
+						STRAIGHT_VALUE + curveFactor);
+			} else {
+				return new MotorData(ROTATION_VALUE * rotatingMultiplier * (-1),
+						ROTATION_VALUE * rotatingMultiplier);
+			}
 		}
 	}
 
@@ -60,28 +76,9 @@ public class InstructionGenerator {
 			Point<Double> next, double orientation) {
 		Point<Double> diff = new Point<Double>(next.x - current.x,
 				next.y - current.y);
-		double angleToNext = fullTanInverse(diff.x, diff.y);
+		double angleToNext = Geometry.fullTanInverse(diff.x, diff.y);
 
 		return (angleToNext - orientation + 360) % 360;
 	}
 
-	/*
-	 * Returns angle in degrees between 0 and 360.
-	 */
-	private static double fullTanInverse(double x, double y) {
-		if (x == 0 && y >= 0)
-			return 90;
-		if (x == 0 && y < 0)
-			return 270;
-
-		double tanInvDegrees = (Math.toDegrees(Math.atan(y / x)) + 360) % 360;
-
-		if (x < 0 && y < 0)
-			tanInvDegrees += 180;
-		if (x < 0 && y > 0)
-			tanInvDegrees -= 180;
-
-		assert (tanInvDegrees < 360 && tanInvDegrees >= 0);
-		return tanInvDegrees;
-	}
 }

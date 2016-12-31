@@ -78,19 +78,24 @@ public class RobotData {
 	}
 
 	/*
-	 * Updates the orientation, location, phase, and path of the robot.
+	 * Alters the location and orientation of the robot. Also changes it's phase
+	 * value (exploring vs. speed run) if it reached its goal. Also removes the
+	 * head of the path if the robot reached the head's location.
 	 */
 	public void updateData(SensorData sensorData) {
 
-		// Updates orientation. Values will be positive.
 		double newTrueOrientation = ((sensorData.IMU + orientationOffset) + 360)
 				% 360;
 		double orientationChange = ((newTrueOrientation - trueOrientation)
 				+ 360) % 360;
 
 		trueOrientation = newTrueOrientation;
-		locationInCell = getNewLocationInCell(sensorData, locationInCell,
-				trueOrientation, orientationChange);
+
+		locationInCell = Geometry.curveRobot(locationInCell, sensorData.IMU,
+				orientationChange,
+				Geometry.tachoToCM(sensorData.leftTachoCount),
+				Geometry.tachoToCM(sensorData.rightTachoCount));
+
 		currentCell = getCurrentCell(currentCell, locationInCell);
 		locationInCell = fixLocationBounds(locationInCell);
 		updatePath();
@@ -98,95 +103,13 @@ public class RobotData {
 	}
 
 	/*
-	 * In calculating the new location in the cell, we need to take into account
-	 * the distance the motors traveled (the tachos), the orientation change
-	 * (which corresponds to rotation), and the front IR sensor distance. Note
-	 * that the left and right IR sensors only give 0/1's.
-	 * 
-	 * If the front IR sensor value isn't -1 then we can figure out one of the
-	 * two coordinates of the motors.
-	 * 
-	 * Tries to rely as little as possible on the previous locationInCell. This
-	 * ensures that if we have to make approximations then small errors won't
-	 * snowball into bigger ones.
-	 * 
-	 * No side effects.
+	 * Modifies as many coordinates as possible. If we need to optimize code,
+	 * here's where to do it. (i.e. put this else where to avoid recomputing the
+	 * same values).
 	 */
-	private Point<Double> getNewLocationInCell(SensorData sensorData,
-			Point<Double> currentLocation, double trueOrientation,
-			double orientationChange) {
-		/*
-		 * Important: For now, using a very simple method. This is just so that
-		 * we can start testing sooner, but eventually we will scrap this code
-		 * and replace it with more feedback-oriented code that will hopefully
-		 * have distance sensors on the sides.
-		 * 
-		 * The simple method is as such: Either the robot is moving in a
-		 * straight line or it is rotating in place.
-		 * 
-		 * Only updates the location in the cell if it moved straight. Doesn't
-		 * if it rotated.
-		 */
-
-		if (within(orientationChange, 0, 5) && sensorData.leftTachoCount > 0
-				&& sensorData.rightTachoCount > 0) {
-			int tachoAvg = (sensorData.leftTachoCount
-					+ sensorData.rightTachoCount) / 2;
-			double distanceMoved = tachoToCM(tachoAvg);
-
-			Point<Double> newLocation = new Point<Double>(0.0, 0.0);
-
-			// Assuming the robot moved in a straight line.
-			newLocation.x = currentLocation.x + (distanceMoved
-					* Math.cos(trueOrientation * Math.PI / 180));
-			newLocation.y = currentLocation.y + (distanceMoved
-					* Math.sin(trueOrientation * Math.PI / 180));
-
-			// Not worrying about bounds here, handled in fixLocationBounds.
-			return newLocation;
-		} else {
-			// Assuming that if the orientation changed, it did not move (part
-			// of the simple method).
-			return currentLocation;
-		}
-	}
-
-	/*
-	 * Assuming that it is aligned with one of the four directions.
-	 */
-	public Direction getDirectionFacing() {
-		int error = 1;
-
-		if (within(trueOrientation, 0, error)
-				|| within(trueOrientation, 360, error))
-			return Direction.EAST;
-		if (within(trueOrientation, 90, error))
-			return Direction.NORTH;
-		if (within(trueOrientation, 180, error))
-			return Direction.WEST;
-		if (within(trueOrientation, 270, error))
-			return Direction.SOUTH;
-
-		return Direction.NORTH; // Q: Throw error?
-	}
-
-	public boolean alignedWithMainDirection() {
-		double error = 1;
-		return (within(trueOrientation, 0, error)
-				|| within(trueOrientation, 90, error)
-				|| within(trueOrientation, 180, error)
-				|| within(trueOrientation, 270, error)
-				|| within(trueOrientation, 360, error));
-	}
-
-	private double tachoToCM(int tacho) {
-		double circumference = Constants.WHEEL_DIAMETER * Math.PI;
-		return circumference
-				* (((double) tacho) / Constants.TACHOS_PER_ROTATION);
-	}
-
-	private boolean within(double a, double b, double error) {
-		return (Math.abs(a - b) <= error);
+	public void fixLocation(SensorData sensorData, Map map) {
+		Localizer.modifyLocationWithMap(locationInCell, currentCell, sensorData,
+				map, trueOrientation);
 	}
 
 	/*
@@ -247,7 +170,8 @@ public class RobotData {
 	 * Removes the head of the path if it is currently in it.
 	 */
 	private void updatePath() {
-		if (path.getNextCell().equals(currentCell)) {
+		// When path is implemented, remove currentCell.
+		if (path.getNextCell(currentCell).equals(currentCell)) {
 			path.removeHead(); // Removes head from path.
 		}
 	}
@@ -304,40 +228,7 @@ public class RobotData {
 
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
-		// Temporary, for testing purposes:
-		if (currentCell.x == 0 && currentCell.y == 0) {
-			return new Point<Integer>(1, 0);
-		}
-
-		if (currentCell.x == 1 && currentCell.y == 0) {
-			return new Point<Integer>(1, 1);
-		}
-
-		if (currentCell.x == 1 && currentCell.y == 1) {
-			return new Point<Integer>(2, 1);
-		}
-
-		if (currentCell.x == 2 && currentCell.y == 1) {
-			return new Point<Integer>(2, 2);
-		}
-
-		if (currentCell.x == 2 && currentCell.y == 2) {
-			return new Point<Integer>(1, 2);
-		}
-
-		if (currentCell.x == 1 && currentCell.y == 2) {
-			return new Point<Integer>(0, 2);
-		}
-
-		if (currentCell.x == 0 && currentCell.y == 2) {
-			return new Point<Integer>(0, 1);
-		}
-
-		if (currentCell.x == 0 && currentCell.y == 1) {
-			return new Point<Integer>(0, 0);
-		}
-
-		return path.getNextCell();
+		return path.getNextCell(currentCell);
 	}
 
 	public double getTrueOrientation() {
@@ -362,9 +253,8 @@ public class RobotData {
 	}
 
 	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
-		double error = 0.5; // In cms.
-		return (Math.sqrt(
-				Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)) <= error);
+		double error = 1; // In cms.
+		return (Geometry.distanceBetween(p1, p2) <= error);
 	}
 
 	public Point<Double> centerOf(Point<Integer> cell) {

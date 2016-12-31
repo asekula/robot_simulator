@@ -19,6 +19,7 @@ public class TestApplet extends Applet {
 	boolean spinningRight = false;
 
 	public void init() {
+
 		emulator = new Emulator();
 		buffer = new DataBuffer(emulator);
 
@@ -49,7 +50,17 @@ public class TestApplet extends Applet {
 					 * between reading the sensor data and outputting the motor
 					 * data.
 					 */
-					delay();
+
+					/*
+					 * Important: If we call getSensorData() too soon after we
+					 * just called it, then the tacho values will be so low that
+					 * they lose a lot of precision. This small error adds up
+					 * (especially if we iterate so quickly) which makes a large
+					 * error. To counteract this, delay is called more times.
+					 */
+					for (int i = 0; i < Constants.EXTRA_ROBOT_DELAY; i++)
+						delay();
+
 				} while (!brain.isFinished());
 			}
 		}.start();
@@ -70,7 +81,7 @@ public class TestApplet extends Applet {
 	 */
 	private void delay() {
 		try {
-			Thread.sleep(20);
+			Thread.sleep(Constants.APPLET_DELAY);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -27,23 +27,31 @@ public class Brain {
 	 */
 	public MotorData computeMotorData(SensorData sensorData) {
 
-		/*
-		 * Alters the location and orientation of the robot. Also changes it's
-		 * phase value (exploring vs. speed run) if it reached its goal. Also
-		 * removes the head of the path if the robot reached the head's
-		 * location.
-		 * 
-		 * Important: updateData changes the phases.
-		 */
-		robotData.updateData(sensorData);
-
 		if (robotData.getPhase() == Phase.EXPLORING) {
+
+			/*
+			 * Important: Updating the location after mapping assumes that the
+			 * location denoted by curveRobot is roughly accurate, and that the
+			 * true location isn't far off if it started out correct before
+			 * curveRobot was called. This requires that there isn't much wait
+			 * time between iterations.
+			 * 
+			 * The reason behind
+			 */
+
+			robotData.updateData(sensorData); // Curves robot.
 			Mapper.updateMap(sensorData, robotData, map);
+			robotData.fixLocation(sensorData, map); // Uses sensors to fix the
+													// location.
+
 			// Mapper alters the map according to the sensorData and robotData.
 			// Explicitly modifying the current map object to save memory.
 
 			Explorer.modifyPath(map, robotData);
 		} else {
+			robotData.updateData(sensorData);
+			robotData.fixLocation(sensorData, map);
+
 			Solver.modifyPath(map, robotData); // Does nothing if it already
 												// found a path.
 			/*

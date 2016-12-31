@@ -32,6 +32,14 @@ public class Constants {
 
 	public static final double LR_MAX_DISTANCE = 15;
 
+	// For the emulator.
+	public static double TIME_STEP = 0.05; // No idea what to put here.
+
+	// Pertaining the applet:
 	public static final int SCALE_FACTOR = 10;
+
+	public static int APPLET_DELAY = 20;
+
+	public static int EXTRA_ROBOT_DELAY = 2;
 
 }
