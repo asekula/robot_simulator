@@ -108,8 +108,8 @@ public class RobotData {
 	 * same values).
 	 */
 	public void fixLocation(SensorData sensorData, Map map) {
-		Localizer.modifyLocationWithMap(locationInCell, currentCell, sensorData,
-				map, trueOrientation);
+		Localizer.modifyLocation(locationInCell, currentCell, sensorData, map,
+				trueOrientation);
 	}
 
 	/*

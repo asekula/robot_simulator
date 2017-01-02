@@ -23,7 +23,7 @@ public class Localizer {
 	 * 
 	 * Only public interface of Localizer.
 	 */
-	public static void modifyLocationWithMap(Point<Double> location,
+	public static void modifyLocation(Point<Double> location,
 			Point<Integer> currentCell, SensorData sensorData, Map map,
 			double orientation) {
 
@@ -41,29 +41,118 @@ public class Localizer {
 			frontDist = sensorData.frontIR + Constants.FRONT_IR_TO_CENTER;
 		}
 
+		Point<Double> p1, p2, p3, avg;
+
+		p1 = pointData(leftDist, 90, currentCell, map);
+		p2 = pointData(frontDist, 0, currentCell, map);
+		p3 = pointData(rightDist, 270, currentCell, map);
+
+		avg = avgData(p1, p2, p3);
+		if (avg.x != -Constants.CELL_WIDTH) {
+			location.x = avg.x;
+		}
+
+		if (avg.y != -Constants.CELL_WIDTH) {
+			location.y = avg.y;
+		}
+
 		// If we need to optimize code, there's a lot of computation in here
 		// that we can cut down on without losing functionality.
 
-		// Writing ugly code for now. Will revise later.
+		// Writing ugly code for now. Will revise later. (this is super ugly I
+		// know)
 
 		// Note: if we have more data than we need, the code below uses all of
 		// the data and averages the values it gets.
+		Point<Double> p1, p2;
+
+		// Ignore the shit code below. Making it a commit just in case the code
+		// above doesn't work out.
 
 		if (leftDist != -1 && rightDist != -1 && frontDist != -1) {
 
 			if (leftFrontDiffGrid(leftDist, frontDist, orientation)) {
 				if (frontRightDiffGrid(frontDist, rightDist, orientation)) {
 					// Return avg of left/front and front/right.
+					p1 = leftFrontPoint(leftDist, frontDist, orientation);
+					p2 = frontRightPoint(frontDist, rightDist, orientation);
+
 				} else {
 					// Return avg of left/front and left/right.
+					p1 = leftFrontPoint(leftDist, frontDist, orientation);
+					p2 = leftRightPoint(leftDist, rightDist, orientation);
 				}
 			} else {
 				if (leftRightDiffGrid(leftDist, rightDist, orientation)) {
 					// We know that frontRight are on different grid lines.
 					// Return avg of left/right and front/right.
+					p1 = leftRightPoint(leftDist, rightDist, orientation);
+					p2 = frontRightPoint(frontDist, rightDist, orientation);
 				} else {
 					// They're all on the same grid line type. Can only use one
 					// coordinate.
+					useLeftFrontRightValue(location, leftDist, frontDist,
+							orientation);
+					// Todo.
+				}
+			}
+			location.x = (p1.x + p2.x) / 2;
+			location.y = (p1.y + p2.y) / 2;
+		} else {
+			if (leftDist == -1) {
+				if (rightDist == -1) {
+					if (frontDist == -1) {
+						return;
+					} else {
+						useFrontValue(location, frontDist, orientation);
+					}
+				} else {
+					if (frontDist == -1) {
+						useRightValue(location, rightDist, orientation);
+					} else {
+						if (frontRightDiffGrid(frontDist, rightDist,
+								orientation)) {
+							p1 = frontRightPoint(frontDist, rightDist,
+									orientation);
+							location.x = p1.x;
+							location.y = p1.y;
+						} else {
+							// ?
+							useFrontRightValue(location, frontDist, rightDist,
+									orientation);
+						}
+					}
+				}
+			} else {
+				if (rightDist == -1) {
+					if (frontDist == -1) {
+						useLeftValue(location, leftDist, orientation);
+					} else {
+						if (leftFrontDiffGrid(leftDist, frontDist,
+								orientation)) {
+							p1 = leftFrontPoint(leftDist, frontDist,
+									orientation);
+							location.x = p1.x;
+							location.y = p1.y;
+						} else {
+							// ?
+						}
+					}
+				} else {
+					if (frontDist == -1) {
+						if (leftRightDiffGrid(leftDist, rightDist,
+								orientation)) {
+							p1 = leftRightPoint(leftDist, rightDist,
+									orientation);
+							location.x = p1.x;
+							location.y = p1.y;
+						} else {
+							useLeftRightValue(location, leftDist, rightDist,
+									orientation);
+						}
+					} else {
+						assert (false); // Won't happen.
+					}
 				}
 			}
 		}
