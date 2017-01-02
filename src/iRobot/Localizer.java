@@ -41,11 +41,13 @@ public class Localizer {
 			frontDist = sensorData.frontIR + Constants.FRONT_IR_TO_CENTER;
 		}
 
+		// If we need to save memory, here's a good place to do it.
+
 		Point<Double> p1, p2, p3, avg;
 
-		p1 = pointData(leftDist, 90, currentCell, map);
-		p2 = pointData(frontDist, 0, currentCell, map);
-		p3 = pointData(rightDist, 270, currentCell, map);
+		p1 = pointData(leftDist, (90 + orientation) % 360, currentCell, map);
+		p2 = pointData(frontDist, orientation, currentCell, map);
+		p3 = pointData(rightDist, (270 + orientation) % 360, currentCell, map);
 
 		avg = avgData(p1, p2, p3);
 		if (avg.x != -Constants.CELL_WIDTH) {
@@ -55,214 +57,73 @@ public class Localizer {
 		if (avg.y != -Constants.CELL_WIDTH) {
 			location.y = avg.y;
 		}
-
-		// If we need to optimize code, there's a lot of computation in here
-		// that we can cut down on without losing functionality.
-
-		// Writing ugly code for now. Will revise later. (this is super ugly I
-		// know)
-
-		// Note: if we have more data than we need, the code below uses all of
-		// the data and averages the values it gets.
-		Point<Double> p1, p2;
-
-		// Ignore the shit code below. Making it a commit just in case the code
-		// above doesn't work out.
-
-		if (leftDist != -1 && rightDist != -1 && frontDist != -1) {
-
-			if (leftFrontDiffGrid(leftDist, frontDist, orientation)) {
-				if (frontRightDiffGrid(frontDist, rightDist, orientation)) {
-					// Return avg of left/front and front/right.
-					p1 = leftFrontPoint(leftDist, frontDist, orientation);
-					p2 = frontRightPoint(frontDist, rightDist, orientation);
-
-				} else {
-					// Return avg of left/front and left/right.
-					p1 = leftFrontPoint(leftDist, frontDist, orientation);
-					p2 = leftRightPoint(leftDist, rightDist, orientation);
-				}
-			} else {
-				if (leftRightDiffGrid(leftDist, rightDist, orientation)) {
-					// We know that frontRight are on different grid lines.
-					// Return avg of left/right and front/right.
-					p1 = leftRightPoint(leftDist, rightDist, orientation);
-					p2 = frontRightPoint(frontDist, rightDist, orientation);
-				} else {
-					// They're all on the same grid line type. Can only use one
-					// coordinate.
-					useLeftFrontRightValue(location, leftDist, frontDist,
-							orientation);
-					// Todo.
-				}
-			}
-			location.x = (p1.x + p2.x) / 2;
-			location.y = (p1.y + p2.y) / 2;
-		} else {
-			if (leftDist == -1) {
-				if (rightDist == -1) {
-					if (frontDist == -1) {
-						return;
-					} else {
-						useFrontValue(location, frontDist, orientation);
-					}
-				} else {
-					if (frontDist == -1) {
-						useRightValue(location, rightDist, orientation);
-					} else {
-						if (frontRightDiffGrid(frontDist, rightDist,
-								orientation)) {
-							p1 = frontRightPoint(frontDist, rightDist,
-									orientation);
-							location.x = p1.x;
-							location.y = p1.y;
-						} else {
-							// ?
-							useFrontRightValue(location, frontDist, rightDist,
-									orientation);
-						}
-					}
-				}
-			} else {
-				if (rightDist == -1) {
-					if (frontDist == -1) {
-						useLeftValue(location, leftDist, orientation);
-					} else {
-						if (leftFrontDiffGrid(leftDist, frontDist,
-								orientation)) {
-							p1 = leftFrontPoint(leftDist, frontDist,
-									orientation);
-							location.x = p1.x;
-							location.y = p1.y;
-						} else {
-							// ?
-						}
-					}
-				} else {
-					if (frontDist == -1) {
-						if (leftRightDiffGrid(leftDist, rightDist,
-								orientation)) {
-							p1 = leftRightPoint(leftDist, rightDist,
-									orientation);
-							location.x = p1.x;
-							location.y = p1.y;
-						} else {
-							useLeftRightValue(location, leftDist, rightDist,
-									orientation);
-						}
-					} else {
-						assert (false); // Won't happen.
-					}
-				}
-			}
-		}
-
-		// Finish.
-	}
-
-	private static boolean leftFrontDiffGrid(double left, double front,
-			double orientation) {
-
-		if (front == -1 || left == -1)
-			return false;
-
-		return !within(Geometry.fullTanInverse(front, left), orientation, 0.5);
-	}
-
-	private static boolean frontRightDiffGrid(double front, double right,
-			double orientation) {
-
-		if (front == -1 || right == -1)
-			return false;
-
-		double angleToRight = Geometry.fullTanInverse(right, front);
-		double potentialOrientation = (angleToRight + 90) % 360;
-		return !within(potentialOrientation, orientation, 0.5);
-	}
-
-	private static boolean leftRightDiffGrid(double left, double right,
-			double orientation) {
-		// Todo.
-		return true;
 	}
 
 	/*
-	 * Given the left ir value and the front ir value, finds as many coordinates
-	 * as it can and updates them in the location point. Doesn't actually use
-	 * location point.
-	 * 
-	 * Modifies location.
+	 * True orientation is the direction that dist is facing. cell is the
+	 * current cell. Returns a point with as much data as possible, indicating
+	 * where the robot is in the current cell. If there is no data in any of the
+	 * coordinates it uses -Constants.CELL_WIDTH to fill the data. Since we're
+	 * using only one distance value, one of the coordinates will definitely be
+	 * -CELL_WIDTH.
 	 */
-	private static void updateCoordinatesLeftFront(Point<Double> location,
-			double left, double front, double orientation) {
+	private static Point<Double> pointData(double dist, double trueOrientation,
+			Point<Integer> cell, Map map) {
 
-		// For now, doing nothing if either length is -1. (maybe change later)
-		if (front == -1 || left == -1) {
-			return;
-		}
+		// Todo.
 
-		if (leftFrontDiffGrid(left, front, orientation) == false) {
-			// Update a single coordinate.
+		return new Point<Double>(-Constants.CELL_WIDTH, -Constants.CELL_WIDTH);
+	}
 
-			System.out.println("Left: " + left + ", front: " + front);
-			System.out.println("Orientation: " + orientation);
+	/*
+	 * Avgs values when they are not -CELL_WIDTH. Returns a point containing
+	 * those average values.
+	 */
+	private static Point<Double> avgData(Point<Double> p1, Point<Double> p2,
+			Point<Double> p3) {
+		int xCoords = 0, yCoords = 0;
+		Point<Double> avgPoint = new Point<Double>(0.0, 0.0);
 
-			System.out.println("Left and front are on same grid line.");
+		// Want tuple here.
+		xCoords = addToAvg(avgPoint, p1.x, xCoords, true);
+		xCoords = addToAvg(avgPoint, p2.x, xCoords, true);
+		xCoords = addToAvg(avgPoint, p3.x, xCoords, true);
 
-			if (orientation < 90 || (orientation > 180 && orientation < 270)) {
+		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
 
-				double distanceToWall = Math.sin(Math.toRadians(orientation))
-						* front;
-				if (distanceToWall > 0) {
-					location.y = Constants.CELL_WIDTH - distanceToWall;
-				} else {
-					location.y = (-1) * distanceToWall;
-				}
-
-				System.out.println("Updated y to " + location.y);
-				System.out.println(" _________________ ");
-
-				return;
-			} else if (orientation > 270
-					|| (orientation > 90 && orientation < 180)) {
-
-				double distanceToWall = Math.cos(Math.toRadians(orientation))
-						* front;
-
-				if (distanceToWall < 0) {
-					location.x = (-1) * distanceToWall;
-				} else {
-					location.x = Constants.CELL_WIDTH - distanceToWall;
-				}
-
-				System.out.println("Updated x to " + location.x);
-			} else {
-				assert (false); // Shouldn't get here.
-			}
+		if (xCoords == 0) {
+			avgPoint.x = -Constants.CELL_WIDTH;
 		} else {
-			// Figure out how to do this.
-		}
-	}
-
-	private static void updateCoordinatesFrontRight(Point<Double> location,
-			double front, double right, double orientation) {
-
-		if (front == -1 || right == -1) {
-			return;
+			avgPoint.x /= xCoords;
 		}
 
-	}
-
-	private static void updateCoordinatesLeftRight(Point<Double> location,
-			double left, double right, double orientation) {
-
-		if (right == -1 || left == -1) {
-			return;
+		if (yCoords == 0) {
+			avgPoint.y = -Constants.CELL_WIDTH;
+		} else {
+			avgPoint.y /= yCoords;
 		}
 
+		return avgPoint;
 	}
 
-	private static boolean within(double a, double b, double error) {
-		return (Math.abs(a - b) <= error);
+	/*
+	 * Returns num if avg wasn't added to, returns num + 1 if it added val to
+	 * one of avg's coordinates (as decided by xPos).
+	 */
+	private static int addToAvg(Point<Double> avg, double val, int num,
+			boolean xPos) {
+
+		if (val != -Constants.CELL_WIDTH) {
+			if (xPos) {
+				avg.x += val;
+			} else {
+				avg.y += val;
+			}
+			return num + 1;
+		} else {
+			return num;
+		}
 	}
 }
