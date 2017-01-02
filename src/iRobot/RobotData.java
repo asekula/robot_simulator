@@ -124,13 +124,13 @@ public class RobotData {
 		Point<Integer> nextCell = new Point<Integer>(cell.x, cell.y);
 
 		if (location.x < 0)
-			nextCell = getAdjacentCell(nextCell, Direction.WEST);
+			nextCell = Point.getAdjacentCell(nextCell, Direction.WEST);
 		if (location.x >= Constants.CELL_WIDTH)
-			nextCell = getAdjacentCell(nextCell, Direction.EAST);
+			nextCell = Point.getAdjacentCell(nextCell, Direction.EAST);
 		if (location.y < 0)
-			nextCell = getAdjacentCell(nextCell, Direction.SOUTH);
+			nextCell = Point.getAdjacentCell(nextCell, Direction.SOUTH);
 		if (location.y >= Constants.CELL_WIDTH)
-			nextCell = getAdjacentCell(nextCell, Direction.NORTH);
+			nextCell = Point.getAdjacentCell(nextCell, Direction.NORTH);
 
 		return nextCell;
 	}
@@ -140,30 +140,6 @@ public class RobotData {
 		fixed.x = (location.x + Constants.CELL_WIDTH) % Constants.CELL_WIDTH;
 		fixed.y = (location.y + Constants.CELL_WIDTH) % Constants.CELL_WIDTH;
 		return fixed;
-	}
-
-	/*
-	 * Moves the current cell to one of its neighboring cells based on the
-	 * direction.
-	 */
-	private Point<Integer> getAdjacentCell(Point<Integer> cell, Direction dir) {
-		Point<Integer> adjacent = new Point<Integer>(cell.x, cell.y);
-		switch (dir) {
-			case NORTH :
-				adjacent.y += 1;
-				break;
-			case SOUTH :
-				adjacent.y -= 1;
-				break;
-			case EAST :
-				adjacent.x += 1;
-				break;
-			case WEST :
-				adjacent.x -= 1;
-				break;
-		}
-
-		return adjacent;
 	}
 
 	/*
