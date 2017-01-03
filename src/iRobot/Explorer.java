@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.util.LinkedList;
+
 public class Explorer {
 
 	/*
@@ -7,10 +9,23 @@ public class Explorer {
 	 * change the map. Uses the map data and the robot data to figure out where
 	 * the robot should go.
 	 */
-	public static void modifyPath(Map map, RobotData robotData) {
-		// Note: Only looks at robotData's current tile and path.
+	public static void modifyPath(Map map, Point<Integer> currentCell,
+			LinkedList<Point<Integer>> path) {
+		// Note: Only looks at robotData's current cell and path.
 		// Only modifies the path.
 
 		// Runs A*
+
+		// Temporary, for testing purposes:
+		if (currentCell.x == 0 && currentCell.y == 0 && path.isEmpty()) {
+			path.add(new Point<Integer>(1, 0));
+			path.add(new Point<Integer>(1, 1));
+			path.add(new Point<Integer>(2, 1));
+			path.add(new Point<Integer>(2, 2));
+			path.add(new Point<Integer>(1, 2));
+			path.add(new Point<Integer>(0, 2));
+			path.add(new Point<Integer>(0, 1));
+			path.add(new Point<Integer>(0, 0));
+		}
 	}
 }

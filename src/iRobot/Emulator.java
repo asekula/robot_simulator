@@ -1,6 +1,8 @@
 package iRobot;
 
 import java.awt.*;
+import java.util.LinkedList;
+import java.util.Iterator;
 
 public class Emulator implements Environment {
 
@@ -120,6 +122,7 @@ public class Emulator implements Environment {
 
 		// Draws the goal location as a yellow circle.
 		drawGoalLocation(g, robotData.nextGoalLocation());
+		drawPath(g, robotData.getCurrentCell(), robotData.getPath());
 		map.drawMaze(g);
 
 		drawSensors(g);
@@ -179,6 +182,33 @@ public class Emulator implements Environment {
 		g.fillOval((int) (goal.x * Constants.SCALE_FACTOR) - (circSize / 2),
 				(int) (goal.y * Constants.SCALE_FACTOR) - (circSize / 2),
 				circSize, circSize);
+	}
+
+	private void drawPath(Graphics g, Point<Integer> currentCell,
+			LinkedList<Point<Integer>> path) {
+		if (path != null) {
+			Iterator<Point<Integer>> iter = path.iterator();
+
+			if (!iter.hasNext())
+				return;
+
+			Point<Integer> current = iter.next();
+
+			drawArrow(g, currentCell, current);
+
+			while (iter.hasNext()) {
+				Point<Integer> next = iter.next();
+				drawArrow(g, current, next);
+				current = next;
+			}
+
+		}
+	}
+
+	private void drawArrow(Graphics g, Point<Integer> from, Point<Integer> to) {
+		double x = Constants.CELL_WIDTH * Constants.SCALE_FACTOR;
+		g.drawLine((int) ((from.x + 0.5) * x), (int) ((from.y + 0.5) * x),
+				(int) ((to.x + 0.5) * x), (int) ((to.y + 0.5) * x));
 	}
 
 	/*
