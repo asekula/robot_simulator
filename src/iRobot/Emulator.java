@@ -50,8 +50,6 @@ public class Emulator implements Environment {
 		locationInMaze = Geometry.curveRobot(locationInMaze, orientation,
 				orientationChange, leftArcLength, rightArcLength);
 
-		System.out.println("New location: " + locationInMaze);
-
 		orientation += orientationChange;
 		orientation = orientation % 360;
 		leftTacho += Geometry.cmToTacho(leftArcLength);
@@ -66,6 +64,7 @@ public class Emulator implements Environment {
 
 	private boolean robotHitWall(Point<Double> location, double orientation) {
 		// Todo.
+		// Q: Do we even need this? Potential A: It would be good to include it.
 		return false;
 	}
 
@@ -89,6 +88,8 @@ public class Emulator implements Environment {
 				Constants.IR_MAX, map);
 		rightIR = Geometry.getDistanceToNearestWall(right, rightTheta,
 				Constants.IR_MAX, map);
+
+		// Set front/left/right to -1 here to test not having sensor data.
 	}
 
 	private Point<Double> getRelativePoint(double theta, double length) {

@@ -72,7 +72,6 @@ public class Localizer {
 
 		avg = avgData(p1, p2, p3);
 
-		System.out.println("Avg: " + avg);
 		if (avg.x != -CELL_WIDTH) {
 			location.x = avg.x;
 		}
@@ -88,7 +87,16 @@ public class Localizer {
 	 */
 	private static void closestValidPoint(Point<Double> location, double dist,
 			double theta, Point<Integer> currentCell, Map map) {
-		// Todo.
+		Point<Double> origin = new Point<Double>(0.0, 0.0);
+		Point<Double> p = Geometry.getRelativePoint(origin, 0, theta, dist);
+
+		double xVal = locInCell(p.x), yVal = locInCell(p.y);
+
+		if (Math.abs(location.x - xVal) < Math.abs(location.y - yVal)) {
+			location.x = xVal;
+		} else {
+			location.y = yVal;
+		}
 	}
 
 	/*
@@ -324,8 +332,8 @@ public class Localizer {
 		xCoords = addToAvg(avgPoint, p3.x, xCoords, true);
 
 		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
-		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
-		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p2.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p3.y, yCoords, false);
 
 		if (xCoords == 0) {
 			avgPoint.x = -Constants.CELL_WIDTH;
