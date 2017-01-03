@@ -87,6 +87,12 @@ public class TestApplet extends Applet {
 		}
 	}
 
+	/*
+	 * Important to note: The coordinate system increases x to the right and
+	 * increases y downwards. This makes the orientation seem reversed, and left
+	 * appears like right on the screen, whereas it's actually just reflected
+	 * across the x-axis, so it's correct.
+	 */
 	public void paint(Graphics g) {
 		emulator.drawEnvironment(g, robotData);
 	}

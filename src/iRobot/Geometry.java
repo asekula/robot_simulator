@@ -219,4 +219,8 @@ public class Geometry {
 		return tanInvDegrees;
 	}
 
+	public static boolean within(double a, double b, double error) {
+		return (Math.abs(a - b) <= error);
+	}
+
 }

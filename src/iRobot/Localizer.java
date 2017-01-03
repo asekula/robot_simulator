@@ -2,11 +2,15 @@ package iRobot;
 
 public class Localizer {
 
-	/*
-	 * Finish.
-	 */
+	// Important: Do not change this line.
+	// Including this to make the code less cluttered.
+	private static final double CELL_WIDTH = Constants.CELL_WIDTH;
 
 	/*
+	 * This method uses the robot's data (including sensor data) to update the
+	 * location of the robot. It is assumed that the robot already moved itself
+	 * via curveRobot with the tacho counts.
+	 * 
 	 * Orientation is the true orientation of the robot. This method uses only
 	 * the sensor data to update the robot's location.
 	 * 
@@ -23,7 +27,7 @@ public class Localizer {
 	 * 
 	 * Only public interface of Localizer.
 	 */
-	public static void modifyLocationWithMap(Point<Double> location,
+	public static void modifyLocation(Point<Double> location,
 			Point<Integer> currentCell, SensorData sensorData, Map map,
 			double orientation) {
 
@@ -41,139 +45,331 @@ public class Localizer {
 			frontDist = sensorData.frontIR + Constants.FRONT_IR_TO_CENTER;
 		}
 
-		// If we need to optimize code, there's a lot of computation in here
-		// that we can cut down on without losing functionality.
+		// If we need to save memory, here's a good place to do it.
+		double thetaL = (90 + orientation) % 360, thetaF = orientation,
+				thetaR = (270 + orientation) % 360;
 
-		// Writing ugly code for now. Will revise later.
-
-		// Note: if we have more data than we need, the code below uses all of
-		// the data and averages the values it gets.
-
-		if (leftDist != -1 && rightDist != -1 && frontDist != -1) {
-
-			if (leftFrontDiffGrid(leftDist, frontDist, orientation)) {
-				if (frontRightDiffGrid(frontDist, rightDist, orientation)) {
-					// Return avg of left/front and front/right.
-				} else {
-					// Return avg of left/front and left/right.
-				}
-			} else {
-				if (leftRightDiffGrid(leftDist, rightDist, orientation)) {
-					// We know that frontRight are on different grid lines.
-					// Return avg of left/right and front/right.
-				} else {
-					// They're all on the same grid line type. Can only use one
-					// coordinate.
-				}
-			}
+		if (leftDist != -1 && frontDist == -1 && rightDist == -1) {
+			closestValidPoint(location, leftDist, thetaL, currentCell, map);
+			return;
 		}
 
-		// Finish.
-	}
+		if (leftDist == -1 && frontDist != -1 && rightDist == -1) {
+			closestValidPoint(location, frontDist, thetaF, currentCell, map);
+			return;
+		}
 
-	private static boolean leftFrontDiffGrid(double left, double front,
-			double orientation) {
+		if (leftDist == -1 && frontDist == -1 && rightDist != -1) {
+			closestValidPoint(location, rightDist, thetaR, currentCell, map);
+			return;
+		}
 
-		if (front == -1 || left == -1)
-			return false;
+		Point<Double> p1, p2, p3, avg;
 
-		return !within(Geometry.fullTanInverse(front, left), orientation, 0.5);
-	}
+		p1 = pointData(leftDist, thetaL, frontDist, thetaF, currentCell, map);
+		p2 = pointData(frontDist, thetaF, rightDist, thetaR, currentCell, map);
+		p3 = pointData(leftDist, thetaL, rightDist, thetaR, currentCell, map);
 
-	private static boolean frontRightDiffGrid(double front, double right,
-			double orientation) {
+		avg = avgData(p1, p2, p3);
 
-		if (front == -1 || right == -1)
-			return false;
+		if (avg.x != -CELL_WIDTH) {
+			location.x = avg.x;
+		}
 
-		double angleToRight = Geometry.fullTanInverse(right, front);
-		double potentialOrientation = (angleToRight + 90) % 360;
-		return !within(potentialOrientation, orientation, 0.5);
-	}
-
-	private static boolean leftRightDiffGrid(double left, double right,
-			double orientation) {
-		// Todo.
-		return true;
+		if (avg.y != -CELL_WIDTH) {
+			location.y = avg.y;
+		}
 	}
 
 	/*
-	 * Given the left ir value and the front ir value, finds as many coordinates
-	 * as it can and updates them in the location point. Doesn't actually use
-	 * location point.
-	 * 
-	 * Modifies location.
+	 * Modifies location. Assumes that there are no other distance values.
+	 * Location will not be modified more after this method.
 	 */
-	private static void updateCoordinatesLeftFront(Point<Double> location,
-			double left, double front, double orientation) {
+	private static void closestValidPoint(Point<Double> location, double dist,
+			double theta, Point<Integer> currentCell, Map map) {
+		Point<Double> origin = new Point<Double>(0.0, 0.0);
+		Point<Double> p = Geometry.getRelativePoint(origin, 0, theta, dist);
 
-		// For now, doing nothing if either length is -1. (maybe change later)
-		if (front == -1 || left == -1) {
-			return;
+		double xVal = locInCell(p.x), yVal = locInCell(p.y);
+
+		if (Math.abs(location.x - xVal) < Math.abs(location.y - yVal)) {
+			location.x = xVal;
+		} else {
+			location.y = yVal;
+		}
+	}
+
+	/*
+	 * Thetax is the direction that distx is facing. cell is the current cell.
+	 * Returns a point with as much data as possible, indicating where the robot
+	 * is in the current cell. If there is no data in any of the coordinates it
+	 * uses -Constants.CELL_WIDTH to fill the data. Since we're using only one
+	 * distance value, one of the coordinates will definitely be -CELL_WIDTH.
+	 * 
+	 * Using -Constants.CELL_WIDTH because the values will never be that low,
+	 * since localization is done quite often, and once the values become
+	 * negative, the cell changes and they become positive again.
+	 * 
+	 * Returns unknown if either distance is -1.
+	 */
+	private static Point<Double> pointData(double dist1, double theta1,
+			double dist2, double theta2, Point<Integer> cell, Map map) {
+
+		// I've accepted the fact that I'll need to plug through cases here.
+
+		if (dist1 == -1 || dist2 == -1) {
+			return new Point<Double>(-CELL_WIDTH, -CELL_WIDTH);
 		}
 
-		if (leftFrontDiffGrid(left, front, orientation) == false) {
-			// Update a single coordinate.
+		Point<Double> origin = new Point<Double>(0.0, 0.0);
 
-			System.out.println("Left: " + left + ", front: " + front);
-			System.out.println("Orientation: " + orientation);
+		Point<Double> p1 = Geometry.getRelativePoint(origin, 0, theta1, dist1);
+		Point<Double> p2 = Geometry.getRelativePoint(origin, 0, theta2, dist2);
 
-			System.out.println("Left and front are on same grid line.");
+		double precision = 0.0001;
+		p1.x = round(p1.x, precision);
+		p1.y = round(p1.y, precision);
+		p2.x = round(p2.x, precision);
+		p2.y = round(p2.y, precision);
 
-			if (orientation < 90 || (orientation > 180 && orientation < 270)) {
+		double error = 0.03; // Important: Change this if localization isn't
+								// precise.
 
-				double distanceToWall = Math.sin(Math.toRadians(orientation))
-						* front;
-				if (distanceToWall > 0) {
-					location.y = Constants.CELL_WIDTH - distanceToWall;
-				} else {
-					location.y = (-1) * distanceToWall;
-				}
+		// If a coordinate of a point is 0, then we know that there is only one
+		// kind of wall that the sensor is detecting.
 
-				System.out.println("Updated y to " + location.y);
-				System.out.println(" _________________ ");
+		if (Math.abs(theta1 - theta2) != 180) {
+			if ((p1.x == 0) || (p2.y == 0)) {
+				return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+			}
 
-				return;
-			} else if (orientation > 270
-					|| (orientation > 90 && orientation < 180)) {
-
-				double distanceToWall = Math.cos(Math.toRadians(orientation))
-						* front;
-
-				if (distanceToWall < 0) {
-					location.x = (-1) * distanceToWall;
-				} else {
-					location.x = Constants.CELL_WIDTH - distanceToWall;
-				}
-
-				System.out.println("Updated x to " + location.x);
-			} else {
-				assert (false); // Shouldn't get here.
+			if ((p1.y == 0) || (p2.x == 0)) {
+				return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
 			}
 		} else {
-			// Figure out how to do this.
+
+			if (p1.x == 0 || p2.x == 0) {
+				// p2.x == 0.
+				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+			}
+
+			if (p1.y == 0 || p2.x == 0) {
+				// p2.y == 0.
+				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+			}
+		}
+
+		// If the coordinates are close enough, they are detecting the same
+		// wall.
+		if (Geometry.within(p1.x, p2.x, error)) {
+			return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+		}
+
+		if (Geometry.within(p1.y, p2.y, error)) {
+			return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+		}
+
+		if (p1.x < 0 && p2.x < 0) {
+
+			// If the y's are the same sign, the vectors are in the same
+			// quadrant, which won't happen with our L/F/R vectors.
+
+			assert (p1.y * p2.y < 0); // True if opposite signs.
+			// (already covered case where one of the coordinates is 0.
+
+			if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, error)) {
+				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+			} else {
+				if (p1.x < p2.x) { // p1 hits the left wall.
+					return new Point<Double>(-p1.x, locInCell(p2.y));
+				} else {
+					return new Point<Double>(-p2.x, locInCell(p1.y));
+				}
+			}
+		}
+
+		if (p1.x > 0 && p2.x > 0) {
+			assert (p1.y * p2.y < 0);
+
+			if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, error)) {
+				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+			} else {
+				if (p1.x > p2.x) { // p1 hits the right wall.
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				} else {
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				}
+			}
+		}
+
+		if (p1.y > 0 && p2.y > 0) {
+
+			if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, error)) {
+				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+			} else {
+				if (p1.y > p2.y) { // p1 hits the top wall.
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				} else {
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				}
+			}
+		}
+
+		if (p1.y < 0 && p2.y < 0) {
+			if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, error)) {
+
+				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+			} else {
+				if (p1.y < p2.y) { // p1 hits the bottom wall.
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				} else {
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				}
+			}
+		}
+
+		// Last case: across from each other (opposite quadrants).
+		// Only case that uses the map.
+		if ((p1.y * p2.y < 0) && (p1.x * p2.x < 0)) {
+			assert (Math.abs(theta1 - theta2) == 180); // No other case.
+
+			// Subtracting p1.x and p2.x because they have different signs.
+			if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, error)) {
+				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+			}
+
+			if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, error)) {
+				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+			}
+
+			boolean westWall = map.wallBetween(cell,
+					Point.getAdjacentCell(cell, Direction.WEST));
+			boolean eastWall = map.wallBetween(cell,
+					Point.getAdjacentCell(cell, Direction.EAST));
+			boolean northWall = map.wallBetween(cell,
+					Point.getAdjacentCell(cell, Direction.NORTH));
+			boolean southWall = map.wallBetween(cell,
+					Point.getAdjacentCell(cell, Direction.SOUTH));
+
+			boolean bottomRight = eastWall && southWall;
+			boolean topLeft = northWall && westWall;
+			boolean topRight = northWall && eastWall;
+			boolean bottomLeft = southWall && westWall;
+
+			/*
+			 * Even if it's not detecting the actual wall (maybe it's detecting
+			 * the wall next to it), we can still use the coordinates to get its
+			 * location relative to that grid line, which is all that we care
+			 * about.
+			 */
+
+			// Todo later: clean this up.
+
+			if (p1.x > 0 && p1.y > 0) {
+				if (topLeft && (!bottomRight)) {
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				}
+				if ((!topLeft) && bottomRight) {
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				}
+			}
+
+			if (p1.x < 0 && p1.y < 0) {
+				if (topLeft && (!bottomRight)) {
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				}
+				if ((!topLeft) && bottomRight) {
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				}
+			}
+
+			if (p1.x < 0 && p1.y > 0) {
+				if (topRight && (!bottomLeft)) {
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				}
+				if ((!topRight) && bottomLeft) {
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				}
+			}
+
+			if (p1.x > 0 && p1.y < 0) {
+				if (topRight && (!bottomLeft)) {
+					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+				}
+				if ((!topRight) && bottomLeft) {
+					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+				}
+			}
+		}
+
+		return new Point<Double>(-CELL_WIDTH, -CELL_WIDTH);
+	}
+
+	private static double avgLocs(double val1, double val2) {
+		return (locInCell(val1) + locInCell(val2)) / 2;
+	}
+
+	private static double locInCell(double val) {
+		if (val > 0) {
+			return Constants.CELL_WIDTH - val;
+		} else {
+			return -val;
 		}
 	}
 
-	private static void updateCoordinatesFrontRight(Point<Double> location,
-			double front, double right, double orientation) {
+	/*
+	 * Averages values when they are not -CELL_WIDTH. Returns a point containing
+	 * those average values.
+	 */
+	private static Point<Double> avgData(Point<Double> p1, Point<Double> p2,
+			Point<Double> p3) {
+		int xCoords = 0, yCoords = 0;
+		Point<Double> avgPoint = new Point<Double>(0.0, 0.0);
 
-		if (front == -1 || right == -1) {
-			return;
+		// Want tuple here.
+		xCoords = addToAvg(avgPoint, p1.x, xCoords, true);
+		xCoords = addToAvg(avgPoint, p2.x, xCoords, true);
+		xCoords = addToAvg(avgPoint, p3.x, xCoords, true);
+
+		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p2.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p3.y, yCoords, false);
+
+		if (xCoords == 0) {
+			avgPoint.x = -Constants.CELL_WIDTH;
+		} else {
+			avgPoint.x /= xCoords;
 		}
 
-	}
-
-	private static void updateCoordinatesLeftRight(Point<Double> location,
-			double left, double right, double orientation) {
-
-		if (right == -1 || left == -1) {
-			return;
+		if (yCoords == 0) {
+			avgPoint.y = -Constants.CELL_WIDTH;
+		} else {
+			avgPoint.y /= yCoords;
 		}
 
+		return avgPoint;
 	}
 
-	private static boolean within(double a, double b, double error) {
-		return (Math.abs(a - b) <= error);
+	/*
+	 * Returns num if avg wasn't added to, returns num + 1 if it added val to
+	 * one of avg's coordinates (as decided by xPos).
+	 */
+	private static int addToAvg(Point<Double> avg, double val, int num,
+			boolean xPos) {
+
+		if (val != -Constants.CELL_WIDTH) {
+			if (xPos) {
+				avg.x += val;
+			} else {
+				avg.y += val;
+			}
+			return num + 1;
+		} else {
+			return num;
+		}
+	}
+
+	private static double round(double val, double precision) {
+		return Math.round(val / precision) * precision;
 	}
 }

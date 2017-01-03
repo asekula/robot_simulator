@@ -117,6 +117,14 @@ public class Map {
 		return true;
 	}
 
+	/*
+	 * Returns true if wall or unknown. (true if unknown because the
+	 * localization code calculates all possibilities).
+	 */
+	public boolean wallBetween(Point<Integer> cell1, Point<Integer> cell2) {
+		return true;
+	}
+
 	public void drawMaze(Graphics g) {
 		// Can be recursive.
 		g.setColor(Color.LIGHT_GRAY);
