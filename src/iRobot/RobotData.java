@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.util.LinkedList;
+
 /*
  * Important method in here is updateData.
  */
@@ -56,7 +58,8 @@ public class RobotData {
 
 	private Phase phase;
 
-	private Path path; // Will be a list of references to nodes in the map.
+	// Q: Better way of representing the path?
+	private LinkedList<Point<Integer>> path;
 
 	public RobotData(double orientationOffset, Point<Double> location) {
 
@@ -70,7 +73,7 @@ public class RobotData {
 				Constants.CENTER_CELL);
 		currentGoalLocation = centerOf(currentCell); // Won't move.
 		phase = Phase.EXPLORING;
-		path = new Path();
+		path = new LinkedList<Point<Integer>>();
 	}
 
 	public Phase getPhase() {
@@ -147,8 +150,10 @@ public class RobotData {
 	 */
 	private void updatePath() {
 		// When path is implemented, remove currentCell.
-		if (path.getNextCell(currentCell).equals(currentCell)) {
-			path.removeHead(); // Removes head from path.
+		if (!path.isEmpty()) {
+			if (path.getFirst().equals(currentCell)) {
+				path.removeFirst();
+			}
 		}
 	}
 
@@ -202,9 +207,17 @@ public class RobotData {
 		return currentCell;
 	}
 
+	public LinkedList<Point<Integer>> getPath() {
+		return path;
+	}
+
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
-		return path.getNextCell(currentCell);
+		if (path.isEmpty()) {
+			return new Point<Integer>(-1, -1);
+		} else {
+			return path.getFirst();
+		}
 	}
 
 	public double getTrueOrientation() {
@@ -219,10 +232,19 @@ public class RobotData {
 
 	/*
 	 * Returns a location in the maze (not necessarily a location in cell).
+	 * 
+	 * Called by the instructionGenerator.
 	 */
 	public Point<Double> nextGoalLocation() {
-		if (closeEnough(currentGoalLocation, getLocationInMaze())) {
-			currentGoalLocation = centerOf(nextCell());
+		if (closeEnough(currentGoalLocation, getLocationInMaze())
+				|| currentGoalLocation.x == -1) {
+			Point<Integer> next = nextCell();
+
+			if (next.x == -1) {
+				currentGoalLocation = new Point<Double>(-1.0, -1.0);
+			} else {
+				currentGoalLocation = centerOf(next);
+			}
 		}
 
 		return currentGoalLocation;

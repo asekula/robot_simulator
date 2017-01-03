@@ -47,7 +47,8 @@ public class Brain {
 			// Mapper alters the map according to the sensorData and robotData.
 			// Explicitly modifying the current map object to save memory.
 
-			Explorer.modifyPath(map, robotData);
+			Explorer.modifyPath(map, robotData.getCurrentCell(),
+					robotData.getPath());
 		} else {
 			robotData.updateData(sensorData);
 			robotData.fixLocation(sensorData, map);
