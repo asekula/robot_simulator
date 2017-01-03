@@ -50,6 +50,8 @@ public class Emulator implements Environment {
 		locationInMaze = Geometry.curveRobot(locationInMaze, orientation,
 				orientationChange, leftArcLength, rightArcLength);
 
+		System.out.println("New location: " + locationInMaze);
+
 		orientation += orientationChange;
 		orientation = orientation % 360;
 		leftTacho += Geometry.cmToTacho(leftArcLength);

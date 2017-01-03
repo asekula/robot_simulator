@@ -71,6 +71,8 @@ public class Localizer {
 		p3 = pointData(leftDist, thetaL, rightDist, thetaR, currentCell, map);
 
 		avg = avgData(p1, p2, p3);
+
+		System.out.println("Avg: " + avg);
 		if (avg.x != -CELL_WIDTH) {
 			location.x = avg.x;
 		}
@@ -107,8 +109,6 @@ public class Localizer {
 
 		// I've accepted the fact that I'll need to plug through cases here.
 
-		// Todo: Test extensively and debug if necessary.
-
 		if (dist1 == -1 || dist2 == -1) {
 			return new Point<Double>(-CELL_WIDTH, -CELL_WIDTH);
 		}
@@ -118,17 +118,37 @@ public class Localizer {
 		Point<Double> p1 = Geometry.getRelativePoint(origin, 0, theta1, dist1);
 		Point<Double> p2 = Geometry.getRelativePoint(origin, 0, theta2, dist2);
 
+		double precision = 0.0001;
+		p1.x = round(p1.x, precision);
+		p1.y = round(p1.y, precision);
+		p2.x = round(p2.x, precision);
+		p2.y = round(p2.y, precision);
+
 		double error = 0.03; // Important: Change this if localization isn't
 								// precise.
 
 		// If a coordinate of a point is 0, then we know that there is only one
 		// kind of wall that the sensor is detecting.
-		if ((p1.x == 0) || (p2.y == 0)) {
-			return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-		}
 
-		if ((p1.y == 0) || (p2.x == 0)) {
-			return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+		if (Math.abs(theta1 - theta2) != 180) {
+			if ((p1.x == 0) || (p2.y == 0)) {
+				return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
+			}
+
+			if ((p1.y == 0) || (p2.x == 0)) {
+				return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
+			}
+		} else {
+
+			if (p1.x == 0 || p2.x == 0) {
+				// p2.x == 0.
+				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+			}
+
+			if (p1.y == 0 || p2.x == 0) {
+				// p2.y == 0.
+				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+			}
 		}
 
 		// If the coordinates are close enough, they are detecting the same
@@ -339,5 +359,9 @@ public class Localizer {
 		} else {
 			return num;
 		}
+	}
+
+	private static double round(double val, double precision) {
+		return Math.round(val / precision) * precision;
 	}
 }
