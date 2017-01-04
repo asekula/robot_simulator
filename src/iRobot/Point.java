@@ -38,6 +38,10 @@ public class Point<T extends Comparable<T>> {
 		return "(" + x.toString() + ", " + y.toString() + ")";
 	}
 
+	public String toVertex() {
+		return x.toString() + "," + y.toString();
+	}
+
 	/*
 	 * Moves the current cell to one of its neighboring cells based on the
 	 * direction.
