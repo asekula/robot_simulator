@@ -30,13 +30,15 @@ public class Brain {
 		if (robotData.getPhase() == Phase.EXPLORING) {
 
 			/*
-			 * Important: Updating the location after mapping assumes that the
-			 * location denoted by curveRobot is roughly accurate, and that the
-			 * true location isn't far off if it started out correct before
-			 * curveRobot was called. This requires that there isn't much wait
-			 * time between iterations.
+			 * Important Todo: As a last check on errors, we should make sure
+			 * that it doesn't update it's location if the new location would be
+			 * a certain distance away from the current location, i.e. we should
+			 * check that fixLocation doesn't do too much damage, and if it
+			 * does, we shouldn't use it to update the location.
 			 * 
-			 * The reason behind
+			 * ^That's something we should put in later after we've debugged
+			 * enough, just to have an extra safeguard in case something goes
+			 * wrong in the competition.
 			 */
 
 			robotData.updateData(sensorData); // Curves robot.

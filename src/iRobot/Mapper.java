@@ -17,13 +17,10 @@ public class Mapper {
 			Map map) {
 
 		/*
-		 * Should probably only do mapping if it's within a certain area in the
-		 * current cell, to avoid edge cases where it's moving from one cell to
-		 * another and it detects a cell change but the sensors still see the
-		 * previous wall.
-		 * 
-		 * Todo: Check if the robot locationInCell is within a smaller square
-		 * inside the current cell, and if so, then perform mapping.
+		 * Will only do mapping if it's within a certain area in the current
+		 * cell, to avoid edge cases where it's moving from one cell to another
+		 * and it detects a cell change but the sensors still see the previous
+		 * wall.
 		 */
 
 		if (insideCell(robotData.getLocationInCell())
@@ -55,6 +52,10 @@ public class Mapper {
 		}
 	}
 
+	/*
+	 * Use a single sensor to figure out if there is a wall or not ahead. Can
+	 * determine a lot from a single sensor value.
+	 */
 	private static void updateMapWithSensor(Map map, double dist, double theta,
 			Point<Double> location, Point<Integer> cell) {
 
@@ -73,29 +74,29 @@ public class Mapper {
 
 		if (dist == -1) {
 			if (xGridLineDist <= Constants.IR_MAX) {
-				setWallXGridLine(map, location, cell, theta, false);
+				setWallXGridLine(map, location, theta, false);
 			}
 
 			if (yGridLineDist <= Constants.IR_MAX) {
-				setWallYGridLine(map, location, cell, theta, false);
+				setWallYGridLine(map, location, theta, false);
 			}
 		} else { // A wall was detected.
 			if (xGridLineDist < yGridLineDist) {
 				if (Geometry.within(xGridLineDist, dist, error)) {
-					setWallXGridLine(map, location, cell, theta, true);
+					setWallXGridLine(map, location, theta, true);
 				} else if (Geometry.within(yGridLineDist, dist, error)) {
-					setWallXGridLine(map, location, cell, theta, false);
-					setWallYGridLine(map, location, cell, theta, true);
+					setWallXGridLine(map, location, theta, false);
+					setWallYGridLine(map, location, theta, true);
 				} else {
 					assert (false);
 					// ^Because one of the two grid lines were detected.
 				}
 			} else {
 				if (Geometry.within(yGridLineDist, dist, error)) {
-					setWallYGridLine(map, location, cell, theta, true);
+					setWallYGridLine(map, location, theta, true);
 				} else if (Geometry.within(xGridLineDist, dist, error)) {
-					setWallYGridLine(map, location, cell, theta, false);
-					setWallXGridLine(map, location, cell, theta, true);
+					setWallYGridLine(map, location, theta, false);
+					setWallXGridLine(map, location, theta, true);
 				} else {
 					assert (false);
 				}
@@ -104,25 +105,70 @@ public class Mapper {
 	}
 
 	private static void setWallXGridLine(Map map, Point<Double> loc,
-			Point<Integer> cell, double theta, boolean setWall) {
-		// Todo.
+			double theta, boolean setWall) {
+
+		Point<Double> wallPoint = new Point<Double>(
+				Geometry.getXGridLine(loc.x, theta), loc.y);
+
+		if (setWall) {
+			map.setWallAtPoint(wallPoint);
+		} else {
+			map.setWallAtPoint(wallPoint);
+		}
 	}
 
 	private static void setWallYGridLine(Map map, Point<Double> loc,
-			Point<Integer> cell, double theta, boolean setWall) {
-		// Todo.
+			double theta, boolean setWall) {
+
+		Point<Double> wallPoint = new Point<Double>(loc.x,
+				Geometry.getYGridLine(loc.y, theta));
+
+		if (setWall) {
+			map.setWallAtPoint(wallPoint);
+		} else {
+			map.setNoWallAtPoint(wallPoint);
+		}
 	}
 
-	private static double getXGridLineDist(Point<Double> loc, double theta) {
-		// Todo.
-		return 0;
+	/*
+	 * Similar to the method in Geometry.
+	 */
+	private static double getXGridLineDist(Point<Double> location,
+			double orientation) {
+		// Line along which we're looking: y = mx + b
+		double m = Math.tan(Math.toRadians(orientation));
+		double b = location.y - (location.x * m);
+
+		assert (m != 0); // Handled these cases above.
+
+		double xGridLine = Geometry.getXGridLine(location.x, orientation);
+
+		Point<Double> xGridLinePoint = new Point<Double>(xGridLine,
+				xGridLine * m + b);
+		return Geometry.distanceBetween(location, xGridLinePoint);
 	}
 
-	private static double getYGridLineDist(Point<Double> loc, double theta) {
-		// Todo.
-		return 0;
+	private static double getYGridLineDist(Point<Double> location,
+			double orientation) {
+		// Line along which we're looking: y = mx + b
+		double m = Math.tan(Math.toRadians(orientation));
+		double b = location.y - (location.x * m);
+
+		assert (m != 0); // Handled these cases above.
+
+		// Want to find intersection of the line with two grid lines.
+		// (grid lines are lines where walls can be located)
+		double yGridLine = Geometry.getYGridLine(location.y, orientation);
+
+		// x = (y - b) / m. Assuming m != 0.
+		Point<Double> yGridLinePoint = new Point<Double>((yGridLine - b) / m,
+				yGridLine);
+		return Geometry.distanceBetween(location, yGridLinePoint);
 	}
 
+	/*
+	 * The sensor is aligned with one of the four main directions.
+	 */
 	private static void updateMapWithDirection(Map map, double distance,
 			Direction dir, Point<Double> location, Point<Integer> cell) {
 		if (distance != -1) {
@@ -134,10 +180,9 @@ public class Mapper {
 
 				map.setWall(cell, dir);
 
-			} else {
-				// Won't bother, really small edge case and we don't need this
-				// functionality.
 			}
+			// else: Won't bother, really small edge case and we don't need this
+			// functionality.
 		} else {
 			map.setNoWall(cell, dir);
 		}
