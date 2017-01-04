@@ -40,9 +40,17 @@ public class Brain {
 			 */
 
 			robotData.updateData(sensorData); // Curves robot.
-			Mapper.updateMap(sensorData, robotData, map);
 			robotData.fixLocation(sensorData, map); // Uses sensors to fix the
 													// location.
+			Mapper.updateMap(sensorData, robotData, map);
+
+			/*
+			 * Important Q: Should updateMap be before or after fixLocation? It
+			 * seems like fixLocation doesn't really rely that much on the map,
+			 * and when it does, it only checks if walls are set. It seems much
+			 * more accurate for mapping's sake if the mapping is done after the
+			 * location is fixed. For now, keeping mapping after localization.
+			 */
 
 			// Mapper alters the map according to the sensorData and robotData.
 			// Explicitly modifying the current map object to save memory.
@@ -53,8 +61,10 @@ public class Brain {
 			robotData.updateData(sensorData);
 			robotData.fixLocation(sensorData, map);
 
-			Solver.modifyPath(map, robotData); // Does nothing if it already
-												// found a path.
+			Solver.modifyPath(map, robotData.getCurrentCell(),
+					robotData.getPath());
+					// ^Does nothing if it already found a path.
+
 			/*
 			 * Q: Should we even include this? We could alternatively compute
 			 * the solution right after it changes phases in updateData, but

@@ -230,6 +230,10 @@ public class RobotData {
 				currentCell.y * Constants.CELL_WIDTH + locationInCell.y);
 	}
 
+	public Point<Double> getLocationInCell() {
+		return locationInCell;
+	}
+
 	/*
 	 * Returns a location in the maze (not necessarily a location in cell).
 	 * 
