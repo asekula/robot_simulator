@@ -27,8 +27,7 @@ public class Emulator implements Environment {
 		motorLSpeed = 0;
 		locationInMaze = new Point<Double>(Constants.CELL_WIDTH / 2,
 				Constants.CELL_WIDTH / 2);
-		map = new Map();
-		map.generateRandomMaze();
+		map = new Map(Map.generateRandomMaze());
 	}
 
 	/*
@@ -123,6 +122,7 @@ public class Emulator implements Environment {
 		// Draws the goal location as a yellow circle.
 		drawGoalLocation(g, robotData.nextGoalLocation());
 		drawPath(g, robotData.getCurrentCell(), robotData.getPath());
+
 		map.drawMaze(g);
 
 		drawSensors(g);

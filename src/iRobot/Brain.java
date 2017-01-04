@@ -18,7 +18,7 @@ public class Brain {
 
 	public Brain(RobotData robotData) {
 		this.robotData = robotData;
-		map = new Map();
+		map = new Map(Map.UnknownMaze());
 	}
 
 	/*

@@ -2,6 +2,8 @@ package iRobot;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -9,39 +11,41 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 public class Map {
 
-	UndirectedGraph<String, DefaultWeightedEdge> stringGraph;
+	private static final double OPENING_WEIGHT = 1;
+	private static final double UNKNOWN_WEIGHT = 1000;
+
+	SimpleWeightedGraph<String, DefaultWeightedEdge> stringGraph;
 
 	// Todo: Fill this with necessary variables and methods.
 
-	public Map() {
-
-	}
-
-	public Map(UndirectedGraph<String, DefaultWeightedEdge> graph) {
+	public Map(SimpleWeightedGraph<String, DefaultWeightedEdge> graph) {
 		stringGraph = graph;
 	}
 
 	// Creates an graph for an unknown 16x16 maze
-	public static UndirectedGraph<String, DefaultWeightedEdge> UnknownMaze() {
-		SimpleWeightedGraph<String, DefaultWeightedEdge> graph = new SimpleWeightedGraph(
-				DefaultWeightedEdge.class);
-		final int dimension = 16;
+	public static SimpleWeightedGraph<String, DefaultWeightedEdge> UnknownMaze() {
 
-		for (int x = 1; x <= dimension; x++) {
-			for (int y = 1; y <= dimension; y++) {
+		SimpleWeightedGraph<String, DefaultWeightedEdge> graph = new SimpleWeightedGraph<String, DefaultWeightedEdge>(
+				DefaultWeightedEdge.class);
+
+		final int dimension = Constants.MAZE_WIDTH;
+
+		for (int x = 0; x < dimension; x++) {
+			for (int y = 0; y < dimension; y++) {
 				graph.addVertex(x + "," + y);
 			}
 		}
 
-		for (int x = 1; x <= dimension; x++) {
-			for (int y = 1; y <= dimension; y++) {
+		for (int x = 0; x < dimension; x++) {
+			for (int y = 0; y < dimension; y++) {
 				String v1 = x + "," + y;
 
 				String v2 = (x + 1) + "," + y;
 				if (graph.containsVertex(v2)) {
 					if (!graph.containsEdge(v1, v2)) {
 						graph.addEdge(v1, v2);
-						graph.setEdgeWeight(graph.getEdge(v1, v2), 1000.0);
+						graph.setEdgeWeight(graph.getEdge(v1, v2),
+								UNKNOWN_WEIGHT);
 					}
 				}
 
@@ -49,7 +53,8 @@ public class Map {
 				if (graph.containsVertex(v2)) {
 					if (!graph.containsEdge(v1, v2)) {
 						graph.addEdge(v1, v2);
-						graph.setEdgeWeight(graph.getEdge(v1, v2), 1000.0);
+						graph.setEdgeWeight(graph.getEdge(v1, v2),
+								UNKNOWN_WEIGHT);
 					}
 				}
 
@@ -63,27 +68,11 @@ public class Map {
 	 */
 	public void setWall(Point<Integer> cell, Direction dir) {
 
-		String v1 = cell.x + "," + cell.y;
-		String v2 = "";
+		Point<Integer> neighbor = Point.getAdjacentCell(cell, dir);
+		String v1 = cell.toVertex();
+		String v2 = neighbor.toVertex();
 
-		// East
-		if (dir.value == 0) {
-			v2 = (cell.x + 1) + "," + cell.y;
-		}
-
-		// North
-		if (dir.value == 90) {
-			v2 = (cell.x) + "," + (cell.y + 1);
-		}
-		// West
-		if (dir.value == 180) {
-			v2 = (cell.x - 1) + "," + cell.y;
-		}
-		// South
-		if (dir.value == 270) {
-			v2 = (cell.x) + "," + (cell.y - 1);
-		}
-
+		stringGraph.removeEdge(v1, v2);
 	}
 
 	/*
@@ -119,8 +108,73 @@ public class Map {
 
 	/*
 	 * Generates random maze for the emulator.
+	 * 
+	 * Using the pseudocode from the cs33 maze assignment:
+	 * https://cs.brown.edu/courses/csci0330/docs/proj/maze.pdf
 	 */
-	public void generateRandomMaze() {
+	public static SimpleWeightedGraph<String, DefaultWeightedEdge> generateRandomMaze() {
+
+		SimpleWeightedGraph<String, DefaultWeightedEdge> graph = Map
+				.UnknownMaze();
+
+		boolean[][] visited = new boolean[Constants.MAZE_WIDTH][Constants.MAZE_WIDTH];
+		// defaults to false^
+
+		drunkenWalk(graph, visited, new Point<Integer>(0, 0));
+		return graph;
+	}
+
+	/*
+	 * Maintaining that row/col are within visited's bounds.
+	 */
+	private static void drunkenWalk(
+			SimpleWeightedGraph<String, DefaultWeightedEdge> graph,
+			boolean[][] visited, Point<Integer> cell) {
+
+		String v1 = cell.toVertex();
+		visited[cell.x][cell.y] = true;
+		Integer[] rand = new Integer[]{0, 1, 2, 3};
+		Collections.shuffle(Arrays.asList(rand));
+
+		for (int i = 0; i < 4; i++) { // Should be random order.
+
+			Direction dir = Direction.getDirection(rand[i] * 90);
+			Point<Integer> neighbor = Point.getAdjacentCell(cell, dir);
+			String v2 = neighbor.toVertex();
+
+			if (inBounds(neighbor)) {
+				if (visited[neighbor.x][neighbor.y]) {
+					// If there was already a space or a wall, do nothing.
+					// Else store wall.
+
+					if (graph.containsEdge(v1, v2)) {
+						if (graph
+								.getEdgeWeight(graph.getEdge(v1, v2)) == 1000) {
+							graph.removeEdge(v1, v2);
+						}
+						// Else there was an opening.
+					}
+					// Else there was a wall.
+
+				} else {
+					// Want to store opening.
+
+					// Is there a better way to do this?
+					if (graph.containsEdge(v1, v2)) {
+						graph.removeEdge(v1, v2);
+					}
+
+					graph.addEdge(v1, v2, new DefaultWeightedEdge());
+					graph.setEdgeWeight(graph.getEdge(v1, v2), OPENING_WEIGHT);
+					drunkenWalk(graph, visited, neighbor);
+				}
+			}
+		}
+	}
+
+	private static boolean inBounds(Point<Integer> cell) {
+		return (cell.x < Constants.MAZE_WIDTH && cell.x >= 0
+				&& cell.y < Constants.MAZE_WIDTH && cell.y >= 0);
 	}
 
 	public boolean wallAt(Point<Double> p) {
@@ -136,17 +190,86 @@ public class Map {
 	}
 
 	public void drawMaze(Graphics g) {
-		// Can be recursive.
-		g.setColor(Color.LIGHT_GRAY);
-		int scaleFactor = Constants.SCALE_FACTOR;
-		for (int i = 1; i < 5; i++) {
-			g.drawLine(0, (int) Constants.CELL_WIDTH * i * scaleFactor,
-					(int) Constants.CELL_WIDTH * 5 * scaleFactor,
-					(int) Constants.CELL_WIDTH * i * scaleFactor);
-			g.drawLine((int) Constants.CELL_WIDTH * i * scaleFactor, 0,
-					(int) Constants.CELL_WIDTH * i * scaleFactor,
-					(int) Constants.CELL_WIDTH * 5 * scaleFactor);
-		}
 		g.setColor(Color.BLACK);
+		drawMazeBounds(g);
+
+		for (int x = 0; x < Constants.MAZE_WIDTH; x++) {
+			for (int y = 0; y < Constants.MAZE_WIDTH; y++) {
+				Point<Integer> cell = new Point<Integer>(x, y);
+				Point<Integer> neighbor1 = Point.getAdjacentCell(cell,
+						Direction.NORTH);
+				Point<Integer> neighbor2 = Point.getAdjacentCell(cell,
+						Direction.EAST);
+
+				if (!stringGraph.containsEdge(cell.toVertex(),
+						neighbor1.toVertex())) {
+					drawWall(g, cell, Direction.NORTH);
+				} else if (stringGraph
+						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
+								neighbor1.toVertex())) == UNKNOWN_WEIGHT) {
+					g.setColor(Color.LIGHT_GRAY);
+					drawWall(g, cell, Direction.NORTH);
+					g.setColor(Color.BLACK);
+				}
+
+				if (!stringGraph.containsEdge(cell.toVertex(),
+						neighbor2.toVertex())) {
+					drawWall(g, cell, Direction.EAST);
+				} else if (stringGraph
+						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
+								neighbor2.toVertex())) == UNKNOWN_WEIGHT) {
+					g.setColor(Color.LIGHT_GRAY);
+					drawWall(g, cell, Direction.EAST);
+					g.setColor(Color.BLACK);
+				}
+			}
+		}
+
+		g.setColor(Color.BLACK);
+	}
+
+	private void drawMazeBounds(Graphics g) {
+		int width = (int) (Constants.MAZE_WIDTH * Constants.CELL_WIDTH
+				* Constants.SCALE_FACTOR);
+		g.drawLine(0, 0, width, 0);
+		g.drawLine(0, 0, 0, width);
+		g.drawLine(0, width, width, width);
+		g.drawLine(width, 0, width, width);
+
+	}
+
+	private void drawWall(Graphics g, Point<Integer> cell, Direction dir) {
+		Point<Integer> p1, p2;
+		if (dir == Direction.NORTH || dir == Direction.WEST) {
+			p1 = new Point<Integer>(
+					(int) (cell.x * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR),
+					(int) ((cell.y + 1) * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR));
+		} else {
+			p1 = new Point<Integer>(
+					(int) ((cell.x + 1) * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR),
+					(int) (cell.y * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR));
+
+		}
+
+		if (dir == Direction.NORTH || dir == Direction.EAST) {
+			p2 = new Point<Integer>(
+					(int) ((cell.x + 1) * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR),
+					(int) ((cell.y + 1) * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR));
+
+		} else {
+			p2 = new Point<Integer>(
+					(int) (cell.x * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR),
+					(int) (cell.y * Constants.CELL_WIDTH
+							* Constants.SCALE_FACTOR));
+		}
+
+		g.drawLine(p1.x, p1.y, p2.x, p2.y);
 	}
 }

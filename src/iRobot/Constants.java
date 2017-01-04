@@ -34,7 +34,7 @@ public class Constants {
 	public static double TIME_STEP = 0.05; // No idea what to put here.
 
 	// Pertaining the applet:
-	public static final int SCALE_FACTOR = 10;
+	public static final int SCALE_FACTOR = 2;
 
 	public static int APPLET_DELAY = 20;
 
