@@ -30,8 +30,6 @@ public class Constants {
 	// Todo: Figure these out.
 	public static final double IR_MAX = 15; // In cms.
 
-	public static final double LR_MAX_DISTANCE = 15;
-
 	// For the emulator.
 	public static double TIME_STEP = 0.05; // No idea what to put here.
 

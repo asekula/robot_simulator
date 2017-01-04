@@ -1,8 +1,8 @@
 package iRobot;
 
 public enum Direction {
-	EAST(0), NORTH(90), WEST(180), SOUTH(270); // Q: Should include NONE? - 
-                                              //We can do unknown?
+	EAST(0), NORTH(90), WEST(180), SOUTH(270); // Q: Should include NONE? -
+												// We can do unknown?
 
 	public int value;
 	Direction(int value) {
@@ -28,5 +28,10 @@ public enum Direction {
 		} else {
 			return Direction.SOUTH;
 		}
+	}
+
+	public static boolean isMainDirection(double orientation) {
+		return (orientation == 0 || orientation == 90 || orientation == 180
+				|| orientation == 270);
 	}
 }

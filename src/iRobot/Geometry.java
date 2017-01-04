@@ -168,7 +168,7 @@ public class Geometry {
 	/*
 	 * Theta is orientation (not relative), y is the location's y coordinate.
 	 */
-	private static double getYGridLine(double y, double theta) {
+	public static double getYGridLine(double y, double theta) {
 		if (theta > 0 && theta < 180) {
 			return Math.ceil(y / Constants.CELL_WIDTH) * Constants.CELL_WIDTH;
 		} else {
@@ -176,7 +176,7 @@ public class Geometry {
 		}
 	}
 
-	private static double getXGridLine(double x, double theta) {
+	public static double getXGridLine(double x, double theta) {
 		if (theta < 90 || theta > 270) {
 			return Math.ceil(x / Constants.CELL_WIDTH) * Constants.CELL_WIDTH;
 		} else {
