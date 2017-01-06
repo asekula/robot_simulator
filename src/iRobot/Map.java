@@ -5,7 +5,6 @@ import java.awt.Graphics;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.jgrapht.UndirectedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 
@@ -396,7 +395,6 @@ public class Map {
 					if (!trueMap.stringGraph.containsEdge(cell.toVertex(),
 							neighbor1.toVertex())) {
 						g.setColor(Color.RED);
-						System.out.println("\t\tRED");
 						drawWall(g, cell, Direction.NORTH, pixelOffset);
 					}
 				}
@@ -421,7 +419,6 @@ public class Map {
 					if (!trueMap.stringGraph.containsEdge(cell.toVertex(),
 							neighbor2.toVertex())) {
 						g.setColor(Color.RED);
-						System.out.println("\t\tRED");
 						drawWall(g, cell, Direction.EAST, pixelOffset);
 					}
 				}
