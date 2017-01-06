@@ -175,7 +175,7 @@ public class Map {
 	}
 
 	private boolean closeToBounds(double val) {
-		double error = 0.1;
+		double error = 1;
 		return Geometry.within((val % Constants.CELL_WIDTH), 0, error)
 				|| Geometry.within((val % Constants.CELL_WIDTH),
 						Constants.CELL_WIDTH, error);
@@ -325,7 +325,10 @@ public class Map {
 		}
 	}
 
-	public void drawMaze(Graphics g) {
+	/*
+	 * Assuming there are no unknown edges in the graph.
+	 */
+	public void drawTrueMaze(Graphics g) {
 		g.setColor(Color.BLACK);
 		drawMazeBounds(g);
 
@@ -339,24 +342,88 @@ public class Map {
 
 				if (!stringGraph.containsEdge(cell.toVertex(),
 						neighbor1.toVertex())) {
-					drawWall(g, cell, Direction.NORTH);
-				} else if (stringGraph
-						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
-								neighbor1.toVertex())) == UNKNOWN_WEIGHT) {
-					g.setColor(Color.LIGHT_GRAY);
-					drawWall(g, cell, Direction.NORTH);
-					g.setColor(Color.BLACK);
+					drawWall(g, cell, Direction.NORTH, 0);
 				}
 
 				if (!stringGraph.containsEdge(cell.toVertex(),
 						neighbor2.toVertex())) {
-					drawWall(g, cell, Direction.EAST);
+					drawWall(g, cell, Direction.EAST, 0);
+				}
+			}
+		}
+
+		g.setColor(Color.BLACK);
+	}
+
+	// Coloring scheme:
+	// Unknown - light grey
+	// Perceived wall that is a true wall - green
+	// Perceived wall that is not a true wall - orange
+	// Perceived opening that is a true wall - red
+	// Perceived opening that is a true opening - no color
+	public void drawRobotMap(Graphics g, Map trueMap) {
+		int pixelOffset = 2;
+		g.setColor(Color.GREEN);
+		drawMazeBounds(g);
+
+		for (int x = 0; x < Constants.MAZE_WIDTH; x++) {
+			for (int y = 0; y < Constants.MAZE_WIDTH; y++) {
+				Point<Integer> cell = new Point<Integer>(x, y);
+				Point<Integer> neighbor1 = Point.getAdjacentCell(cell,
+						Direction.NORTH);
+				Point<Integer> neighbor2 = Point.getAdjacentCell(cell,
+						Direction.EAST);
+
+				// No edge == wall.
+				if (!stringGraph.containsEdge(cell.toVertex(),
+						neighbor1.toVertex())) {
+					if (trueMap.stringGraph.containsEdge(cell.toVertex(),
+							neighbor1.toVertex())) { // If there's actually an
+														// opening.
+						g.setColor(Color.ORANGE);
+					} else {
+						g.setColor(Color.GREEN);
+					}
+					drawWall(g, cell, Direction.NORTH, pixelOffset);
+				} else if (stringGraph
+						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
+								neighbor1.toVertex())) == UNKNOWN_WEIGHT) {
+					// If unknown.
+					g.setColor(Color.WHITE);
+					drawWall(g, cell, Direction.NORTH, pixelOffset);
+				} else {
+					// If the true map has a wall there...
+					if (!trueMap.stringGraph.containsEdge(cell.toVertex(),
+							neighbor1.toVertex())) {
+						g.setColor(Color.RED);
+						System.out.println("\t\tRED");
+						drawWall(g, cell, Direction.NORTH, pixelOffset);
+					}
+				}
+
+				if (!stringGraph.containsEdge(cell.toVertex(),
+						neighbor2.toVertex())) {
+					if (trueMap.stringGraph.containsEdge(cell.toVertex(),
+							neighbor2.toVertex())) { // If there's actually an
+														// opening.
+						g.setColor(Color.ORANGE);
+					} else {
+						g.setColor(Color.GREEN);
+					}
+					drawWall(g, cell, Direction.EAST, pixelOffset);
 				} else if (stringGraph
 						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
 								neighbor2.toVertex())) == UNKNOWN_WEIGHT) {
-					g.setColor(Color.LIGHT_GRAY);
-					drawWall(g, cell, Direction.EAST);
-					g.setColor(Color.BLACK);
+					g.setColor(Color.WHITE);
+					drawWall(g, cell, Direction.EAST, pixelOffset);
+				} else {
+					// If the true map has a wall there...
+					if (!trueMap.stringGraph.containsEdge(cell.toVertex(),
+							neighbor2.toVertex())) {
+						g.setColor(Color.RED);
+						System.out.println("\t\tRED");
+						drawWall(g, cell, Direction.EAST, pixelOffset);
+					}
 				}
 			}
 		}
@@ -374,36 +441,37 @@ public class Map {
 
 	}
 
-	private void drawWall(Graphics g, Point<Integer> cell, Direction dir) {
+	private void drawWall(Graphics g, Point<Integer> cell, Direction dir,
+			int offset) {
 		Point<Integer> p1, p2;
 		if (dir == Direction.NORTH || dir == Direction.WEST) {
 			p1 = new Point<Integer>(
 					(int) (cell.x * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR),
+							* Constants.SCALE_FACTOR) + offset,
 					(int) ((cell.y + 1) * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR));
+							* Constants.SCALE_FACTOR) + offset);
 		} else {
 			p1 = new Point<Integer>(
 					(int) ((cell.x + 1) * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR),
+							* Constants.SCALE_FACTOR) + offset,
 					(int) (cell.y * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR));
+							* Constants.SCALE_FACTOR) + offset);
 
 		}
 
 		if (dir == Direction.NORTH || dir == Direction.EAST) {
 			p2 = new Point<Integer>(
 					(int) ((cell.x + 1) * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR),
+							* Constants.SCALE_FACTOR) + offset,
 					(int) ((cell.y + 1) * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR));
+							* Constants.SCALE_FACTOR) + offset);
 
 		} else {
 			p2 = new Point<Integer>(
 					(int) (cell.x * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR),
+							* Constants.SCALE_FACTOR) + offset,
 					(int) (cell.y * Constants.CELL_WIDTH
-							* Constants.SCALE_FACTOR));
+							* Constants.SCALE_FACTOR) + offset);
 		}
 
 		g.drawLine(p1.x, p1.y, p2.x, p2.y);

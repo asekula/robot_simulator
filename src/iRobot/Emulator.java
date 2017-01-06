@@ -3,7 +3,7 @@ package iRobot;
 import java.awt.*;
 import java.util.LinkedList;
 import java.util.Iterator;
-
+import java.util.ConcurrentModificationException;
 public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
@@ -123,7 +123,7 @@ public class Emulator implements Environment {
 		drawGoalLocation(g, robotData.nextGoalLocation());
 		drawPath(g, robotData.getCurrentCell(), robotData.getPath());
 
-		map.drawMaze(g);
+		map.drawTrueMaze(g);
 
 		drawSensors(g);
 
@@ -196,10 +196,14 @@ public class Emulator implements Environment {
 
 			drawArrow(g, currentCell, current);
 
-			while (iter.hasNext()) {
-				Point<Integer> next = iter.next();
-				drawArrow(g, current, next);
-				current = next;
+			try {
+				while (iter.hasNext()) {
+					Point<Integer> next = iter.next();
+					drawArrow(g, current, next);
+					current = next;
+				}
+			} catch (ConcurrentModificationException e) {
+				System.out.println("Could not draw path.");
 			}
 
 		}
@@ -232,6 +236,10 @@ public class Emulator implements Environment {
 
 		g2.rotate(Math.toRadians(-theta), location.x * scaleFactor,
 				location.y * scaleFactor);
+	}
+
+	public Map getMap() {
+		return map;
 	}
 
 	// We shouldn't forget to implement random noise in the sensor data.
@@ -270,5 +278,9 @@ public class Emulator implements Environment {
 	public void setMotors(int left, int right) {
 		motorLSpeed = left;
 		motorRSpeed = right;
+	}
+
+	public Point<Double> cheat() {
+		return locationInMaze;
 	}
 }

@@ -64,6 +64,15 @@ public class Localizer {
 
 	private static Point<Double> shiftAlongSensorLine(double dist, double theta,
 			Point<Double> location, Map map) {
+		// Todo.
+
+		/*
+		 * For now, only using a sensor value to correct location if it's close
+		 * enough to the perceived sensor value. (if one is -1 and the other
+		 * returns a value), or if they're far apart, then we won't bother
+		 * figuring out where it should be (for now).
+		 */
+
 		return location;
 	}
 }

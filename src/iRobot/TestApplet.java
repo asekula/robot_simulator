@@ -39,11 +39,15 @@ public class TestApplet extends Applet {
 		// Thread that runs the brain/buffer.
 		new Thread() {
 			public void run() {
+				delay();
 				SensorData sensorData;
 				MotorData motorData;
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
+
+					brain.overrideLocation(emulator.cheat());
+
 					buffer.moveRobotMotors(motorData);
 					/*
 					 * Note: Assuming that the robot will not move too much in
@@ -95,5 +99,6 @@ public class TestApplet extends Applet {
 	 */
 	public void paint(Graphics g) {
 		emulator.drawEnvironment(g, robotData);
+		brain.getMap().drawRobotMap(g, emulator.getMap());
 	}
 }
