@@ -23,7 +23,7 @@ public class Mapper {
 		 * wall.
 		 */
 
-		if (insideCell(robotData.getLocationInMaze())
+		if (Geometry.insideCell(robotData.getLocationInMaze())
 				&& map.needsWallData(robotData.getCurrentCell())) {
 
 			Point<Double> loc = robotData.getLocationInMaze();
@@ -59,11 +59,6 @@ public class Mapper {
 	private static void updateMapWithSensor(Map map, double dist, double theta,
 			Point<Double> location, Point<Integer> cell) {
 
-		System.out.println("Dist: " + dist);
-		System.out.println("Theta: " + theta);
-		System.out.println("Location: " + location);
-		System.out.println("Cell: " + cell);
-
 		if (Direction.isMainDirection(theta)) {
 			Direction dir = Direction.getDirection(theta);
 			updateMapWithDirection(map, dist, dir, location, cell);
@@ -74,14 +69,6 @@ public class Mapper {
 				theta);
 		Point<Double> yGridLinePoint = Geometry.getYGridLinePoint(location,
 				theta);
-
-		/*
-		 * If it's too close to the corner, don't use data (in case it's off).
-		 */
-		// if (closeToCorner(xGridLinePoint) || closeToCorner(yGridLinePoint)) {
-		// return;
-		// }
-		// ^Covered in map class.
 
 		double xGridLineDist = Geometry.distanceBetween(location,
 				xGridLinePoint);
@@ -159,8 +146,6 @@ public class Mapper {
 	private static void updateMapWithDirection(Map map, double distance,
 			Direction dir, Point<Double> location, Point<Integer> cell) {
 
-		// If the
-
 		if (distance == -1) {
 			if (distanceToGrid(location, dir) < Constants.IR_MAX) {
 				map.setNoWall(cell, dir);
@@ -193,11 +178,4 @@ public class Mapper {
 		}
 	}
 
-	private static boolean insideCell(Point<Double> p) {
-		double dist = 2;
-		double x = p.x % Constants.CELL_WIDTH;
-		double y = p.y % Constants.CELL_WIDTH;
-		return ((x <= Constants.CELL_WIDTH - dist) && (x >= dist)
-				&& (y <= Constants.CELL_WIDTH - dist) && (y >= dist));
-	}
 }

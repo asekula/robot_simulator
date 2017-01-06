@@ -2,10 +2,6 @@ package iRobot;
 
 public class Localizer {
 
-	// Important: Do not change this line.
-	// Including this to make the code less cluttered.
-	private static final double CELL_WIDTH = Constants.CELL_WIDTH;
-
 	/*
 	 * This method uses the robot's data (including sensor data) to update the
 	 * location of the robot. It is assumed that the robot already moved itself
@@ -51,20 +47,33 @@ public class Localizer {
 		double thetaL = (90 + orientation) % 360, thetaF = orientation,
 				thetaR = (270 + orientation) % 360;
 
-		Point<Double> updated = locationInMaze;
+		Point<Double> p1, p2, p3;
 
 		// ShiftAlongSensorLine relies heavily on the map.
 		// It also uses Geometry.getDistanceToNearestWall.
-		updated = shiftAlongSensorLine(leftDist, thetaL, updated, map);
-		updated = shiftAlongSensorLine(frontDist, thetaF, updated, map);
-		updated = shiftAlongSensorLine(rightDist, thetaR, updated, map);
+		p1 = shiftAlongSensorLine(frontDist, thetaF, locationInMaze, map);
+		p2 = shiftAlongSensorLine(leftDist, thetaL, locationInMaze, map);
+		p3 = shiftAlongSensorLine(rightDist, thetaR, locationInMaze, map);
 
-		return updated;
+		return avgPoint(locationInMaze, p1, p2, p3);
 	}
 
-	private static Point<Double> shiftAlongSensorLine(double dist, double theta,
-			Point<Double> location, Map map) {
-		// Todo.
+	private static Point<Double> shiftAlongSensorLine(double realDist,
+			double theta, Point<Double> location, Map map) {
+
+		Point<Double> unknown = new Point<Double>(-1.0, -1.0);
+
+		if (realDist == -1)
+			return unknown;
+
+		double maxDist = Math.min(Constants.FRONT_IR_TO_CENTER,
+				Constants.DISTANCE_BETWEEN_MOTORS / 2) + Constants.IR_MAX;
+
+		double dist = Geometry.getDistanceToNearestWall(location, theta,
+				maxDist, map);
+
+		if (dist == -1)
+			return unknown;
 
 		/*
 		 * For now, only using a sensor value to correct location if it's close
@@ -73,6 +82,61 @@ public class Localizer {
 		 * figuring out where it should be (for now).
 		 */
 
-		return location;
+		double error = 3; // Test different values here.
+		if (!Geometry.within(realDist, dist, error))
+			return unknown;
+
+		return Geometry.getRelativePoint(location, 0, theta, dist - realDist);
+	}
+
+	private static Point<Double> avgPoint(Point<Double> location,
+			Point<Double> p1, Point<Double> p2, Point<Double> p3) {
+
+		int xCoords = 0, yCoords = 0;
+		double x = 0, y = 0;
+
+		if (p1.x != -1) {
+			x += p1.x;
+			xCoords++;
+		}
+
+		if (p2.x != -1) {
+			x += p2.x;
+			xCoords++;
+		}
+
+		if (p3.x != -1) {
+			x += p3.x;
+			xCoords++;
+		}
+
+		if (p1.y != -1) {
+			y += p1.y;
+			yCoords++;
+		}
+
+		if (p2.y != -1) {
+			y += p2.y;
+			yCoords++;
+		}
+
+		if (p3.y != -1) {
+			y += p3.y;
+			yCoords++;
+		}
+
+		if (xCoords == 0) {
+			if (yCoords == 0) {
+				return location;
+			} else {
+				return new Point<Double>(location.x, y / yCoords);
+			}
+		} else {
+			if (yCoords == 0) {
+				return new Point<Double>(x / xCoords, location.y);
+			} else {
+				return new Point<Double>(x / xCoords, y / yCoords);
+			}
+		}
 	}
 }

@@ -91,11 +91,4 @@ public class Brain {
 	public Map getMap() {
 		return map;
 	}
-
-	/*
-	 * Only to test mapping. This should really not be here.
-	 */
-	public void overrideLocation(Point<Double> trueLocation) {
-		robotData.setLocationInMaze(trueLocation);
-	}
 }

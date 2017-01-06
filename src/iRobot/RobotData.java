@@ -239,8 +239,4 @@ public class RobotData {
 		return new Point<Double>((cell.x + 0.5) * Constants.CELL_WIDTH,
 				(cell.y + 0.5) * Constants.CELL_WIDTH);
 	}
-
-	public void setLocationInMaze(Point<Double> location) {
-		locationInMaze = location;
-	}
 }

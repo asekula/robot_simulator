@@ -45,9 +45,6 @@ public class TestApplet extends Applet {
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
-
-					brain.overrideLocation(emulator.cheat());
-
 					buffer.moveRobotMotors(motorData);
 					/*
 					 * Note: Assuming that the robot will not move too much in
@@ -62,7 +59,7 @@ public class TestApplet extends Applet {
 					 * (especially if we iterate so quickly) which makes a large
 					 * error. To counteract this, delay is called more times.
 					 */
-					for (int i = 0; i < Constants.EXTRA_ROBOT_DELAY; i++)
+					for (int i = 0; i < Constants.EXTRA_ROBOT_DELAY + 1; i++)
 						delay();
 
 				} while (!brain.isFinished());

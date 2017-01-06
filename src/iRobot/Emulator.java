@@ -279,8 +279,4 @@ public class Emulator implements Environment {
 		motorLSpeed = left;
 		motorRSpeed = right;
 	}
-
-	public Point<Double> cheat() {
-		return locationInMaze;
-	}
 }

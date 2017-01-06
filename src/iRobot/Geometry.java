@@ -241,4 +241,12 @@ public class Geometry {
 		return (Math.abs(a - b) <= error);
 	}
 
+	public static boolean insideCell(Point<Double> p) {
+		double dist = 2;
+		double x = p.x % Constants.CELL_WIDTH;
+		double y = p.y % Constants.CELL_WIDTH;
+		return ((x <= Constants.CELL_WIDTH - dist) && (x >= dist)
+				&& (y <= Constants.CELL_WIDTH - dist) && (y >= dist));
+	}
+
 }
