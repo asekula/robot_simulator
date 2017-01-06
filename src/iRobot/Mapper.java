@@ -29,6 +29,8 @@ public class Mapper {
 			Point<Double> loc = robotData.getLocationInMaze();
 			Point<Integer> cell = robotData.getCurrentCell();
 
+			map.visited[cell.x][cell.y] = true;
+
 			double orientation = robotData.getTrueOrientation();
 			double thetaL = (orientation + 90) % 360;
 			double thetaR = (orientation + 270) % 360;
@@ -152,7 +154,6 @@ public class Mapper {
 			}
 		} else {
 			// If it's not detecting the next cell's wall.
-			// Q: Should we even include this?
 			if (distance - Math.max(Constants.FRONT_IR_TO_CENTER,
 					Constants.DISTANCE_BETWEEN_MOTORS
 							/ 2) < Constants.CELL_WIDTH) {
