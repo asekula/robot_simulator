@@ -188,9 +188,11 @@ public class Map {
 	 * always false, no mapping occurs.
 	 */
 	public boolean needsWallData(Point<Integer> cell) {
-		for (DefaultWeightedEdge e : stringGraph.edgesOf(cell.toVertex())) {
-			if (stringGraph.getEdgeWeight(e) == UNKNOWN_WEIGHT) {
-				return true;
+		if (stringGraph.containsVertex(cell.toVertex())) {
+			for (DefaultWeightedEdge e : stringGraph.edgesOf(cell.toVertex())) {
+				if (stringGraph.getEdgeWeight(e) == UNKNOWN_WEIGHT) {
+					return true;
+				}
 			}
 		}
 		return false;
