@@ -30,33 +30,13 @@ public class Brain {
 		if (robotData.getPhase() == Phase.EXPLORING) {
 
 			/*
-			 * Important Todo: As a last check on errors, we should make sure
-			 * that it doesn't update it's location if the new location would be
-			 * a certain distance away from the current location, i.e. we should
-			 * check that fixLocation doesn't do too much damage, and if it
-			 * does, we shouldn't use it to update the location.
-			 * 
-			 * ^That's something we should put in later after we've debugged
-			 * enough, just to have an extra safeguard in case something goes
-			 * wrong in the competition.
+			 * Important: Functionality is a lot better when the mapper goes
+			 * after the localization.
 			 */
 
 			robotData.updateData(sensorData); // Curves robot.
 			robotData.fixLocation(sensorData, map);
-			// ^Uses sensors to fix the location.
-
 			Mapper.updateMap(sensorData, robotData, map);
-
-			/*
-			 * Important Q: Should updateMap be before or after fixLocation? It
-			 * seems like fixLocation doesn't really rely that much on the map,
-			 * and when it does, it only checks if walls are set. It seems much
-			 * more accurate for mapping's sake if the mapping is done after the
-			 * location is fixed. For now, keeping mapping after localization.
-			 */
-
-			// Mapper alters the map according to the sensorData and robotData.
-			// Explicitly modifying the current map object to save memory.
 
 			Explorer.modifyPath(map, robotData.getCurrentCell(),
 					robotData.getPath());
@@ -86,5 +66,9 @@ public class Brain {
 	public boolean isFinished() {
 		return (false); // Todo: Figure out what to do here.
 		// Q: Do we want to stop the robot ever?
+	}
+
+	public Map getMap() {
+		return map;
 	}
 }

@@ -39,6 +39,7 @@ public class TestApplet extends Applet {
 		// Thread that runs the brain/buffer.
 		new Thread() {
 			public void run() {
+				delay();
 				SensorData sensorData;
 				MotorData motorData;
 				do {
@@ -58,7 +59,7 @@ public class TestApplet extends Applet {
 					 * (especially if we iterate so quickly) which makes a large
 					 * error. To counteract this, delay is called more times.
 					 */
-					for (int i = 0; i < Constants.EXTRA_ROBOT_DELAY; i++)
+					for (int i = 0; i < Constants.EXTRA_ROBOT_DELAY + 1; i++)
 						delay();
 
 				} while (!brain.isFinished());
@@ -95,5 +96,6 @@ public class TestApplet extends Applet {
 	 */
 	public void paint(Graphics g) {
 		emulator.drawEnvironment(g, robotData);
+		brain.getMap().drawRobotMap(g, emulator.getMap());
 	}
 }

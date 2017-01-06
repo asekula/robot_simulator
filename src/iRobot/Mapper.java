@@ -23,7 +23,7 @@ public class Mapper {
 		 * wall.
 		 */
 
-		if (insideCell(robotData.getLocationInMaze())
+		if (Geometry.insideCell(robotData.getLocationInMaze())
 				&& map.needsWallData(robotData.getCurrentCell())) {
 
 			Point<Double> loc = robotData.getLocationInMaze();
@@ -62,6 +62,7 @@ public class Mapper {
 		if (Direction.isMainDirection(theta)) {
 			Direction dir = Direction.getDirection(theta);
 			updateMapWithDirection(map, dist, dir, location, cell);
+			return;
 		}
 
 		Point<Double> xGridLinePoint = Geometry.getXGridLinePoint(location,
@@ -74,12 +75,13 @@ public class Mapper {
 		double yGridLineDist = Geometry.distanceBetween(location,
 				yGridLinePoint);
 
-		double error = 0.1;
+		double error = 0.02;
 
 		if (Geometry.within(xGridLineDist, yGridLineDist, error)) {
 			return; // Too close to decide walls.
 		}
 
+		// If dist == -1, not detecting any wall.
 		if (dist == -1) {
 			if (xGridLineDist <= Constants.IR_MAX) {
 				setWallXGridLine(map, location, theta, false);
@@ -121,7 +123,7 @@ public class Mapper {
 		if (setWall) {
 			map.setWallAtPoint(wallPoint);
 		} else {
-			map.setWallAtPoint(wallPoint);
+			map.setNoWallAtPoint(wallPoint);
 		}
 	}
 
@@ -143,28 +145,37 @@ public class Mapper {
 	 */
 	private static void updateMapWithDirection(Map map, double distance,
 			Direction dir, Point<Double> location, Point<Integer> cell) {
-		if (distance != -1) {
 
+		if (distance == -1) {
+			if (distanceToGrid(location, dir) < Constants.IR_MAX) {
+				map.setNoWall(cell, dir);
+			}
+		} else {
 			// If it's not detecting the next cell's wall.
+			// Q: Should we even include this?
 			if (distance - Math.max(Constants.FRONT_IR_TO_CENTER,
 					Constants.DISTANCE_BETWEEN_MOTORS
 							/ 2) < Constants.CELL_WIDTH) {
 
 				map.setWall(cell, dir);
-
 			}
-			// else: Won't bother, really small edge case and we don't need this
-			// functionality.
-		} else {
-			map.setNoWall(cell, dir);
+		}
+		return;
+	}
+
+	private static double distanceToGrid(Point<Double> p, Direction dir) {
+		switch (dir) {
+			case NORTH :
+				return Constants.CELL_WIDTH - (p.y % Constants.CELL_WIDTH);
+			case SOUTH :
+				return (p.y % Constants.CELL_WIDTH);
+			case EAST :
+				return Constants.CELL_WIDTH - (p.x % Constants.CELL_WIDTH);
+			case WEST :
+				return (p.x % Constants.CELL_WIDTH);
+			default :
+				return 0;
 		}
 	}
 
-	private static boolean insideCell(Point<Double> p) {
-		double dist = 0.5;
-		double x = p.x % Constants.CELL_WIDTH;
-		double y = p.y % Constants.CELL_WIDTH;
-		return ((x <= Constants.CELL_WIDTH - dist) && (x >= dist)
-				&& (y <= Constants.CELL_WIDTH - dist) && (y >= dist));
-	}
 }
