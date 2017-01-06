@@ -54,7 +54,7 @@ public class RobotData {
 	 * which we will say is the point on the line that goes through the two
 	 * motors, and is equidistant to the two motors.
 	 */
-	protected Point<Double> locationInCell;
+	protected Point<Double> locationInMaze;
 
 	private Phase phase;
 
@@ -64,7 +64,7 @@ public class RobotData {
 	public RobotData(double orientationOffset, Point<Double> location) {
 
 		this.orientationOffset = orientationOffset;
-		locationInCell = location;
+		locationInMaze = location;
 
 		trueOrientation = orientationOffset;
 
@@ -94,13 +94,12 @@ public class RobotData {
 
 		trueOrientation = newTrueOrientation;
 
-		locationInCell = Geometry.curveRobot(locationInCell, sensorData.IMU,
+		locationInMaze = Geometry.curveRobot(locationInMaze, sensorData.IMU,
 				orientationChange,
 				Geometry.tachoToCM(sensorData.leftTachoCount),
 				Geometry.tachoToCM(sensorData.rightTachoCount));
 
-		currentCell = getCurrentCell(currentCell, locationInCell);
-		locationInCell = fixLocationBounds(locationInCell);
+		currentCell = getCurrentCell(currentCell, locationInMaze);
 		updatePath();
 		updatePhase();
 	}
@@ -111,8 +110,8 @@ public class RobotData {
 	 * same values).
 	 */
 	public void fixLocation(SensorData sensorData, Map map) {
-		Localizer.modifyLocation(locationInCell, currentCell, sensorData, map,
-				trueOrientation);
+		locationInMaze = Localizer.fixedLocation(locationInMaze, sensorData,
+				map, trueOrientation);
 	}
 
 	/*
@@ -123,26 +122,9 @@ public class RobotData {
 	 */
 	private Point<Integer> getCurrentCell(Point<Integer> cell,
 			Point<Double> location) {
-
-		Point<Integer> nextCell = new Point<Integer>(cell.x, cell.y);
-
-		if (location.x < 0)
-			nextCell = Point.getAdjacentCell(nextCell, Direction.WEST);
-		if (location.x >= Constants.CELL_WIDTH)
-			nextCell = Point.getAdjacentCell(nextCell, Direction.EAST);
-		if (location.y < 0)
-			nextCell = Point.getAdjacentCell(nextCell, Direction.SOUTH);
-		if (location.y >= Constants.CELL_WIDTH)
-			nextCell = Point.getAdjacentCell(nextCell, Direction.NORTH);
-
-		return nextCell;
-	}
-
-	private Point<Double> fixLocationBounds(Point<Double> location) {
-		Point<Double> fixed = new Point<Double>(0.0, 0.0);
-		fixed.x = (location.x + Constants.CELL_WIDTH) % Constants.CELL_WIDTH;
-		fixed.y = (location.y + Constants.CELL_WIDTH) % Constants.CELL_WIDTH;
-		return fixed;
+		return new Point<Integer>(
+				(int) Math.floor(location.x / Constants.CELL_WIDTH),
+				(int) Math.floor(location.y / Constants.CELL_WIDTH));
 	}
 
 	/*
@@ -225,13 +207,7 @@ public class RobotData {
 	}
 
 	public Point<Double> getLocationInMaze() {
-		return new Point<Double>(
-				currentCell.x * Constants.CELL_WIDTH + locationInCell.x,
-				currentCell.y * Constants.CELL_WIDTH + locationInCell.y);
-	}
-
-	public Point<Double> getLocationInCell() {
-		return locationInCell;
+		return locationInMaze;
 	}
 
 	/*

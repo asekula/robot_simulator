@@ -23,7 +23,7 @@ public class Mapper {
 		 * wall.
 		 */
 
-		if (insideCell(robotData.getLocationInCell())
+		if (insideCell(robotData.getLocationInMaze())
 				&& map.needsWallData(robotData.getCurrentCell())) {
 
 			Point<Double> loc = robotData.getLocationInMaze();
@@ -64,9 +64,17 @@ public class Mapper {
 			updateMapWithDirection(map, dist, dir, location, cell);
 		}
 
-		double xGridLineDist = getXGridLineDist(location, theta);
-		double yGridLineDist = getYGridLineDist(location, theta);
-		double error = 0.1; // Q: What to put here?
+		Point<Double> xGridLinePoint = Geometry.getXGridLinePoint(location,
+				theta);
+		Point<Double> yGridLinePoint = Geometry.getYGridLinePoint(location,
+				theta);
+
+		double xGridLineDist = Geometry.distanceBetween(location,
+				xGridLinePoint);
+		double yGridLineDist = Geometry.distanceBetween(location,
+				yGridLinePoint);
+
+		double error = 0.1;
 
 		if (Geometry.within(xGridLineDist, yGridLineDist, error)) {
 			return; // Too close to decide walls.
@@ -131,42 +139,6 @@ public class Mapper {
 	}
 
 	/*
-	 * Similar to the method in Geometry.
-	 */
-	private static double getXGridLineDist(Point<Double> location,
-			double orientation) {
-		// Line along which we're looking: y = mx + b
-		double m = Math.tan(Math.toRadians(orientation));
-		double b = location.y - (location.x * m);
-
-		assert (m != 0); // Handled these cases above.
-
-		double xGridLine = Geometry.getXGridLine(location.x, orientation);
-
-		Point<Double> xGridLinePoint = new Point<Double>(xGridLine,
-				xGridLine * m + b);
-		return Geometry.distanceBetween(location, xGridLinePoint);
-	}
-
-	private static double getYGridLineDist(Point<Double> location,
-			double orientation) {
-		// Line along which we're looking: y = mx + b
-		double m = Math.tan(Math.toRadians(orientation));
-		double b = location.y - (location.x * m);
-
-		assert (m != 0); // Handled these cases above.
-
-		// Want to find intersection of the line with two grid lines.
-		// (grid lines are lines where walls can be located)
-		double yGridLine = Geometry.getYGridLine(location.y, orientation);
-
-		// x = (y - b) / m. Assuming m != 0.
-		Point<Double> yGridLinePoint = new Point<Double>((yGridLine - b) / m,
-				yGridLine);
-		return Geometry.distanceBetween(location, yGridLinePoint);
-	}
-
-	/*
 	 * The sensor is aligned with one of the four main directions.
 	 */
 	private static void updateMapWithDirection(Map map, double distance,
@@ -190,7 +162,9 @@ public class Mapper {
 
 	private static boolean insideCell(Point<Double> p) {
 		double dist = 0.5;
-		return ((p.x <= Constants.CELL_WIDTH - dist) && (p.x >= dist)
-				&& (p.y <= Constants.CELL_WIDTH - dist) && (p.y >= dist));
+		double x = p.x % Constants.CELL_WIDTH;
+		double y = p.y % Constants.CELL_WIDTH;
+		return ((x <= Constants.CELL_WIDTH - dist) && (x >= dist)
+				&& (y <= Constants.CELL_WIDTH - dist) && (y >= dist));
 	}
 }

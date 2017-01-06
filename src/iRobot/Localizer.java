@@ -61,4 +61,9 @@ public class Localizer {
 
 		return updated;
 	}
+
+	private static Point<Double> shiftAlongSensorLine(double dist, double theta,
+			Point<Double> location, Map map) {
+		return location;
+	}
 }

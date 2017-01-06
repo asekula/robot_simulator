@@ -91,25 +91,14 @@ public class Geometry {
 			Direction dir = Direction.getDirection(orientation);
 			return getNearestWallInDirection(location, dir, maxDist, map);
 		} else {
-			// Line along which we're looking: y = mx + b
-			double m = Math.tan(Math.toRadians(orientation));
-			double b = location.y - (location.x * m);
 
-			assert (m != 0); // Handled these cases above.
+			Point<Double> xGridLinePoint = getXGridLinePoint(location,
+					orientation);
+			Point<Double> yGridLinePoint = getYGridLinePoint(location,
+					orientation);
 
-			// Want to find intersection of the line with two grid lines.
-			// (grid lines are lines where walls can be located)
-			double xGridLine = getXGridLine(location.x, orientation);
-			double yGridLine = getYGridLine(location.y, orientation);
-
-			Point<Double> xGridLinePoint = new Point<Double>(xGridLine,
-					xGridLine * m + b);
-			double xGridLineDistance = Geometry.distanceBetween(location,
+			double xGridLineDistance = distanceBetween(location,
 					xGridLinePoint);
-
-			// x = (y - b) / m. Assuming m != 0.
-			Point<Double> yGridLinePoint = new Point<Double>(
-					(yGridLine - b) / m, yGridLine);
 			double yGridLineDistance = distanceBetween(location,
 					yGridLinePoint);
 
@@ -182,6 +171,35 @@ public class Geometry {
 		} else {
 			return Math.floor(x / Constants.CELL_WIDTH) * Constants.CELL_WIDTH;
 		}
+	}
+
+	public static Point<Double> getXGridLinePoint(Point<Double> location,
+			double orientation) {
+		// Line along which we're looking: y = mx + b
+		double m = Math.tan(Math.toRadians(orientation));
+		double b = location.y - (location.x * m);
+
+		assert (m != 0); // Handled these cases above.
+
+		double xGridLine = Geometry.getXGridLine(location.x, orientation);
+
+		return new Point<Double>(xGridLine, xGridLine * m + b);
+	}
+
+	public static Point<Double> getYGridLinePoint(Point<Double> location,
+			double orientation) {
+		// Line along which we're looking: y = mx + b
+		double m = Math.tan(Math.toRadians(orientation));
+		double b = location.y - (location.x * m);
+
+		assert (m != 0); // Handled these cases above.
+
+		// Want to find intersection of the line with two grid lines.
+		// (grid lines are lines where walls can be located)
+		double yGridLine = Geometry.getYGridLine(location.y, orientation);
+
+		// x = (y - b) / m. Assuming m != 0.
+		return new Point<Double>((yGridLine - b) / m, yGridLine);
 	}
 
 	/*
