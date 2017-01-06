@@ -42,8 +42,9 @@ public class Brain {
 			 */
 
 			robotData.updateData(sensorData); // Curves robot.
-			robotData.fixLocation(sensorData, map); // Uses sensors to fix the
-													// location.
+			robotData.fixLocation(sensorData, map);
+			// ^Uses sensors to fix the location.
+
 			Mapper.updateMap(sensorData, robotData, map);
 
 			/*
