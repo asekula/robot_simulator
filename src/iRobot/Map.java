@@ -10,12 +10,18 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 
 public class Map {
 
-	private static final double OPENING_WEIGHT = 1;
-	private static final double UNKNOWN_WEIGHT = 1000;
+	public static final double OPENING_WEIGHT = 1;
+	public static final double UNKNOWN_WEIGHT = 1000;
 
+	/*
+	 * Including a visited array for the explorer. Updated by mapper. Used by
+	 * explorer.
+	 */
+	boolean[][] visited;
 	SimpleWeightedGraph<String, DefaultWeightedEdge> stringGraph;
 
 	public Map(SimpleWeightedGraph<String, DefaultWeightedEdge> graph) {
+		visited = new boolean[Constants.MAZE_WIDTH][Constants.MAZE_WIDTH];
 		stringGraph = graph;
 	}
 

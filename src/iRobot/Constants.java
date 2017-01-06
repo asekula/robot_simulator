@@ -40,4 +40,7 @@ public class Constants {
 
 	public static int EXTRA_ROBOT_DELAY = 0;
 
+	// Todo: Collect all the error variables and put them in here.
+	// i.e. put all tweakable variables in here.
+
 }
