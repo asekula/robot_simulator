@@ -31,6 +31,9 @@ public class Localizer {
 			Point<Integer> currentCell, SensorData sensorData, Map map,
 			double orientation) {
 
+		if (closeToEdge(location))
+			return;
+
 		double leftDist = -1.0, rightDist = -1.0, frontDist = -1.0;
 
 		if (sensorData.leftIR != -1) {
@@ -67,18 +70,43 @@ public class Localizer {
 		Point<Double> p1, p2, p3, avg;
 
 		p1 = pointData(leftDist, thetaL, frontDist, thetaF, currentCell, map);
+		System.out.println("1:" + p1);
 		p2 = pointData(frontDist, thetaF, rightDist, thetaR, currentCell, map);
+		System.out.println("2:" + p2);
 		p3 = pointData(leftDist, thetaL, rightDist, thetaR, currentCell, map);
+		System.out.println("3:" + p3);
 
 		avg = avgData(p1, p2, p3);
 
+		double leeway = 0.5;
+
 		if (avg.x != -CELL_WIDTH) {
-			location.x = avg.x;
+			if (Geometry.within(avg.x, location.x, leeway)) {
+				location.x = avg.x;
+			} else {
+				System.out.println();
+				System.out.println("LEEWAY");
+				System.out.println();
+			}
 		}
 
 		if (avg.y != -CELL_WIDTH) {
-			location.y = avg.y;
+			if (Geometry.within(avg.y, location.y, leeway)) {
+				location.y = avg.y;
+			} else {
+				System.out.println();
+				System.out.println("LEEWAY");
+				System.out.println();
+			}
 		}
+	}
+
+	private static boolean closeToEdge(Point<Double> location) {
+		double error = 1;
+		return (Geometry.within(0, location.x, error)
+				|| Geometry.within(CELL_WIDTH, location.x, error)
+				|| Geometry.within(0, location.y, error)
+				|| Geometry.within(CELL_WIDTH, location.y, error));
 	}
 
 	/*
@@ -132,8 +160,13 @@ public class Localizer {
 		p2.x = round(p2.x, precision);
 		p2.y = round(p2.y, precision);
 
+		System.out.println("\t p1: " + p1);
+		System.out.println("\t p2: " + p2);
+
 		double error = 0.03; // Important: Change this if localization isn't
 								// precise.
+
+		double sameWallError = 0.4;
 
 		// If a coordinate of a point is 0, then we know that there is only one
 		// kind of wall that the sensor is detecting.
@@ -147,7 +180,6 @@ public class Localizer {
 				return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
 			}
 		} else {
-
 			if (p1.x == 0 || p2.x == 0) {
 				// p2.x == 0.
 				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
@@ -161,11 +193,19 @@ public class Localizer {
 
 		// If the coordinates are close enough, they are detecting the same
 		// wall.
-		if (Geometry.within(p1.x, p2.x, error)) {
+		if (Geometry.within(p1.x, p2.x, sameWallError)) {
 			return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
 		}
 
-		if (Geometry.within(p1.y, p2.y, error)) {
+		if (Geometry.within(p1.y, p2.y, sameWallError)) {
+			return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
+		}
+
+		if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, sameWallError)) {
+			return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
+		}
+
+		if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, sameWallError)) {
 			return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
 		}
 

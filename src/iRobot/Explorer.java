@@ -22,9 +22,15 @@ public class Explorer {
 			path.add(new Point<Integer>(1, 1));
 			path.add(new Point<Integer>(2, 1));
 			path.add(new Point<Integer>(2, 2));
-			path.add(new Point<Integer>(1, 2));
-			path.add(new Point<Integer>(0, 2));
-			path.add(new Point<Integer>(0, 1));
+			path.add(new Point<Integer>(2, 3));
+			path.add(new Point<Integer>(2, 4));
+			path.add(new Point<Integer>(3, 4));
+			path.add(new Point<Integer>(3, 3));
+			path.add(new Point<Integer>(3, 2));
+			path.add(new Point<Integer>(3, 1));
+			path.add(new Point<Integer>(3, 0));
+			path.add(new Point<Integer>(2, 0));
+			path.add(new Point<Integer>(1, 0));
 			path.add(new Point<Integer>(0, 0));
 		}
 	}

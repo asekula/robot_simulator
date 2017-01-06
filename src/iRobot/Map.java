@@ -16,8 +16,6 @@ public class Map {
 
 	SimpleWeightedGraph<String, DefaultWeightedEdge> stringGraph;
 
-	// Todo: Fill this with necessary variables and methods.
-
 	public Map(SimpleWeightedGraph<String, DefaultWeightedEdge> graph) {
 		stringGraph = graph;
 	}
@@ -72,7 +70,9 @@ public class Map {
 		String v1 = cell.toVertex();
 		String v2 = neighbor.toVertex();
 
-		stringGraph.removeEdge(v1, v2);
+		if (stringGraph.containsVertex(v1) && stringGraph.containsVertex(v2)) {
+			stringGraph.removeEdge(v1, v2);
+		}
 	}
 
 	/*
@@ -80,15 +80,58 @@ public class Map {
 	 * direction.
 	 */
 	public void setNoWall(Point<Integer> cell, Direction dir) {
-		// Todo.
+		Point<Integer> neighbor = Point.getAdjacentCell(cell, dir);
+		String v1 = cell.toVertex();
+		String v2 = neighbor.toVertex();
+
+		if (stringGraph.containsVertex(v1) && stringGraph.containsVertex(v2)) {
+			if (!stringGraph.containsEdge(v1, v2)) {
+				stringGraph.addEdge(v1, v2);
+			}
+
+			stringGraph.setEdgeWeight(stringGraph.getEdge(v1, v2),
+					OPENING_WEIGHT);
+		}
 	}
 
 	/*
 	 * Sets a wall at the given location, where one of p's coordinates is a
 	 * multiple of CELL_WIDTH.
+	 * 
+	 * Todo: Code reuse...when I'm not feeling lazy clean this up.
 	 */
 	public void setWallAtPoint(Point<Double> p) {
-		// Todo.
+		if (!tooCloseToCorner(p)) {
+			if (!tooCloseToCorner(p)) {
+				double remainderX = p.x % Constants.CELL_WIDTH;
+				double remainderY = p.y % Constants.CELL_WIDTH;
+				double error = 0.01;
+
+				if (Geometry.within(remainderX, 0, error) || Geometry
+						.within(remainderX, Constants.CELL_WIDTH, error)) {
+
+					// Important: x is round and y is floor.
+					int cellX = (int) Math.round(p.x / Constants.CELL_WIDTH);
+					int cellY = (int) Math.floor(p.y / Constants.CELL_WIDTH);
+					Direction dir = Direction.WEST;
+
+					Point<Integer> cell = new Point<Integer>(cellX, cellY);
+					setWall(cell, dir);
+				}
+
+				if (Geometry.within(remainderY, 0, error) || Geometry
+						.within(remainderY, Constants.CELL_WIDTH, error)) {
+
+					int cellX = (int) Math.floor(p.x / Constants.CELL_WIDTH);
+					int cellY = (int) Math.round(p.y / Constants.CELL_WIDTH);
+					Direction dir = Direction.SOUTH;
+
+					Point<Integer> cell = new Point<Integer>(cellX, cellY);
+					setWall(cell, dir);
+				}
+			}
+		}
+		// Else do nothing.
 	}
 
 	/*
@@ -96,13 +139,60 @@ public class Map {
 	 * multiple of CELL_WIDTH.
 	 */
 	public void setNoWallAtPoint(Point<Double> p) {
-		// Todo.
+		if (!tooCloseToCorner(p)) {
+			double remainderX = p.x % Constants.CELL_WIDTH;
+			double remainderY = p.y % Constants.CELL_WIDTH;
+			double error = 0.01;
+
+			if (Geometry.within(remainderX, 0, error) || Geometry
+					.within(remainderX, Constants.CELL_WIDTH, error)) {
+
+				// Important: x is round and y is floor.
+				int cellX = (int) Math.round(p.x / Constants.CELL_WIDTH);
+				int cellY = (int) Math.floor(p.y / Constants.CELL_WIDTH);
+				Direction dir = Direction.WEST;
+
+				Point<Integer> cell = new Point<Integer>(cellX, cellY);
+				setNoWall(cell, dir);
+			}
+
+			if (Geometry.within(remainderY, 0, error) || Geometry
+					.within(remainderY, Constants.CELL_WIDTH, error)) {
+
+				int cellX = (int) Math.floor(p.x / Constants.CELL_WIDTH);
+				int cellY = (int) Math.round(p.y / Constants.CELL_WIDTH);
+				Direction dir = Direction.SOUTH;
+
+				Point<Integer> cell = new Point<Integer>(cellX, cellY);
+				setNoWall(cell, dir);
+			}
+		}
+		// Else do nothing.
+	}
+
+	private boolean tooCloseToCorner(Point<Double> p) {
+		return (closeToBounds(p.x) && closeToBounds(p.y));
+	}
+
+	private boolean closeToBounds(double val) {
+		double error = 0.1;
+		return Geometry.within((val % Constants.CELL_WIDTH), 0, error)
+				|| Geometry.within((val % Constants.CELL_WIDTH),
+						Constants.CELL_WIDTH, error);
 	}
 
 	/*
 	 * Returns true if there is unknown wall data pertaining the input cell.
+	 * 
+	 * Make this return something other than always false to test mapping. With
+	 * always false, no mapping occurs.
 	 */
 	public boolean needsWallData(Point<Integer> cell) {
+		for (DefaultWeightedEdge e : stringGraph.edgesOf(cell.toVertex())) {
+			if (stringGraph.getEdgeWeight(e) == UNKNOWN_WEIGHT) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -125,7 +215,7 @@ public class Map {
 	}
 
 	/*
-	 * Maintaining that row/col are within visited's bounds.
+	 * Maintaining that cell is within visited's bounds.
 	 */
 	private static void drunkenWalk(
 			SimpleWeightedGraph<String, DefaultWeightedEdge> graph,
@@ -177,8 +267,43 @@ public class Map {
 				&& cell.y < Constants.MAZE_WIDTH && cell.y >= 0);
 	}
 
+	// For sensors. Returns false if unknown.
+	// Should not be used by robot.
 	public boolean wallAt(Point<Double> p) {
-		return true;
+		double remainderX = p.x % Constants.CELL_WIDTH;
+		double remainderY = p.y % Constants.CELL_WIDTH;
+		double error = 0.01;
+
+		if (Geometry.within(remainderX, 0, error)
+				|| Geometry.within(remainderX, Constants.CELL_WIDTH, error)) {
+
+			// Important: x is round and y is floor.
+			int cellX = (int) Math.round(p.x / Constants.CELL_WIDTH);
+			int cellY = (int) Math.floor(p.y / Constants.CELL_WIDTH);
+			Direction dir = Direction.WEST;
+
+			Point<Integer> cell = new Point<Integer>(cellX, cellY);
+			Point<Integer> neighbor = Point.getAdjacentCell(cell, dir);
+
+			return !stringGraph.containsEdge(cell.toVertex(),
+					neighbor.toVertex());
+		}
+
+		if (Geometry.within(remainderY, 0, error)
+				|| Geometry.within(remainderY, Constants.CELL_WIDTH, error)) {
+
+			int cellX = (int) Math.floor(p.x / Constants.CELL_WIDTH);
+			int cellY = (int) Math.round(p.y / Constants.CELL_WIDTH);
+			Direction dir = Direction.SOUTH;
+
+			Point<Integer> cell = new Point<Integer>(cellX, cellY);
+			Point<Integer> neighbor = Point.getAdjacentCell(cell, dir);
+
+			return !stringGraph.containsEdge(cell.toVertex(),
+					neighbor.toVertex());
+		}
+
+		return false;
 	}
 
 	/*
@@ -186,7 +311,16 @@ public class Map {
 	 * localization code calculates all possibilities).
 	 */
 	public boolean wallBetween(Point<Integer> cell1, Point<Integer> cell2) {
-		return true;
+		if (stringGraph.containsEdge(cell1.toVertex(), cell2.toVertex())) {
+			if (stringGraph.getEdgeWeight(stringGraph.getEdge(cell1.toVertex(),
+					cell2.toVertex())) == UNKNOWN_WEIGHT) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return true;
+		}
 	}
 
 	public void drawMaze(Graphics g) {
