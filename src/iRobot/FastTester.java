@@ -2,8 +2,6 @@ package iRobot;
 
 public class FastTester {
 
-	private static boolean RUNNING;
-
 	public static void main(String[] args) {
 		int numTests = 10;
 		int succeeded = 0;
@@ -29,60 +27,28 @@ public class FastTester {
 		DataBuffer buffer;
 		Brain brain;
 		RobotData robotData;
-
-		RUNNING = true;
+		SensorData sensorData;
+		MotorData motorData;
 
 		emulator = new Emulator();
 		buffer = new DataBuffer(emulator);
-
 		robotData = buffer.calibrate();
 		brain = new Brain(robotData);
 
-		// Thread that runs the emulator.
-		Thread emulatorThread = new Thread() {
-			public void run() {
-				while (RUNNING) {
-					emulator.moveRobot();
-					delay();
-				}
-			}
-		};
-		emulatorThread.start();
+		emulator.moveRobot();
 
-		// Thread that runs the brain/buffer.
-		Thread robotThread = new Thread() {
-			public void run() {
-				delay();
-				SensorData sensorData;
-				MotorData motorData;
-				do {
-					sensorData = buffer.getSensorData();
-					motorData = brain.computeMotorData(sensorData);
-					buffer.moveRobotMotors(motorData);
-					delay();
+		do {
+			sensorData = buffer.getSensorData();
+			motorData = brain.computeMotorData(sensorData);
+			buffer.moveRobotMotors(motorData);
+			emulator.moveRobot();
 
-				} while (!brain.isFinished() && RUNNING);
-			}
-		};
-		robotThread.start();
-
-		while (brain.getMap().needsWallData()) {
 			if (containsError(brain.getMap(), emulator.getMap())) {
-				RUNNING = false;
 				return false;
 			}
-		}
+		} while (brain.getMap().needsWallData());
 
-		RUNNING = false;
 		return true;
-	}
-
-	private static void delay() {
-		try {
-			Thread.sleep(2); // Include this?
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private static boolean containsError(Map map1, Map map2) {
