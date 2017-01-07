@@ -59,8 +59,8 @@ public class RobotData {
 	private Phase phase;
 
 	private LinkedList<Point<Integer>> path;
-	
-	//Stores the path was cells walked through
+
+	// Stores the path was cells walked through
 	private LinkedList<Point<Integer>> traveresedPath;
 
 	public RobotData(double orientationOffset, Point<Double> location) {
@@ -104,7 +104,7 @@ public class RobotData {
 
 		currentCell = getCurrentCell(currentCell, locationInMaze);
 		updatePath();
-		updatePhase();
+		// updatePhase(); // Uncomment this later.
 	}
 
 	/*
@@ -195,10 +195,10 @@ public class RobotData {
 	public LinkedList<Point<Integer>> getPath() {
 		return path;
 	}
-	
+
 	public LinkedList<Point<Integer>> getTraversedPath() {
-    return traveresedPath;
-  }
+		return traveresedPath;
+	}
 
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {
@@ -237,7 +237,7 @@ public class RobotData {
 		return currentGoalLocation;
 	}
 
-	private boolean closeEnough(Point<Double> p1, Point<Double> p2) {
+	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
 		return (Geometry.distanceBetween(p1,
 				p2) <= Constants.MAX_DISTANCE_TO_GOAL);
 	}

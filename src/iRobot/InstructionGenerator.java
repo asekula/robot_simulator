@@ -29,8 +29,10 @@ public class InstructionGenerator {
 		// If no next cell, don't move. (i.e. if it hasn't figured out where to
 		// go yet).
 
-		if (next.x == -1)
-			return new MotorData(0, 0);
+		if (next.x == -1) {
+			System.out.println("Rotating.");
+			return new MotorData(ROTATION_VALUE, -ROTATION_VALUE);
+		}
 
 		Point<Double> current = robotData.getLocationInMaze();
 		double orientation = robotData.getTrueOrientation();

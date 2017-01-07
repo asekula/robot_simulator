@@ -19,16 +19,16 @@ public class Emulator implements Environment {
 	private Map map;
 
 	public Emulator() {
-		orientation = 0;
-		leftIR = 1;
-		rightIR = 1;
+		orientation = 0; // Set random
+		leftIR = -1;
+		rightIR = -1;
 		frontIR = -1;
 		leftTacho = 0;
 		rightTacho = 0;
 		motorRSpeed = 0;
 		motorLSpeed = 0;
 		locationInMaze = new Point<Double>(Constants.CELL_WIDTH / 2,
-				Constants.CELL_WIDTH / 2);
+				Constants.CELL_WIDTH / 2); // Set random
 		map = new Map(Map.generateRandomMaze());
 	}
 
@@ -67,8 +67,9 @@ public class Emulator implements Environment {
 
 	private boolean robotHitWall(Point<Double> location, double orientation) {
 		// Todo.
-		// Q: Do we even need this? Potential A: It would be good to include it. Yeah 
-	  // It's walked through walls during different trials
+		// Q: Do we even need this? Potential A: It would be good to include it.
+		// Yeah
+		// It's walked through walls during different trials
 		return false;
 	}
 
@@ -190,16 +191,15 @@ public class Emulator implements Environment {
 	private void drawPath(Graphics g, Point<Integer> currentCell,
 			LinkedList<Point<Integer>> path) {
 		if (path != null) {
-			Iterator<Point<Integer>> iter = path.iterator();
-
-			if (!iter.hasNext())
-				return;
-
-			Point<Integer> current = iter.next();
-
-			drawArrow(g, currentCell, current);
-
 			try {
+				Iterator<Point<Integer>> iter = path.iterator();
+
+				if (!iter.hasNext())
+					return;
+
+				Point<Integer> current = iter.next();
+
+				drawArrow(g, currentCell, current);
 				while (iter.hasNext()) {
 					Point<Integer> next = iter.next();
 					drawArrow(g, current, next);
