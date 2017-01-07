@@ -37,9 +37,14 @@ public class Brain {
 			robotData.updateData(sensorData); // Curves robot.
 			robotData.fixLocation(sensorData, map);
 			Mapper.updateMap(sensorData, robotData, map);
-
+			
+		
+			
+			if(robotData.getPath().isEmpty() || 
+			    robotData.closeEnough(robotData.locationInMaze, robotData.centerOf(robotData.getPath().getLast()))) {
 			Explorer.modifyPath(map, robotData.getCurrentCell(),
-					robotData.getPath());
+					robotData.getPath(), robotData.getTraversedPath());
+			}
 		} else {
 			robotData.updateData(sensorData);
 			robotData.fixLocation(sensorData, map);

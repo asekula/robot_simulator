@@ -59,6 +59,9 @@ public class RobotData {
 	private Phase phase;
 
 	private LinkedList<Point<Integer>> path;
+	
+	//Stores the path was cells walked through
+	private LinkedList<Point<Integer>> traveresedPath;
 
 	public RobotData(double orientationOffset, Point<Double> location) {
 
@@ -73,6 +76,7 @@ public class RobotData {
 		currentGoalLocation = centerOf(currentCell); // Won't move.
 		phase = Phase.EXPLORING;
 		path = new LinkedList<Point<Integer>>();
+		traveresedPath = new LinkedList<Point<Integer>>();
 	}
 
 	public Phase getPhase() {
@@ -191,6 +195,10 @@ public class RobotData {
 	public LinkedList<Point<Integer>> getPath() {
 		return path;
 	}
+	
+	public LinkedList<Point<Integer>> getTraversedPath() {
+    return traveresedPath;
+  }
 
 	// Will be -1, -1 if there is no next cell.
 	public Point<Integer> nextCell() {

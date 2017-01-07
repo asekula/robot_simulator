@@ -1,9 +1,11 @@
 package iRobot;
 
-import java.awt.*;
-import java.util.LinkedList;
-import java.util.Iterator;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.LinkedList;
 public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
@@ -65,7 +67,8 @@ public class Emulator implements Environment {
 
 	private boolean robotHitWall(Point<Double> location, double orientation) {
 		// Todo.
-		// Q: Do we even need this? Potential A: It would be good to include it.
+		// Q: Do we even need this? Potential A: It would be good to include it. Yeah 
+	  // It's walked through walls during different trials
 		return false;
 	}
 
