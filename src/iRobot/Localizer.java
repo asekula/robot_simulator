@@ -82,8 +82,7 @@ public class Localizer {
 		 * figuring out where it should be (for now).
 		 */
 
-		double error = 3; // Test different values here.
-		if (!Geometry.within(realDist, dist, error))
+		if (!Geometry.within(realDist, dist, Constants.MAX_SHIFT_DISTANCE))
 			return unknown;
 
 		return Geometry.getRelativePoint(location, 0, theta, dist - realDist);

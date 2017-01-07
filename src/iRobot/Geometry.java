@@ -242,7 +242,7 @@ public class Geometry {
 	}
 
 	public static boolean insideCell(Point<Double> p) {
-		double dist = 2;
+		double dist = Constants.INSIDE_CELL;
 		double x = p.x % Constants.CELL_WIDTH;
 		double y = p.y % Constants.CELL_WIDTH;
 		return ((x <= Constants.CELL_WIDTH - dist) && (x >= dist)
