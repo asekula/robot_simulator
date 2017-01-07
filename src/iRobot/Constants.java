@@ -61,12 +61,12 @@ public class Constants {
 
 	// If a sensor distance is close enough to the grid line point, then there
 	// is a wall at that grid line point. Error described here.
-	public static double GRID_LINE_IS_WALL = 1;
+	public static double GRID_LINE_IS_WALL = 2;
 
 	// If the grid line points are too close (i.e. corner) don't map.
-	public static double GRID_LINES_TOO_CLOSE = 2;
+	public static double GRID_LINES_TOO_CLOSE = 4;
 
 	// If the location is farther than this value from the walls, it is
 	// considered inside the cell. (where the walls are the width multiples).
-	public static double INSIDE_CELL = 2;
+	public static double INSIDE_CELL = 1;
 }

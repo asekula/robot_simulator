@@ -3,7 +3,6 @@ package iRobot;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 public class Emulator implements Environment {
@@ -205,7 +204,7 @@ public class Emulator implements Environment {
 					drawArrow(g, current, next);
 					current = next;
 				}
-			} catch (ConcurrentModificationException e) {
+			} catch (Exception e) {
 				System.out.println("Could not draw path.");
 			}
 

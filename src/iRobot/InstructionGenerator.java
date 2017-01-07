@@ -30,7 +30,6 @@ public class InstructionGenerator {
 		// go yet).
 
 		if (next.x == -1) {
-			System.out.println("Rotating.");
 			return new MotorData(ROTATION_VALUE, -ROTATION_VALUE);
 		}
 

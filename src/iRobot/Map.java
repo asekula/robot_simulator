@@ -480,4 +480,15 @@ public class Map {
 
 		g.drawLine(p1.x, p1.y, p2.x, p2.y);
 	}
+
+	public boolean needsWallData() {
+		for (int i = 0; i < Constants.MAZE_WIDTH; i++) {
+			for (int j = 0; j < Constants.MAZE_WIDTH; j++) {
+				if (needsWallData(new Point<Integer>(i, j))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

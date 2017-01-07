@@ -35,13 +35,10 @@ public class Explorer {
 					&& !map.wallBetween(currentCell, adjacentCell)) {
 				path.add(adjacentCell);
 				traversedPath.add(adjacentCell);
-				System.out.println("Added " + adjacentCell.toVertex());
 				return;
 			}
 			dir = dir.left();
 		}
-
-		System.out.println(traversedPath.toString());
 
 		// backtracking
 		for (int i = traversedPath.size() - 1; i >= 0; i--) {

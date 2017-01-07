@@ -16,7 +16,6 @@ public class TestApplet extends Applet {
 	DataBuffer buffer;
 	Brain brain;
 	RobotData robotData;
-	boolean spinningRight = false;
 
 	public void init() {
 

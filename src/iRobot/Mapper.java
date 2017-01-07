@@ -77,12 +77,12 @@ public class Mapper {
 		double yGridLineDist = Geometry.distanceBetween(location,
 				yGridLinePoint);
 
-		double error = Constants.GRID_LINE_IS_WALL;
-
 		if (Geometry.within(xGridLineDist, yGridLineDist,
 				Constants.GRID_LINES_TOO_CLOSE)) {
 			return; // Too close to decide walls.
 		}
+
+		double error = Constants.GRID_LINE_IS_WALL;
 
 		// If dist == -1, not detecting any wall.
 		if (dist == -1) {
