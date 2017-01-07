@@ -58,7 +58,6 @@ public class RobotData {
 
 	private Phase phase;
 
-	// Q: Better way of representing the path?
 	private LinkedList<Point<Integer>> path;
 
 	public RobotData(double orientationOffset, Point<Double> location) {
@@ -230,9 +229,9 @@ public class RobotData {
 		return currentGoalLocation;
 	}
 
-	public boolean closeEnough(Point<Double> p1, Point<Double> p2) {
-		double error = 1; // In cms.
-		return (Geometry.distanceBetween(p1, p2) <= error);
+	private boolean closeEnough(Point<Double> p1, Point<Double> p2) {
+		return (Geometry.distanceBetween(p1,
+				p2) <= Constants.MAX_DISTANCE_TO_GOAL);
 	}
 
 	public Point<Double> centerOf(Point<Integer> cell) {

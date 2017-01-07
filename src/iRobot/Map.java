@@ -110,7 +110,7 @@ public class Map {
 			if (!tooCloseToCorner(p)) {
 				double remainderX = p.x % Constants.CELL_WIDTH;
 				double remainderY = p.y % Constants.CELL_WIDTH;
-				double error = 0.01;
+				double error = Constants.CHECK_MULTIPLE_OF_CELL_WIDTH;
 
 				if (Geometry.within(remainderX, 0, error) || Geometry
 						.within(remainderX, Constants.CELL_WIDTH, error)) {
@@ -147,7 +147,8 @@ public class Map {
 		if (!tooCloseToCorner(p)) {
 			double remainderX = p.x % Constants.CELL_WIDTH;
 			double remainderY = p.y % Constants.CELL_WIDTH;
-			double error = 0.01;
+
+			double error = Constants.CHECK_MULTIPLE_OF_CELL_WIDTH;
 
 			if (Geometry.within(remainderX, 0, error) || Geometry
 					.within(remainderX, Constants.CELL_WIDTH, error)) {
@@ -180,7 +181,7 @@ public class Map {
 	}
 
 	private boolean closeToBounds(double val) {
-		double error = 1;
+		double error = Constants.TOO_CLOSE_TO_WALL;
 		return Geometry.within((val % Constants.CELL_WIDTH), 0, error)
 				|| Geometry.within((val % Constants.CELL_WIDTH),
 						Constants.CELL_WIDTH, error);
@@ -279,7 +280,7 @@ public class Map {
 	public boolean wallAt(Point<Double> p) {
 		double remainderX = p.x % Constants.CELL_WIDTH;
 		double remainderY = p.y % Constants.CELL_WIDTH;
-		double error = 0.01;
+		double error = Constants.CHECK_MULTIPLE_OF_CELL_WIDTH;
 
 		if (Geometry.within(remainderX, 0, error)
 				|| Geometry.within(remainderX, Constants.CELL_WIDTH, error)) {
@@ -361,7 +362,7 @@ public class Map {
 	}
 
 	// Coloring scheme:
-	// Unknown - light grey
+	// Unknown - white
 	// Perceived wall that is a true wall - green
 	// Perceived wall that is not a true wall - orange
 	// Perceived opening that is a true wall - red
