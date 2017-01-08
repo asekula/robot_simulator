@@ -61,6 +61,10 @@ public class Mapper {
 	private static void updateMapWithSensor(Map map, double dist, double theta,
 			Point<Double> location, Point<Integer> cell) {
 
+		if (!closeToMainDirection(theta)) {
+			return;
+		}
+
 		if (Direction.isMainDirection(theta)) {
 			Direction dir = Direction.getDirection(theta);
 			updateMapWithDirection(map, dist, dir, location, cell);
@@ -180,6 +184,15 @@ public class Mapper {
 			default :
 				return 0;
 		}
+	}
+
+	private static boolean closeToMainDirection(double theta) {
+		double error = Constants.CLOSE_TO_MAIN_DIRECTION;
+		return Geometry.within(theta, 0, error)
+				|| Geometry.within(theta, 90, error)
+				|| Geometry.within(theta, 180, error)
+				|| Geometry.within(theta, 270, error)
+				|| Geometry.within(theta, 360, error);
 	}
 
 }

@@ -50,23 +50,28 @@ public class Constants {
 	// the goal location to say that the robot reached the goal.
 	public static double MAX_DISTANCE_TO_GOAL = 1;
 
+	// Mapper uses the following:
+
+	// Theta is within x degrees of a main direction to be used in mapper.
+	public static double CLOSE_TO_MAIN_DIRECTION = 10;
+
 	// x % width needs to be 0 with this error in order to treat x as a multiple
 	// of width.
 	public static double CHECK_MULTIPLE_OF_CELL_WIDTH = 0.01;
 
-	// If the robot is within this value distance of a wall, then it is dubbed
+	// If the location is farther than this value from the walls, it is
+	// considered inside the cell. (where the walls are the width multiples).
+	public static double INSIDE_CELL = 1;
+
+	// If a point is within this value distance of a wall, then it is dubbed
 	// "too close" by the map, and if the point is at a corner then it doesn't
 	// set a wall there.
 	public static double TOO_CLOSE_TO_WALL = 1;
 
 	// If a sensor distance is close enough to the grid line point, then there
 	// is a wall at that grid line point. Error described here.
-	public static double GRID_LINE_IS_WALL = 2;
+	public static double GRID_LINE_IS_WALL = 5;
 
 	// If the grid line points are too close (i.e. corner) don't map.
-	public static double GRID_LINES_TOO_CLOSE = 4;
-
-	// If the location is farther than this value from the walls, it is
-	// considered inside the cell. (where the walls are the width multiples).
-	public static double INSIDE_CELL = 1;
+	public static double GRID_LINES_TOO_CLOSE = 7;
 }
