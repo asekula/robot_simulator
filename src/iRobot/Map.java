@@ -11,7 +11,8 @@ import org.jgrapht.graph.SimpleWeightedGraph;
 public class Map {
 
 	public static final double OPENING_WEIGHT = 1;
-	public static final double UNKNOWN_WEIGHT = 1000;
+	public static final double STARTING_UNKNOWN_WEIGHT = 1000;
+	public static final int MAPPING_CONFIRMATIONS = 3;
 
 	/*
 	 * Including a visited array for the explorer. Updated by mapper. Used by
@@ -48,7 +49,7 @@ public class Map {
 					if (!graph.containsEdge(v1, v2)) {
 						graph.addEdge(v1, v2);
 						graph.setEdgeWeight(graph.getEdge(v1, v2),
-								UNKNOWN_WEIGHT);
+								STARTING_UNKNOWN_WEIGHT);
 					}
 				}
 
@@ -57,7 +58,7 @@ public class Map {
 					if (!graph.containsEdge(v1, v2)) {
 						graph.addEdge(v1, v2);
 						graph.setEdgeWeight(graph.getEdge(v1, v2),
-								UNKNOWN_WEIGHT);
+								STARTING_UNKNOWN_WEIGHT);
 					}
 				}
 
@@ -68,6 +69,8 @@ public class Map {
 	}
 	/*
 	 * Sets a wall between the cell and it's neighbor in the direction of dir.
+	 * 
+	 * Subtracts one for wall.
 	 */
 	public void setWall(Point<Integer> cell, Direction dir) {
 
@@ -76,7 +79,23 @@ public class Map {
 		String v2 = neighbor.toVertex();
 
 		if (stringGraph.containsVertex(v1) && stringGraph.containsVertex(v2)) {
-			stringGraph.removeEdge(v1, v2);
+			if (stringGraph.containsEdge(v1, v2)) {
+
+				DefaultWeightedEdge e = stringGraph.getEdge(v1, v2);
+				double weight = stringGraph.getEdgeWeight(e);
+
+				if (weight != OPENING_WEIGHT) {
+
+					weight--;
+
+					if (weight <= (STARTING_UNKNOWN_WEIGHT
+							- MAPPING_CONFIRMATIONS)) {
+						stringGraph.removeEdge(v1, v2);
+					} else {
+						stringGraph.setEdgeWeight(e, weight);
+					}
+				}
+			}
 		}
 	}
 
@@ -90,12 +109,23 @@ public class Map {
 		String v2 = neighbor.toVertex();
 
 		if (stringGraph.containsVertex(v1) && stringGraph.containsVertex(v2)) {
-			if (!stringGraph.containsEdge(v1, v2)) {
-				stringGraph.addEdge(v1, v2);
-			}
+			if (stringGraph.containsEdge(v1, v2)) {
 
-			stringGraph.setEdgeWeight(stringGraph.getEdge(v1, v2),
-					OPENING_WEIGHT);
+				DefaultWeightedEdge e = stringGraph.getEdge(v1, v2);
+				double weight = stringGraph.getEdgeWeight(e);
+
+				if (weight != OPENING_WEIGHT) {
+
+					weight++;
+
+					if (weight >= STARTING_UNKNOWN_WEIGHT
+							+ MAPPING_CONFIRMATIONS) {
+						stringGraph.setEdgeWeight(e, OPENING_WEIGHT);
+					} else {
+						stringGraph.setEdgeWeight(e, weight);
+					}
+				}
+			}
 		}
 	}
 
@@ -196,7 +226,7 @@ public class Map {
 	public boolean needsWallData(Point<Integer> cell) {
 		if (stringGraph.containsVertex(cell.toVertex())) {
 			for (DefaultWeightedEdge e : stringGraph.edgesOf(cell.toVertex())) {
-				if (stringGraph.getEdgeWeight(e) == UNKNOWN_WEIGHT) {
+				if (stringGraph.getEdgeWeight(e) != OPENING_WEIGHT) {
 					return true;
 				}
 			}
@@ -321,7 +351,7 @@ public class Map {
 	public boolean wallBetween(Point<Integer> cell1, Point<Integer> cell2) {
 		if (stringGraph.containsEdge(cell1.toVertex(), cell2.toVertex())) {
 			if (stringGraph.getEdgeWeight(stringGraph.getEdge(cell1.toVertex(),
-					cell2.toVertex())) == UNKNOWN_WEIGHT) {
+					cell2.toVertex())) != OPENING_WEIGHT) {
 				return true;
 			} else {
 				return false;
@@ -393,7 +423,7 @@ public class Map {
 					drawWall(g, cell, Direction.NORTH, pixelOffset);
 				} else if (stringGraph
 						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
-								neighbor1.toVertex())) == UNKNOWN_WEIGHT) {
+								neighbor1.toVertex())) != OPENING_WEIGHT) {
 					// If unknown.
 					g.setColor(Color.WHITE);
 					drawWall(g, cell, Direction.NORTH, pixelOffset);
@@ -418,7 +448,7 @@ public class Map {
 					drawWall(g, cell, Direction.EAST, pixelOffset);
 				} else if (stringGraph
 						.getEdgeWeight(stringGraph.getEdge(cell.toVertex(),
-								neighbor2.toVertex())) == UNKNOWN_WEIGHT) {
+								neighbor2.toVertex())) != OPENING_WEIGHT) {
 					g.setColor(Color.WHITE);
 					drawWall(g, cell, Direction.EAST, pixelOffset);
 				} else {

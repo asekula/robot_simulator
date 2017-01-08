@@ -86,8 +86,7 @@ public class FastTester {
 						.getEdge(cell.toVertex(), neighbor.toVertex()));
 			}
 
-			if (weight1 != Map.UNKNOWN_WEIGHT
-					&& weight2 != Map.UNKNOWN_WEIGHT) {
+			if (decidedWeight(weight1) && decidedWeight(weight2)) {
 				if (weight1 != weight2) {
 					System.out.println("Cell: " + cell);
 					System.out.println("Direction: " + dir);
@@ -101,5 +100,9 @@ public class FastTester {
 		}
 
 		return true;
+	}
+
+	private static boolean decidedWeight(double weight) {
+		return (weight == Map.OPENING_WEIGHT || weight == -1);
 	}
 }
