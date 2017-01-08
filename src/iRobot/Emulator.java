@@ -123,12 +123,12 @@ public class Emulator implements Environment {
 				(int) (locationInMaze.y / Constants.CELL_WIDTH));
 
 		// Draws the goal location as a yellow circle.
-		drawGoalLocation(g, robotData.nextGoalLocation());
-		drawPath(g, robotData.getCurrentCell(), robotData.getPath());
+		// drawGoalLocation(g, robotData.nextGoalLocation());
+		// drawPath(g, robotData.getCurrentCell(), robotData.getPath());
 
-		map.drawTrueMaze(g);
+		// map.drawTrueMaze(g);
 
-		drawSensors(g);
+		// drawSensors(g);
 
 		g2.setColor(Color.BLACK);
 		g2.drawString(currentCell.toString(), 10, 20);
@@ -138,8 +138,8 @@ public class Emulator implements Environment {
 		g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
 
 		// Draws the robot's perceived location.
-		drawRobot(g2, robotData.getLocationInMaze(),
-				robotData.getTrueOrientation());
+		// drawRobot(g2, robotData.getLocationInMaze(),
+		// robotData.getTrueOrientation());
 
 		// Draw orientation line.
 

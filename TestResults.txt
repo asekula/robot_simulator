@@ -15,4 +15,7 @@ New method (with restricting theta to within a main direction):
 (10, 0.01, 5, 1, 5, 10) results in 2 out of 4.
 (3, 0.01, 5, 1, 5, 10) results in 4 out of 5.
 (3, 0.01, 1, 4, 5, 10) results in 0 out of 2.
-(10, 0.1, 1, 1, 5, 7) results in 46 out of 50.
+(10, 0.01, 1, 1, 5, 7) results in 46 out of 50.
+
+When not allowing wall override:
+(10, 0.01, 1, 1, 5, 7) results in 46 out of 50.
