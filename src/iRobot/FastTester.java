@@ -2,8 +2,18 @@ package iRobot;
 
 public class FastTester {
 
+	/*
+	 * I'm pretty sure this isn't an accurate test of the robot, most likely due
+	 * to the speed/single-threadedness of this simulation code.
+	 * 
+	 * Code that gets 100% accuracy here will fail in the applet. I trust the
+	 * applet more, because of the delay and multithreadedness.
+	 * 
+	 * Don't use this tester.
+	 */
+
 	public static void main(String[] args) {
-		int numTests = 200;
+		int numTests = 50;
 		int succeeded = 0;
 
 		for (int i = 0; i < numTests; i++) {

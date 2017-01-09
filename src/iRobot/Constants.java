@@ -25,7 +25,7 @@ public class Constants {
 	public static final int CENTER_CELL = 7;
 
 	// The max cell in the maze is at (MAZE_WIDTH - 1, MAZE_WIDTH - 1).
-	public static final int MAZE_WIDTH = 5;
+	public static final int MAZE_WIDTH = 16;
 
 	// Todo: Figure these out.
 	public static final double IR_MAX = 15; // In cms.
@@ -36,7 +36,7 @@ public class Constants {
 	// Pertaining the applet:
 	public static final int SCALE_FACTOR = 2;
 
-	public static int APPLET_DELAY = 2;
+	public static int APPLET_DELAY = 1;
 
 	public static int EXTRA_ROBOT_DELAY = 0;
 
@@ -74,4 +74,8 @@ public class Constants {
 
 	// If the grid line points are too close (i.e. corner) don't map.
 	public static double GRID_LINES_TOO_CLOSE = 7;
+
+	// The number of times a wall needs to be set to a wall before it's actually
+	// set in the graph as a wall (and same for opening)
+	public static final int MAPPING_CONFIRMATIONS = 3;
 }

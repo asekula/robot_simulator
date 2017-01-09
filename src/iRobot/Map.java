@@ -12,7 +12,6 @@ public class Map {
 
 	public static final double OPENING_WEIGHT = 1;
 	public static final double STARTING_UNKNOWN_WEIGHT = 1000;
-	public static final int MAPPING_CONFIRMATIONS = 10;
 
 	/*
 	 * Including a visited array for the explorer. Updated by mapper. Used by
@@ -89,7 +88,7 @@ public class Map {
 					weight--;
 
 					if (weight <= (STARTING_UNKNOWN_WEIGHT
-							- MAPPING_CONFIRMATIONS)) {
+							- Constants.MAPPING_CONFIRMATIONS)) {
 						stringGraph.removeEdge(v1, v2);
 					} else {
 						stringGraph.setEdgeWeight(e, weight);
@@ -119,7 +118,7 @@ public class Map {
 					weight++;
 
 					if (weight >= STARTING_UNKNOWN_WEIGHT
-							+ MAPPING_CONFIRMATIONS) {
+							+ Constants.MAPPING_CONFIRMATIONS) {
 						stringGraph.setEdgeWeight(e, OPENING_WEIGHT);
 					} else {
 						stringGraph.setEdgeWeight(e, weight);
