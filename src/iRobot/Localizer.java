@@ -55,7 +55,13 @@ public class Localizer {
 		p2 = shiftAlongSensorLine(leftDist, thetaL, locationInMaze, map);
 		p3 = shiftAlongSensorLine(rightDist, thetaR, locationInMaze, map);
 
-		return avgPoint(locationInMaze, p1, p2, p3);
+		Point<Double> updated = avgPoint(locationInMaze, p1, p2, p3);
+
+		p1 = shiftAlongSensorLine(frontDist, thetaF, updated, map);
+		p2 = shiftAlongSensorLine(leftDist, thetaL, updated, map);
+		p3 = shiftAlongSensorLine(rightDist, thetaR, updated, map);
+
+		return avgPoint(updated, p1, p2, p3);
 	}
 
 	private static Point<Double> shiftAlongSensorLine(double realDist,

@@ -38,7 +38,7 @@ public class Constants {
 	// Pertaining the applet:
 	public static final int SCALE_FACTOR = 2;
 
-	public static int APPLET_DELAY = 1;
+	public static int APPLET_DELAY = 2;
 
 	public static int EXTRA_ROBOT_DELAY = 0;
 
@@ -63,7 +63,7 @@ public class Constants {
 
 	// If the location is farther than this value from the walls, it is
 	// considered inside the cell. (where the walls are the width multiples).
-	public static double INSIDE_CELL = 2;
+	public static double INSIDE_CELL = 4;
 
 	// If a point is within this value distance of a wall, then it is dubbed
 	// "too close" by the map, and if the point is at a corner then it doesn't

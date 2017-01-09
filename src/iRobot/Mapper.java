@@ -29,8 +29,6 @@ public class Mapper {
 			Point<Double> loc = robotData.getLocationInMaze();
 			Point<Integer> cell = robotData.getCurrentCell();
 
-			map.visited[cell.x][cell.y] = true;
-
 			double orientation = robotData.getTrueOrientation();
 			double thetaL = (orientation + 90) % 360;
 			double thetaR = (orientation + 270) % 360;

@@ -138,8 +138,8 @@ public class Emulator implements Environment {
 		g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
 
 		// Draws the robot's perceived location.
-		// drawRobot(g2, robotData.getLocationInMaze(),
-		// robotData.getTrueOrientation());
+		drawRobot(g2, robotData.getLocationInMaze(),
+				robotData.getTrueOrientation());
 
 		// Draw orientation line.
 
