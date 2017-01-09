@@ -14,7 +14,6 @@ public class FastTester {
 				System.out.println("Passed.");
 			} else {
 				System.out.println("Failed.");
-				break;
 			}
 		}
 

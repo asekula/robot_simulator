@@ -49,37 +49,6 @@ public class Localizer {
 		double thetaL = (90 + orientation) % 360, thetaF = orientation,
 				thetaR = (270 + orientation) % 360;
 
-		Point<Integer> currentCell = getCurrentCell(locationInMaze);
-		Point<Double> locationInCell = new Point<Double>(
-				locationInMaze.x % CELL_WIDTH, locationInMaze.y % CELL_WIDTH);
-
-		Point<Double> singleSensorPoint;
-
-		if (leftDist != -1 && frontDist == -1 && rightDist == -1) {
-			singleSensorPoint = closestValidPoint(locationInCell, leftDist,
-					thetaL, currentCell, map);
-			fixPoint(singleSensorPoint, currentCell);
-			return singleSensorPoint;
-		}
-
-		if (leftDist == -1 && frontDist != -1 && rightDist == -1) {
-			singleSensorPoint = closestValidPoint(locationInCell, frontDist,
-					thetaF, currentCell, map);
-			fixPoint(singleSensorPoint, currentCell);
-			return singleSensorPoint;
-		}
-
-		if (leftDist == -1 && frontDist == -1 && rightDist != -1) {
-			singleSensorPoint = closestValidPoint(locationInCell, rightDist,
-					thetaR, currentCell, map);
-			fixPoint(singleSensorPoint, currentCell);
-			return singleSensorPoint;
-		}
-
-		// If only left/right...
-		// if (frontDist == -1)
-		// return;
-
 		Point<Double> p1, p2, p3;
 
 		// ShiftAlongSensorLine relies heavily on the map.
@@ -88,43 +57,14 @@ public class Localizer {
 		p2 = shiftAlongSensorLine(leftDist, thetaL, locationInMaze, map);
 		p3 = shiftAlongSensorLine(rightDist, thetaR, locationInMaze, map);
 
-		Point<Double> avgCheck = avgData(locationInMaze, p1, p2, p3);
-
-		p1 = pointData(leftDist, thetaL, frontDist, thetaF, currentCell, map);
-		p2 = pointData(frontDist, thetaF, rightDist, thetaR, currentCell, map);
-		p3 = pointData(leftDist, thetaL, rightDist, thetaR, currentCell, map);
-
-		// Converts the points from relative points to locations in maze.
-		fixPoint(p1, currentCell);
-		fixPoint(p2, currentCell);
-		fixPoint(p3, currentCell);
-
+		double LOCALIZATION_ERROR = 2;
 		Point<Double> avg = avgData(locationInMaze, p1, p2, p3);
-
-		double LOCALIZATION_ERROR = 4;
-
-		if (Geometry.within(Geometry.distanceBetween(avg, avgCheck), 0,
+		if (Geometry.within(Geometry.distanceBetween(avg, locationInMaze), 0,
 				LOCALIZATION_ERROR)) {
-			return avgCheck;
+			return avg;
 		} else {
 			return locationInMaze;
 		}
-	}
-
-	private static void fixPoint(Point<Double> relativeToCell,
-			Point<Integer> currentCell) {
-		if (relativeToCell.x != -CELL_WIDTH) {
-			relativeToCell.x += (currentCell.x * CELL_WIDTH);
-		}
-		if (relativeToCell.y != -CELL_WIDTH) {
-			relativeToCell.y += (currentCell.y * CELL_WIDTH);
-		}
-	}
-
-	private static Point<Integer> getCurrentCell(Point<Double> location) {
-		return new Point<Integer>(
-				(int) Math.floor(location.x / Constants.CELL_WIDTH),
-				(int) Math.floor(location.y / Constants.CELL_WIDTH));
 	}
 
 	private static Point<Double> shiftAlongSensorLine(double realDist,
@@ -155,244 +95,6 @@ public class Localizer {
 			return unknown;
 
 		return Geometry.getRelativePoint(location, 0, theta, dist - realDist);
-	}
-
-	/*
-	 * Does not modify location. Assumes that there are no other distance
-	 * values. Location will not be modified more after this method.
-	 */
-	private static Point<Double> closestValidPoint(Point<Double> location,
-			double dist, double theta, Point<Integer> currentCell, Map map) {
-		Point<Double> origin = new Point<Double>(0.0, 0.0);
-		Point<Double> p = Geometry.getRelativePoint(origin, 0, theta, dist);
-
-		double xVal = locInCell(p.x), yVal = locInCell(p.y);
-
-		if (Math.abs(location.x - xVal) < Math.abs(location.y - yVal)) {
-			return new Point<Double>(xVal, location.y);
-		} else {
-			return new Point<Double>(location.x, yVal);
-		}
-	}
-
-	/*
-	 * Thetax is the direction that distx is facing. cell is the current cell.
-	 * Returns a point with as much data as possible, indicating where the robot
-	 * is in the current cell. If there is no data in any of the coordinates it
-	 * uses -Constants.CELL_WIDTH to fill the data. Since we're using only one
-	 * distance value, one of the coordinates will definitely be -CELL_WIDTH.
-	 * 
-	 * Using -Constants.CELL_WIDTH because the values will never be that low,
-	 * since localization is done quite often, and once the values become
-	 * negative, the cell changes and they become positive again.
-	 * 
-	 * Important: Returns values relative to a cell's coordinates.
-	 * 
-	 * Returns unknown if either distance is -1.
-	 */
-	private static Point<Double> pointData(double dist1, double theta1,
-			double dist2, double theta2, Point<Integer> cell, Map map) {
-
-		// I've accepted the fact that I'll need to plug through cases here.
-
-		if (dist1 == -1 || dist2 == -1) {
-			return new Point<Double>(-CELL_WIDTH, -CELL_WIDTH);
-		}
-
-		Point<Double> origin = new Point<Double>(0.0, 0.0);
-
-		Point<Double> p1 = Geometry.getRelativePoint(origin, 0, theta1, dist1);
-		Point<Double> p2 = Geometry.getRelativePoint(origin, 0, theta2, dist2);
-
-		double precision = 0.0001;
-		p1.x = round(p1.x, precision);
-		p1.y = round(p1.y, precision);
-		p2.x = round(p2.x, precision);
-		p2.y = round(p2.y, precision);
-
-		double error = 0.03; // Important: Change this if localization isn't
-								// precise.
-
-		// If a coordinate of a point is 0, then we know that there is only one
-		// kind of wall that the sensor is detecting.
-
-		if (Math.abs(theta1 - theta2) != 180) {
-			if ((p1.x == 0) || (p2.y == 0)) {
-				return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-			}
-
-			if ((p1.y == 0) || (p2.x == 0)) {
-				return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-			}
-		} else {
-
-			if (p1.x == 0 || p2.x == 0) {
-				// p2.x == 0.
-				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
-			}
-
-			if (p1.y == 0 || p2.x == 0) {
-				// p2.y == 0.
-				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
-			}
-		}
-
-		// If the coordinates are close enough, they are detecting the same
-		// wall.
-		if (Geometry.within(p1.x, p2.x, error)) {
-			return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
-		}
-
-		if (Geometry.within(p1.y, p2.y, error)) {
-			return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
-		}
-
-		if (p1.x < 0 && p2.x < 0) {
-
-			// If the y's are the same sign, the vectors are in the same
-			// quadrant, which won't happen with our L/F/R vectors.
-
-			assert (p1.y * p2.y < 0); // True if opposite signs.
-			// (already covered case where one of the coordinates is 0.
-
-			if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, error)) {
-				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
-			} else {
-				if (p1.x < p2.x) { // p1 hits the left wall.
-					return new Point<Double>(-p1.x, locInCell(p2.y));
-				} else {
-					return new Point<Double>(-p2.x, locInCell(p1.y));
-				}
-			}
-		}
-
-		if (p1.x > 0 && p2.x > 0) {
-			assert (p1.y * p2.y < 0);
-
-			if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, error)) {
-				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
-			} else {
-				if (p1.x > p2.x) { // p1 hits the right wall.
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				} else {
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				}
-			}
-		}
-
-		if (p1.y > 0 && p2.y > 0) {
-
-			if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, error)) {
-				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
-			} else {
-				if (p1.y > p2.y) { // p1 hits the top wall.
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				} else {
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				}
-			}
-		}
-
-		if (p1.y < 0 && p2.y < 0) {
-			if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, error)) {
-
-				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
-			} else {
-				if (p1.y < p2.y) { // p1 hits the bottom wall.
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				} else {
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				}
-			}
-		}
-
-		// Last case: across from each other (opposite quadrants).
-		// Only case that uses the map.
-		if ((p1.y * p2.y < 0) && (p1.x * p2.x < 0)) {
-			assert (Math.abs(theta1 - theta2) == 180); // No other case.
-
-			// Subtracting p1.x and p2.x because they have different signs.
-			if (Geometry.within(Math.abs(p1.x - p2.x), CELL_WIDTH, error)) {
-				return new Point<Double>(avgLocs(p1.x, p2.x), -CELL_WIDTH);
-			}
-
-			if (Geometry.within(Math.abs(p1.y - p2.y), CELL_WIDTH, error)) {
-				return new Point<Double>(-CELL_WIDTH, avgLocs(p1.y, p2.y));
-			}
-
-			boolean westWall = map.wallBetween(cell,
-					Point.getAdjacentCell(cell, Direction.WEST));
-			boolean eastWall = map.wallBetween(cell,
-					Point.getAdjacentCell(cell, Direction.EAST));
-			boolean northWall = map.wallBetween(cell,
-					Point.getAdjacentCell(cell, Direction.NORTH));
-			boolean southWall = map.wallBetween(cell,
-					Point.getAdjacentCell(cell, Direction.SOUTH));
-
-			boolean bottomRight = eastWall && southWall;
-			boolean topLeft = northWall && westWall;
-			boolean topRight = northWall && eastWall;
-			boolean bottomLeft = southWall && westWall;
-
-			/*
-			 * Even if it's not detecting the actual wall (maybe it's detecting
-			 * the wall next to it), we can still use the coordinates to get its
-			 * location relative to that grid line, which is all that we care
-			 * about.
-			 */
-
-			// Todo later: clean this up.
-
-			if (p1.x > 0 && p1.y > 0) {
-				if (topLeft && (!bottomRight)) {
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				}
-				if ((!topLeft) && bottomRight) {
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				}
-			}
-
-			if (p1.x < 0 && p1.y < 0) {
-				if (topLeft && (!bottomRight)) {
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				}
-				if ((!topLeft) && bottomRight) {
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				}
-			}
-
-			if (p1.x < 0 && p1.y > 0) {
-				if (topRight && (!bottomLeft)) {
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				}
-				if ((!topRight) && bottomLeft) {
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				}
-			}
-
-			if (p1.x > 0 && p1.y < 0) {
-				if (topRight && (!bottomLeft)) {
-					return new Point<Double>(locInCell(p1.x), locInCell(p2.y));
-				}
-				if ((!topRight) && bottomLeft) {
-					return new Point<Double>(locInCell(p2.x), locInCell(p1.y));
-				}
-			}
-		}
-
-		return new Point<Double>(-CELL_WIDTH, -CELL_WIDTH);
-	}
-
-	private static double avgLocs(double val1, double val2) {
-		return (locInCell(val1) + locInCell(val2)) / 2;
-	}
-
-	private static double locInCell(double val) {
-		if (val > 0) {
-			return Constants.CELL_WIDTH - val;
-		} else {
-			return -val;
-		}
 	}
 
 	/*
@@ -445,9 +147,5 @@ public class Localizer {
 		} else {
 			return num;
 		}
-	}
-
-	private static double round(double val, double precision) {
-		return Math.round(val / precision) * precision;
 	}
 }
