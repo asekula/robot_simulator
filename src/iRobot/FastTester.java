@@ -2,18 +2,10 @@ package iRobot;
 
 public class FastTester {
 
-	/*
-	 * I'm pretty sure this isn't an accurate test of the robot, most likely due
-	 * to the speed/single-threadedness of this simulation code.
-	 * 
-	 * Code that gets 100% accuracy here will fail in the applet. I trust the
-	 * applet more, because of the delay and multithreadedness.
-	 * 
-	 * Don't use this tester.
-	 */
+	private static boolean RUNNING;
 
 	public static void main(String[] args) {
-		int numTests = 50;
+		int numTests = 10;
 		int succeeded = 0;
 
 		for (int i = 0; i < numTests; i++) {
@@ -37,28 +29,60 @@ public class FastTester {
 		DataBuffer buffer;
 		Brain brain;
 		RobotData robotData;
-		SensorData sensorData;
-		MotorData motorData;
+
+		RUNNING = true;
 
 		emulator = new Emulator();
 		buffer = new DataBuffer(emulator);
+
 		robotData = buffer.calibrate();
 		brain = new Brain(robotData);
 
-		emulator.moveRobot();
+		// Thread that runs the emulator.
+		Thread emulatorThread = new Thread() {
+			public void run() {
+				while (RUNNING) {
+					emulator.moveRobot();
+					delay();
+				}
+			}
+		};
+		emulatorThread.start();
 
-		do {
-			sensorData = buffer.getSensorData();
-			motorData = brain.computeMotorData(sensorData);
-			buffer.moveRobotMotors(motorData);
-			emulator.moveRobot();
+		// Thread that runs the brain/buffer.
+		Thread robotThread = new Thread() {
+			public void run() {
+				delay();
+				SensorData sensorData;
+				MotorData motorData;
+				do {
+					sensorData = buffer.getSensorData();
+					motorData = brain.computeMotorData(sensorData);
+					buffer.moveRobotMotors(motorData);
+					delay();
 
+				} while (!brain.isFinished() && RUNNING);
+			}
+		};
+		robotThread.start();
+
+		while (brain.getMap().needsWallData()) {
 			if (containsError(brain.getMap(), emulator.getMap())) {
+				RUNNING = false;
 				return false;
 			}
-		} while (brain.getMap().needsWallData());
+		}
 
+		RUNNING = false;
 		return true;
+	}
+
+	private static void delay() {
+		try {
+			Thread.sleep(Constants.APPLET_DELAY);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static boolean containsError(Map map1, Map map2) {
@@ -80,7 +104,7 @@ public class FastTester {
 		Direction dir = Direction.EAST;
 		Point<Integer> neighbor;
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 2; i++) {
 			neighbor = Point.getAdjacentCell(cell, dir);
 			double weight1 = -1, weight2 = -1; // -1 is no edge.
 
@@ -96,7 +120,8 @@ public class FastTester {
 						.getEdge(cell.toVertex(), neighbor.toVertex()));
 			}
 
-			if (decidedWeight(weight1) && decidedWeight(weight2)) {
+			if ((weight1 == Map.OPENING_WEIGHT || weight1 == -1)
+					&& (weight2 == Map.OPENING_WEIGHT || weight2 == -1)) {
 				if (weight1 != weight2) {
 					System.out.println("Cell: " + cell);
 					System.out.println("Direction: " + dir);
@@ -110,9 +135,5 @@ public class FastTester {
 		}
 
 		return true;
-	}
-
-	private static boolean decidedWeight(double weight) {
-		return (weight == Map.OPENING_WEIGHT || weight == -1);
 	}
 }

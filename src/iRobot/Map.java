@@ -248,7 +248,32 @@ public class Map {
 		// defaults to false^
 
 		drunkenWalk(graph, visited, new Point<Integer>(0, 0));
+
+		for (int i = 0; i < Constants.NUM_REMOVED_WALLS; i++) {
+			addRandomEdge(graph);
+		}
+
 		return graph;
+	}
+
+	public static void addRandomEdge(
+			SimpleWeightedGraph<String, DefaultWeightedEdge> graph) {
+		int row = (int) (Math.floor(Math.random() * Constants.MAZE_WIDTH));
+		int col = (int) (Math.floor(Math.random() * Constants.MAZE_WIDTH));
+		int dirNum = (int) (Math.floor(Math.random() * 4));
+		Direction dir = Direction.getDirection(dirNum * 90);
+
+		Point<Integer> current = new Point<Integer>(row, col);
+		Point<Integer> neighbor = Point.getAdjacentCell(current, dir);
+
+		if (graph.containsVertex(current.toVertex())
+				&& graph.containsVertex(neighbor.toVertex())) {
+
+			graph.addEdge(current.toVertex(), neighbor.toVertex());
+			graph.setEdgeWeight(
+					graph.getEdge(current.toVertex(), neighbor.toVertex()),
+					OPENING_WEIGHT);
+		}
 	}
 
 	/*

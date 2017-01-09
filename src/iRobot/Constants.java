@@ -27,6 +27,8 @@ public class Constants {
 	// The max cell in the maze is at (MAZE_WIDTH - 1, MAZE_WIDTH - 1).
 	public static final int MAZE_WIDTH = 16;
 
+	public static final int NUM_REMOVED_WALLS = 10;
+
 	// Todo: Figure these out.
 	public static final double IR_MAX = 15; // In cms.
 
