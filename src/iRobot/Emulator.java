@@ -14,7 +14,7 @@ public class Emulator implements Environment {
 	private double frontIR, leftIR, rightIR;
 	private int leftTacho;
 	private int rightTacho;
-	private Point<Double> locationInMaze;
+	public Point<Double> locationInMaze;
 	private Map map;
 
 	public Emulator() {

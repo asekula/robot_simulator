@@ -102,7 +102,7 @@ public class RobotData {
 				Geometry.tachoToCM(sensorData.leftTachoCount),
 				Geometry.tachoToCM(sensorData.rightTachoCount));
 
-		currentCell = getCurrentCell(currentCell, locationInMaze);
+		currentCell = getCurrentCell(locationInMaze);
 		updatePath();
 		// updatePhase(); // Uncomment this later.
 	}
@@ -123,8 +123,7 @@ public class RobotData {
 	 * 
 	 * Only modifies currentCell and locationInCell.
 	 */
-	private Point<Integer> getCurrentCell(Point<Integer> cell,
-			Point<Double> location) {
+	private Point<Integer> getCurrentCell(Point<Double> location) {
 		return new Point<Integer>(
 				(int) Math.floor(location.x / Constants.CELL_WIDTH),
 				(int) Math.floor(location.y / Constants.CELL_WIDTH));

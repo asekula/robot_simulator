@@ -5,7 +5,7 @@ public class FastTester {
 	private static boolean RUNNING;
 
 	public static void main(String[] args) {
-		int numTests = 10;
+		int numTests = 100;
 		int succeeded = 0;
 
 		for (int i = 0; i < numTests; i++) {
@@ -14,6 +14,7 @@ public class FastTester {
 				System.out.println("Passed.");
 			} else {
 				System.out.println("Failed.");
+				break;
 			}
 		}
 
@@ -68,10 +69,14 @@ public class FastTester {
 
 		while (brain.getMap().needsWallData()) {
 			if (containsError(brain.getMap(), emulator.getMap())) {
+				System.out.println(Geometry.distanceBetween(
+						robotData.locationInMaze, emulator.locationInMaze));
 				RUNNING = false;
 				return false;
 			}
 		}
+		System.out.println(Geometry.distanceBetween(robotData.locationInMaze,
+				emulator.locationInMaze));
 
 		RUNNING = false;
 		return true;
