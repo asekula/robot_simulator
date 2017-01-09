@@ -12,7 +12,7 @@ public class Map {
 
 	public static final double OPENING_WEIGHT = 1;
 	public static final double STARTING_UNKNOWN_WEIGHT = 1000;
-	public static final int MAPPING_CONFIRMATIONS = 3;
+	public static final int MAPPING_CONFIRMATIONS = 10;
 
 	/*
 	 * Including a visited array for the explorer. Updated by mapper. Used by

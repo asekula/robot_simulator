@@ -3,7 +3,7 @@ package iRobot;
 public class FastTester {
 
 	public static void main(String[] args) {
-		int numTests = 50;
+		int numTests = 200;
 		int succeeded = 0;
 
 		for (int i = 0; i < numTests; i++) {
