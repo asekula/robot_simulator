@@ -2,6 +2,8 @@ package iRobot;
 
 public class Localizer {
 
+	private static double CELL_WIDTH = Constants.CELL_WIDTH;
+
 	/*
 	 * This method uses the robot's data (including sensor data) to update the
 	 * location of the robot. It is assumed that the robot already moved itself
@@ -55,13 +57,20 @@ public class Localizer {
 		p2 = shiftAlongSensorLine(leftDist, thetaL, locationInMaze, map);
 		p3 = shiftAlongSensorLine(rightDist, thetaR, locationInMaze, map);
 
-		return avgPoint(locationInMaze, p1, p2, p3);
+		double LOCALIZATION_ERROR = 2;
+		Point<Double> avg = avgData(locationInMaze, p1, p2, p3);
+		if (Geometry.within(Geometry.distanceBetween(avg, locationInMaze), 0,
+				LOCALIZATION_ERROR)) {
+			return avg;
+		} else {
+			return locationInMaze;
+		}
 	}
 
 	private static Point<Double> shiftAlongSensorLine(double realDist,
 			double theta, Point<Double> location, Map map) {
 
-		Point<Double> unknown = new Point<Double>(-1.0, -1.0);
+		Point<Double> unknown = new Point<Double>(-CELL_WIDTH, -CELL_WIDTH);
 
 		if (realDist == -1)
 			return unknown;
@@ -88,54 +97,55 @@ public class Localizer {
 		return Geometry.getRelativePoint(location, 0, theta, dist - realDist);
 	}
 
-	private static Point<Double> avgPoint(Point<Double> location,
+	/*
+	 * Averages values when they are not -CELL_WIDTH. Returns a point containing
+	 * those average values.
+	 */
+	private static Point<Double> avgData(Point<Double> location,
 			Point<Double> p1, Point<Double> p2, Point<Double> p3) {
-
 		int xCoords = 0, yCoords = 0;
-		double x = 0, y = 0;
+		Point<Double> avgPoint = new Point<Double>(0.0, 0.0);
 
-		if (p1.x != -1) {
-			x += p1.x;
-			xCoords++;
-		}
+		// Want tuple here.
+		xCoords = addToAvg(avgPoint, p1.x, xCoords, true);
+		xCoords = addToAvg(avgPoint, p2.x, xCoords, true);
+		xCoords = addToAvg(avgPoint, p3.x, xCoords, true);
 
-		if (p2.x != -1) {
-			x += p2.x;
-			xCoords++;
-		}
-
-		if (p3.x != -1) {
-			x += p3.x;
-			xCoords++;
-		}
-
-		if (p1.y != -1) {
-			y += p1.y;
-			yCoords++;
-		}
-
-		if (p2.y != -1) {
-			y += p2.y;
-			yCoords++;
-		}
-
-		if (p3.y != -1) {
-			y += p3.y;
-			yCoords++;
-		}
+		yCoords = addToAvg(avgPoint, p1.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p2.y, yCoords, false);
+		yCoords = addToAvg(avgPoint, p3.y, yCoords, false);
 
 		if (xCoords == 0) {
-			if (yCoords == 0) {
-				return location;
-			} else {
-				return new Point<Double>(location.x, y / yCoords);
-			}
+			avgPoint.x = location.x;
 		} else {
-			if (yCoords == 0) {
-				return new Point<Double>(x / xCoords, location.y);
+			avgPoint.x /= xCoords;
+		}
+
+		if (yCoords == 0) {
+			avgPoint.y = location.y;
+		} else {
+			avgPoint.y /= yCoords;
+		}
+
+		return avgPoint;
+	}
+
+	/*
+	 * Returns num if avg wasn't added to, returns num + 1 if it added val to
+	 * one of avg's coordinates (as decided by xPos).
+	 */
+	private static int addToAvg(Point<Double> avg, double val, int num,
+			boolean xPos) {
+
+		if (val != -Constants.CELL_WIDTH) {
+			if (xPos) {
+				avg.x += val;
 			} else {
-				return new Point<Double>(x / xCoords, y / yCoords);
+				avg.y += val;
 			}
+			return num + 1;
+		} else {
+			return num;
 		}
 	}
 }

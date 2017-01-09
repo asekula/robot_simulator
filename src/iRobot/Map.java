@@ -13,15 +13,9 @@ public class Map {
 	public static final double OPENING_WEIGHT = 1;
 	public static final double STARTING_UNKNOWN_WEIGHT = 1000;
 
-	/*
-	 * Including a visited array for the explorer. Updated by mapper. Used by
-	 * explorer.
-	 */
-	boolean[][] visited;
 	SimpleWeightedGraph<String, DefaultWeightedEdge> stringGraph;
 
 	public Map(SimpleWeightedGraph<String, DefaultWeightedEdge> graph) {
-		visited = new boolean[Constants.MAZE_WIDTH][Constants.MAZE_WIDTH];
 		stringGraph = graph;
 	}
 
@@ -176,7 +170,6 @@ public class Map {
 		if (!tooCloseToCorner(p)) {
 			double remainderX = p.x % Constants.CELL_WIDTH;
 			double remainderY = p.y % Constants.CELL_WIDTH;
-
 			double error = Constants.CHECK_MULTIPLE_OF_CELL_WIDTH;
 
 			if (Geometry.within(remainderX, 0, error) || Geometry
@@ -422,7 +415,7 @@ public class Map {
 	// Perceived opening that is a true wall - red
 	// Perceived opening that is a true opening - no color
 	public void drawRobotMap(Graphics g, Map trueMap) {
-		int pixelOffset = 2;
+		int pixelOffset = 0;
 		g.setColor(Color.GREEN);
 		drawMazeBounds(g);
 
