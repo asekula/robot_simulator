@@ -123,8 +123,13 @@ public class Emulator implements Environment {
 				(int) (locationInMaze.y / Constants.CELL_WIDTH));
 
 		// Draws the goal location as a yellow circle.
-		// drawGoalLocation(g, robotData.nextGoalLocation());
-		// drawPath(g, robotData.getCurrentCell(), robotData.getPath());
+		if (robotData.getPhase() == Phase.EXPLORING) {
+			drawGoalLocation(g, robotData.nextGoalLocation());
+		} else {
+			drawGoalLocation(g, InstructionGenerator.getGoalLocation(
+					robotData.getCurrentCell(), robotData.nextCell()));
+		}
+		drawPath(g, robotData.getCurrentCell(), robotData.getPath());
 
 		// map.drawTrueMaze(g);
 
@@ -181,7 +186,7 @@ public class Emulator implements Environment {
 
 	private void drawGoalLocation(Graphics g, Point<Double> goal) {
 		int circSize = 4 * Constants.SCALE_FACTOR;
-		g.setColor(Color.YELLOW);
+		g.setColor(Color.BLACK);
 		g.fillOval((int) (goal.x * Constants.SCALE_FACTOR) - (circSize / 2),
 				(int) (goal.y * Constants.SCALE_FACTOR) - (circSize / 2),
 				circSize, circSize);

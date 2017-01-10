@@ -149,7 +149,8 @@ public class RobotData {
 	private void updatePhase(Map map) {
 		if (phase == Phase.EXPLORING) {
 			if (!map.needsWallData()) {
-				phase = Phase.RETURNING;
+				setNextPhase();
+				updateGoalCell();
 			}
 		} else {
 			if (currentCell.equals(goalCell)) {
