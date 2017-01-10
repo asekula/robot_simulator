@@ -99,11 +99,11 @@ public class InstructionGenerator {
 				rotatingMultiplier = 1;
 			}
 
-			if (rotate <= 60 || rotate >= 300) {
+			if (rotate <= 80 || rotate >= 280) {
 
 				int curveFactor;
 
-				if (rotate <= 60) {
+				if (rotate <= 80) {
 					curveFactor = (int) rotate;
 				} else {
 					curveFactor = (int) (rotate - 360);

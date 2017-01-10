@@ -5,7 +5,9 @@ Test results for exploration as of commit f04d06397f3e8f1ee0467404d02528d5245706
 **************
 
 Todo:
-	1. Explorer: search for nearest unknown cell (avoid backtracking).
-	2. Solver: Precomputing faster values (straight stretches of 2 or more are faster than turns).
-	(3. Perfect localization.)
-	(4. Test on real robot.)
+	1. Fix that one Solver bug (when the path changes due to localization error).
+		(can do this by not removing the cell from the path until it reaches 2nd cell in path,
+		thus not relying on currentCell to get the goalLocation). 
+	2. Perfect localization.
+	3. Test on real robot (including converting to C++).
+	4. Optimize code if needed (a few places that we can do this).

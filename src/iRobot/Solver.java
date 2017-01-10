@@ -1,6 +1,7 @@
 package iRobot;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import org.jgrapht.alg.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -21,16 +22,15 @@ public class Solver {
 					map.stringGraph, currentCell.toVertex(),
 					goalCell.toVertex());
 
-			convertPath(map, pathFinder.getPath(), path, currentCell);
+			convertPath(map, pathFinder.getPathEdgeList(), path, currentCell);
 		}
 	}
 
-	private static void convertPath(Map map,
-			GraphPath<String, DefaultWeightedEdge> graphPath,
+	public static void convertPath(Map map, List<DefaultWeightedEdge> graphPath,
 			LinkedList<Point<Integer>> path, Point<Integer> currentCell) {
 		Point<Integer> current = currentCell;
 
-		for (DefaultWeightedEdge e : graphPath.getEdgeList()) {
+		for (DefaultWeightedEdge e : graphPath) {
 			Point<Integer> next = otherVertex(map, current, e);
 			path.add(next);
 			current = next;

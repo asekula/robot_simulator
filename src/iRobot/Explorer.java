@@ -1,6 +1,9 @@
 package iRobot;
 
 import java.util.LinkedList;
+import java.util.List;
+import org.jgrapht.alg.DijkstraShortestPath;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 public class Explorer {
 
@@ -40,22 +43,38 @@ public class Explorer {
 			dir = dir.left();
 		}
 
-		/*
-		 * Todo: Instead of backtracking the same path, do a BFS to get a path
-		 * to the closest cell that needs wall data
-		 */
+		// Path is empty at this point.
 
-		// backtracking
-		for (int i = traversedPath.size() - 1; i >= 0; i--) {
+		List<DefaultWeightedEdge> bestPath = null;
+
+		for (int i = 0; i < traversedPath.size(); i++) {
 			Point<Integer> lastTraversed = traversedPath.get(i);
-			path.add(lastTraversed);
-			traversedPath.remove(lastTraversed);
 			if (accessibleNeighborNeedsWallData(map, lastTraversed)) {
-				traversedPath.add(lastTraversed);
-				break;
+
+				// Shouldn't redo computation every time.
+				List<DefaultWeightedEdge> shortest = DijkstraShortestPath
+						.findPathBetween(map.stringGraph,
+								currentCell.toVertex(),
+								lastTraversed.toVertex());
+
+				if (bestPath != null) {
+					if (shortest.size() < bestPath.size()) {
+						bestPath = shortest;
+					}
+				} else {
+					bestPath = shortest;
+				}
 			}
 		}
 
+		if (bestPath != null) {
+			Solver.convertPath(map, bestPath, path, currentCell);
+			traversedPath.removeAll(path);
+		} else {
+			if (map.needsWallData()) {
+				System.out.println("Todo: This case.");
+			}
+		}
 	}
 
 	/*
