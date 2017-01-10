@@ -68,14 +68,15 @@ public class FastTester {
 
 		while (brain.getMap().needsWallData()) {
 			if (containsError(brain.getMap(), emulator.getMap())) {
-				System.out.println(Geometry.distanceBetween(
-						robotData.locationInMaze, emulator.locationInMaze));
+				System.out.println(
+						Geometry.distanceBetween(robotData.getLocationInMaze(),
+								emulator.locationInMaze));
 				RUNNING = false;
 				return false;
 			}
 		}
-		System.out.println(Geometry.distanceBetween(robotData.locationInMaze,
-				emulator.locationInMaze));
+		System.out.println(Geometry.distanceBetween(
+				robotData.getLocationInMaze(), emulator.locationInMaze));
 
 		RUNNING = false;
 		return true;

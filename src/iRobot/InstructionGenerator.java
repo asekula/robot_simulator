@@ -5,7 +5,7 @@ public class InstructionGenerator {
 	public static int STRAIGHT_VALUE = 10; // Q: What to put here?
 	public static int ROTATION_VALUE = 2; // ^Same
 
-	public static MotorData generateMotorData(RobotData robotData) {
+	public static MotorData generateExploringMotorData(RobotData robotData) {
 		/*
 		 * To start out this can be very simple. All it requires is looking at
 		 * the motors' local coordinates, the orientation, and the next tile in
@@ -68,6 +68,39 @@ public class InstructionGenerator {
 						ROTATION_VALUE * rotatingMultiplier);
 			}
 		}
+	}
+
+	public static MotorData generateSolverMotorData(RobotData robotData) {
+		Point<Integer> current = robotData.getCurrentCell();
+		Point<Integer> next = robotData.nextCell();
+
+		if (next.x == -1)
+			return new MotorData(0, 0);
+
+		Point<Integer> afterNext = robotData.secondNextCell();
+
+		double desiredOrientation = getDesiredOrientation(next, afterNext);
+		Point<Double> goalLocation = getGoalLocation(current, next);
+
+		return motorDataToCurveRobot(robotData.getLocationInMaze(),
+				goalLocation, robotData.getTrueOrientation(),
+				desiredOrientation);
+	}
+
+	// Todo: The following three methods.
+	private static double getDesiredOrientation(Point<Integer> cell,
+			Point<Integer> next) {
+		return 0;
+	}
+
+	private static Point<Double> getGoalLocation(Point<Integer> current,
+			Point<Integer> next) {
+		return new Point<Double>(-1.0, -1.0);
+	}
+
+	private static MotorData motorDataToCurveRobot(Point<Double> current,
+			Point<Double> goal, double theta, double desiredTheta) {
+		return new MotorData(0, 0);
 	}
 
 	/*

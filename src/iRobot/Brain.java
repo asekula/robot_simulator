@@ -34,19 +34,21 @@ public class Brain {
 			 * after the localization.
 			 */
 
-			robotData.updateData(sensorData); // Curves robot.
+			robotData.updateData(sensorData, map); // Curves robot.
 			robotData.fixLocation(sensorData, map);
 			Mapper.updateMap(sensorData, robotData, map);
-			
-		
-			
-			if(robotData.getPath().isEmpty() || 
-			    robotData.closeEnough(robotData.locationInMaze, robotData.centerOf(robotData.getPath().getLast()))) {
-			Explorer.modifyPath(map, robotData.getCurrentCell(),
-					robotData.getPath(), robotData.getTraversedPath());
+			Mapper.deduceWalls(map);
+
+			if (robotData.getPath().isEmpty() || robotData.closeEnough(
+					robotData.getLocationInMaze(),
+					robotData.centerOf(robotData.getPath().getLast()))) {
+
+				Explorer.modifyPath(map, robotData.getCurrentCell(),
+						robotData.getPath(), robotData.getTraversedPath());
 			}
+			return InstructionGenerator.generateExploringMotorData(robotData);
 		} else {
-			robotData.updateData(sensorData);
+			robotData.updateData(sensorData, map);
 			robotData.fixLocation(sensorData, map);
 
 			Solver.modifyPath(map, robotData.getCurrentCell(),
@@ -58,14 +60,8 @@ public class Brain {
 			 * the solution right after it changes phases in updateData, but
 			 * here it's more explicit.
 			 */
+			return InstructionGenerator.generateSolverMotorData(robotData);
 		}
-
-		/*
-		 * Uses robotData's path to generate motor instructions. Assumes that
-		 * the path is a valid path in map, which is why it doesn't need a
-		 * reference to the map.
-		 */
-		return InstructionGenerator.generateMotorData(robotData);
 	}
 
 	public boolean isFinished() {

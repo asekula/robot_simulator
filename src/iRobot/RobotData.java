@@ -54,7 +54,7 @@ public class RobotData {
 	 * which we will say is the point on the line that goes through the two
 	 * motors, and is equidistant to the two motors.
 	 */
-	protected Point<Double> locationInMaze;
+	private Point<Double> locationInMaze;
 
 	private Phase phase;
 
@@ -88,7 +88,7 @@ public class RobotData {
 	 * value (exploring vs. speed run) if it reached its goal. Also removes the
 	 * head of the path if the robot reached the head's location.
 	 */
-	public void updateData(SensorData sensorData) {
+	public void updateData(SensorData sensorData, Map map) {
 
 		double newTrueOrientation = ((sensorData.IMU + orientationOffset) + 360)
 				% 360;
@@ -104,7 +104,7 @@ public class RobotData {
 
 		currentCell = getCurrentCell(locationInMaze);
 		updatePath();
-		// updatePhase(); // Uncomment this later.
+		updatePhase(map); // Uncomment this later.
 	}
 
 	/*
@@ -146,10 +146,16 @@ public class RobotData {
 	 * should change to the next phase. Also updates the goal cell. Does not
 	 * change the path, that's the solver/mapper's job.
 	 */
-	private void updatePhase() {
-		if (currentCell.equals(goalCell)) {
-			setNextPhase();
-			updateGoalCell();
+	private void updatePhase(Map map) {
+		if (phase == Phase.EXPLORING) {
+			if (!map.needsWallData()) {
+				phase = Phase.RETURNING;
+			}
+		} else {
+			if (currentCell.equals(goalCell)) {
+				setNextPhase();
+				updateGoalCell();
+			}
 		}
 	}
 
@@ -205,6 +211,14 @@ public class RobotData {
 			return new Point<Integer>(-1, -1);
 		} else {
 			return path.getFirst();
+		}
+	}
+
+	public Point<Integer> secondNextCell() {
+		if (path.size() >= 2) {
+			return path.get(1);
+		} else {
+			return new Point<Integer>(-1, -1);
 		}
 	}
 

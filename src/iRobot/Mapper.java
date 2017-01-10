@@ -1,5 +1,7 @@
 package iRobot;
 
+import org.jgrapht.graph.DefaultWeightedEdge;
+
 public class Mapper {
 
 	/*
@@ -193,4 +195,75 @@ public class Mapper {
 				|| Geometry.within(theta, 360, error);
 	}
 
+	/*
+	 * If there is only one possible path to a cell, then set that path as a
+	 * path of openings. (i.e. using current walls to figure out the some
+	 * unknown edges need to be openings, because every cell can be accessed by
+	 * every other cell.)
+	 * 
+	 * Not perfect, but good enough to still be computational useful.
+	 */
+	public static void deduceWalls(Map map) {
+		for (int i = 0; i < Constants.MAZE_WIDTH; i++) {
+			for (int j = 0; j < Constants.MAZE_WIDTH; j++) {
+				if (map.stringGraph.edgesOf(i + "," + j).size() == 1) {
+					DefaultWeightedEdge e = map.stringGraph.edgesOf(i + "," + j)
+							.iterator().next();
+					setOpeningChain(map, new Point<Integer>(i, j));
+				}
+			}
+		}
+	}
+
+	/*
+	 * Cell has a singular accessible neighbor, and it's edge weight with it is
+	 * unknown.
+	 */
+	private static void setOpeningChain(Map map, Point<Integer> cell) {
+		Direction dir = Direction.EAST;
+		for (int i = 0; i < 4; i++) {
+			Point<Integer> neighbor = Point.getAdjacentCell(cell, dir);
+			if (map.stringGraph.containsVertex(neighbor.toVertex())) {
+				if (map.stringGraph.containsEdge(cell.toVertex(),
+						neighbor.toVertex())) {
+					break;
+				}
+			}
+			dir = dir.left();
+		}
+
+		map.setNoWall(cell, dir);
+
+		Point<Integer> next = Point.getAdjacentCell(cell, dir);
+		while (map.stringGraph.edgesOf(next.toVertex()).size() == 2) {
+			Direction nextDir = Direction.EAST;
+			boolean found = false;
+
+			for (int i = 0; i < 4; i++) {
+				Point<Integer> neighbor = Point.getAdjacentCell(next, dir);
+				if (map.stringGraph.containsVertex(neighbor.toVertex())) {
+					if (map.stringGraph.containsEdge(next.toVertex(),
+							neighbor.toVertex())) {
+
+						DefaultWeightedEdge e = map.stringGraph
+								.getEdge(next.toVertex(), neighbor.toVertex());
+
+						if (map.stringGraph
+								.getEdgeWeight(e) != Map.OPENING_WEIGHT) {
+							found = true;
+							break;
+						}
+					}
+				}
+				nextDir = nextDir.left();
+			}
+
+			if (!found)
+				break;
+			else {
+				map.setNoWall(next, nextDir);
+				next = Point.getAdjacentCell(next, nextDir);
+			}
+		}
+	}
 }

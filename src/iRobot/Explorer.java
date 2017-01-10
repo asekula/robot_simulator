@@ -40,6 +40,11 @@ public class Explorer {
 			dir = dir.left();
 		}
 
+		/*
+		 * Todo: Instead of backtracking the same path, do a BFS to get a path
+		 * to the closest cell that needs wall data
+		 */
+
 		// backtracking
 		for (int i = traversedPath.size() - 1; i >= 0; i--) {
 			Point<Integer> lastTraversed = traversedPath.get(i);
