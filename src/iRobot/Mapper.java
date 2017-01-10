@@ -201,7 +201,8 @@ public class Mapper {
 	 * unknown edges need to be openings, because every cell can be accessed by
 	 * every other cell.)
 	 * 
-	 * Not perfect, but good enough to still be computational useful.
+	 * Could save some computation by remembering which walls were already
+	 * deduced.
 	 */
 	public static void deduceWalls(Map map) {
 		for (int i = 0; i < Constants.MAZE_WIDTH; i++) {
@@ -216,8 +217,7 @@ public class Mapper {
 	}
 
 	/*
-	 * Cell has a singular accessible neighbor, and it's edge weight with it is
-	 * unknown.
+	 * Cell has a singular accessible neighbor.
 	 */
 	private static void setOpeningChain(Map map, Point<Integer> cell) {
 		Direction dir = Direction.EAST;
@@ -234,22 +234,22 @@ public class Mapper {
 
 		map.setNoWall(cell, dir);
 
+		Direction prevDir = dir;
 		Point<Integer> next = Point.getAdjacentCell(cell, dir);
 		while (map.stringGraph.edgesOf(next.toVertex()).size() == 2) {
 			Direction nextDir = Direction.EAST;
 			boolean found = false;
 
 			for (int i = 0; i < 4; i++) {
-				Point<Integer> neighbor = Point.getAdjacentCell(next, dir);
-				if (map.stringGraph.containsVertex(neighbor.toVertex())) {
-					if (map.stringGraph.containsEdge(next.toVertex(),
-							neighbor.toVertex())) {
+				if (nextDir != prevDir.left().left()) {
 
-						DefaultWeightedEdge e = map.stringGraph
-								.getEdge(next.toVertex(), neighbor.toVertex());
+					Point<Integer> neighbor = Point.getAdjacentCell(next,
+							nextDir);
 
-						if (map.stringGraph
-								.getEdgeWeight(e) != Map.OPENING_WEIGHT) {
+					if (map.stringGraph.containsVertex(neighbor.toVertex())) {
+						if (map.stringGraph.containsEdge(next.toVertex(),
+								neighbor.toVertex())) {
+
 							found = true;
 							break;
 						}
@@ -263,6 +263,7 @@ public class Mapper {
 			else {
 				map.setNoWall(next, nextDir);
 				next = Point.getAdjacentCell(next, nextDir);
+				prevDir = nextDir;
 			}
 		}
 	}
