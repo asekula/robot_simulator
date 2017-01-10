@@ -38,7 +38,7 @@ public class Constants {
 	// Pertaining the applet:
 	public static final int SCALE_FACTOR = 3;
 
-	public static int APPLET_DELAY = 2;
+	public static int APPLET_DELAY = 4;
 
 	public static int EXTRA_ROBOT_DELAY = 0;
 
@@ -50,7 +50,7 @@ public class Constants {
 
 	// The maximum number of cms that the current location needs to be away from
 	// the goal location to say that the robot reached the goal.
-	public static double MAX_DISTANCE_TO_GOAL = 1;
+	public static double MAX_DISTANCE_TO_GOAL = 2;
 
 	// Mapper uses the following:
 

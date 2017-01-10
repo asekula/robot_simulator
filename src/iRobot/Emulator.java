@@ -124,12 +124,11 @@ public class Emulator implements Environment {
 
 		// Draws the goal location as a yellow circle.
 		if (robotData.getPhase() == Phase.EXPLORING) {
-			drawGoalLocation(g, robotData.nextGoalLocation());
+			drawGoalLocation(g, robotData.nextGoalLocation(true));
 		} else {
-			drawGoalLocation(g, InstructionGenerator.getGoalLocation(
-					robotData.getCurrentCell(), robotData.nextCell()));
+			drawGoalLocation(g, robotData.nextGoalLocation(false));
 		}
-		drawPath(g, robotData.getCurrentCell(), robotData.getPath());
+		drawPath(g, robotData.getPath());
 
 		// map.drawTrueMaze(g);
 
@@ -192,8 +191,7 @@ public class Emulator implements Environment {
 				circSize, circSize);
 	}
 
-	private void drawPath(Graphics g, Point<Integer> currentCell,
-			LinkedList<Point<Integer>> path) {
+	private void drawPath(Graphics g, LinkedList<Point<Integer>> path) {
 		if (path != null) {
 			try {
 				Iterator<Point<Integer>> iter = path.iterator();
@@ -203,7 +201,6 @@ public class Emulator implements Environment {
 
 				Point<Integer> current = iter.next();
 
-				drawArrow(g, currentCell, current);
 				while (iter.hasNext()) {
 					Point<Integer> next = iter.next();
 					drawArrow(g, current, next);

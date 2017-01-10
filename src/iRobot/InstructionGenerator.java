@@ -2,7 +2,7 @@ package iRobot;
 
 public class InstructionGenerator {
 
-	public static int STRAIGHT_VALUE = 4; // Q: What to put here?
+	public static int STRAIGHT_VALUE = 10; // Q: What to put here?
 	public static int ROTATION_VALUE = 2; // ^Same
 
 	public static MotorData generateExploringMotorData(RobotData robotData) {
@@ -24,7 +24,7 @@ public class InstructionGenerator {
 		 * in a straight line. Will eventually redo this.
 		 */
 
-		Point<Double> next = robotData.nextGoalLocation();
+		Point<Double> next = robotData.nextGoalLocation(true);
 
 		// If no next cell, don't move. (i.e. if it hasn't figured out where to
 		// go yet).
@@ -72,60 +72,17 @@ public class InstructionGenerator {
 
 	public static MotorData generateSolverMotorData(RobotData robotData) {
 
-		Point<Integer> current = robotData.getCurrentCell();
-		Point<Integer> next = robotData.nextCell();
+		Point<Double> next = robotData.nextGoalLocation(false);
 
 		if (next.x == -1)
 			return new MotorData(0, 0);
 
-		Point<Integer> afterNext = robotData.secondNextCell();
-
-		double desiredOrientation = getDesiredOrientation(current, afterNext);
-		Point<Double> goalLocation = getGoalLocation(current, next);
-
-		return motorDataToCurveRobot(robotData.getLocationInMaze(),
-				goalLocation, robotData.getTrueOrientation(),
-				desiredOrientation);
+		return motorDataToCurveRobot(robotData.getLocationInMaze(), next,
+				robotData.getTrueOrientation());
 	}
-
-	private static double getDesiredOrientation(Point<Integer> first,
-			Point<Integer> third) {
-		int dx = third.x - first.x;
-		int dy = third.y - first.y;
-		return Geometry.fullTanInverse(dx, dy);
-	}
-
-	public static Point<Double> getGoalLocation(Point<Integer> current,
-			Point<Integer> next) {
-		Direction directionTo = current.directionTo(next);
-		switch (directionTo) {
-			case EAST :
-				return new Point<Double>((current.x + 1) * Constants.CELL_WIDTH,
-						(current.y + 0.5) * Constants.CELL_WIDTH);
-
-			case NORTH :
-				return new Point<Double>(
-						(current.x + 0.5) * Constants.CELL_WIDTH,
-						(current.y + 1) * Constants.CELL_WIDTH);
-
-			case SOUTH :
-				return new Point<Double>(
-						(current.x + 0.5) * Constants.CELL_WIDTH,
-						current.y * Constants.CELL_WIDTH);
-
-			case WEST :
-				return new Point<Double>(current.x * Constants.CELL_WIDTH,
-						(current.y + 0.5) * Constants.CELL_WIDTH);
-
-		}
-		return new Point<Double>(-1.0, -1.0);
-	}
-
-	private static final double A_SCALE = 10; // What to put here?
-	private static final double B_SCALE = 10; // What to put here?
 
 	private static MotorData motorDataToCurveRobot(Point<Double> current,
-			Point<Double> goal, double theta, double desiredTheta) {
+			Point<Double> goal, double theta) {
 
 		// double a = 0, b = 0;
 

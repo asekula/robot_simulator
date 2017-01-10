@@ -239,9 +239,12 @@ public class RobotData {
 	/*
 	 * Returns a location in the maze (not necessarily a location in cell).
 	 * 
+	 * exploring parameter returns center of the goal cell if true, and returns
+	 * a point closer to the edge if false.
+	 * 
 	 * Called by the instructionGenerator.
 	 */
-	public Point<Double> nextGoalLocation() {
+	public Point<Double> nextGoalLocation(boolean exploring) {
 		if (closeEnough(currentGoalLocation, getLocationInMaze())
 				|| currentGoalLocation.x == -1) {
 			Point<Integer> next = nextCell();
@@ -249,7 +252,12 @@ public class RobotData {
 			if (next.x == -1) {
 				currentGoalLocation = new Point<Double>(-1.0, -1.0);
 			} else {
-				currentGoalLocation = centerOf(next);
+				if (exploring) {
+					currentGoalLocation = centerOf(next);
+				} else {
+					currentGoalLocation = getSolverGoalLocation(currentCell,
+							next);
+				}
 			}
 		}
 
@@ -264,5 +272,34 @@ public class RobotData {
 	public Point<Double> centerOf(Point<Integer> cell) {
 		return new Point<Double>((cell.x + 0.5) * Constants.CELL_WIDTH,
 				(cell.y + 0.5) * Constants.CELL_WIDTH);
+	}
+
+	public static Point<Double> getSolverGoalLocation(Point<Integer> current,
+			Point<Integer> next) {
+		Direction directionTo = current.directionTo(next);
+		double offset = 0.1;
+		switch (directionTo) {
+			case EAST :
+				return new Point<Double>(
+						(current.x + 1 + offset) * Constants.CELL_WIDTH,
+						(current.y + 0.5) * Constants.CELL_WIDTH);
+
+			case NORTH :
+				return new Point<Double>(
+						(current.x + 0.5) * Constants.CELL_WIDTH,
+						(current.y + 1 + offset) * Constants.CELL_WIDTH);
+
+			case SOUTH :
+				return new Point<Double>(
+						(current.x + 0.5) * Constants.CELL_WIDTH,
+						(current.y - offset) * Constants.CELL_WIDTH);
+
+			case WEST :
+				return new Point<Double>(
+						(current.x - offset) * Constants.CELL_WIDTH,
+						(current.y + 0.5) * Constants.CELL_WIDTH);
+
+		}
+		return new Point<Double>(-1.0, -1.0);
 	}
 }
