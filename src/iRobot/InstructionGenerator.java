@@ -71,8 +71,13 @@ public class InstructionGenerator {
 	}
 
 	public static MotorData generateSolverMotorData(RobotData robotData) {
+
 		Point<Integer> current = robotData.getCurrentCell();
 		Point<Integer> next = robotData.nextCell();
+
+		if (next.x == next.x) { // Remove this to test the code below.
+			return generateExploringMotorData(robotData);
+		}
 
 		if (next.x == -1)
 			return new MotorData(0, 0);

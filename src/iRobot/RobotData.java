@@ -164,6 +164,7 @@ public class RobotData {
 	 */
 	private void setNextPhase() {
 		// Including redundant breaks because C++ needs them.
+		path.clear();
 		switch (phase) {
 			case EXPLORING :
 				phase = Phase.RETURNING;
@@ -228,6 +229,10 @@ public class RobotData {
 
 	public Point<Double> getLocationInMaze() {
 		return locationInMaze;
+	}
+
+	public Point<Integer> getGoalCell() {
+		return goalCell;
 	}
 
 	/*

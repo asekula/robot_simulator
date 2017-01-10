@@ -52,7 +52,7 @@ public class Brain {
 			robotData.fixLocation(sensorData, map);
 
 			Solver.modifyPath(map, robotData.getCurrentCell(),
-					robotData.getPath());
+					robotData.getGoalCell(), robotData.getPath());
 					// ^Does nothing if it already found a path.
 
 			/*

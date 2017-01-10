@@ -1,2 +1,12 @@
 
-Current localization and mapping test results on a 16 by 16 maze: 94 out of 100. 
+Test results as of commit f04d06397f3e8f1ee0467404d02528d52457069e:
+	94 out of 100 (for a 16 by 16 maze)
+
+**************
+
+Todo:
+	1. Explorer: search for next unknown cell.
+	2. Solver: Precomputing faster values (straight stretches of 2 or more are faster than turns).
+	3. Instruction generator: Solving instructions.
+	(4. Perfect localization.)
+	(5. Test on real robot.)
