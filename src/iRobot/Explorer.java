@@ -1,5 +1,6 @@
 package iRobot;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.jgrapht.alg.DijkstraShortestPath;
@@ -72,9 +73,57 @@ public class Explorer {
 			traversedPath.removeAll(path);
 		} else {
 			if (map.needsWallData()) {
-				System.out.println("Todo: This case.");
+
+				// There's probably a better way of addressing this one special
+				// case...
+
+				System.out.println("Special case.");
+				List<DefaultWeightedEdge> shortest = DijkstraShortestPath
+						.findPathBetween(map.stringGraph,
+								currentCell.toVertex(),
+								map.someCellThatNeedsData().toVertex());
+				// Guaranteed that a cell needs data.
+
+				Solver.convertPath(map, shortest, path, currentCell);
+				removeUnknownConnections(map, path);
+
+				traversedPath.removeAll(path);
+				System.out.println("Problem solved: " + (!path.isEmpty()));
+
 			}
 		}
+	}
+
+	private static void removeUnknownConnections(Map map,
+			LinkedList<Point<Integer>> path) {
+
+		LinkedList<Point<Integer>> fixed = new LinkedList<Point<Integer>>();
+		if (path.size() >= 2) {
+			fixed.add(path.getFirst());
+			Iterator<Point<Integer>> iter = path.iterator();
+			Point<Integer> current = iter.next();
+			while (iter.hasNext()) {
+				Point<Integer> next = iter.next();
+				if (map.stringGraph.containsEdge(current.toVertex(),
+						next.toVertex())) {
+					if (map.stringGraph.getEdgeWeight(
+							map.stringGraph.getEdge(current.toVertex(),
+									next.toVertex())) != Map.OPENING_WEIGHT) {
+						break;
+					} else {
+						fixed.add(next);
+					}
+				} else {
+					break;
+				}
+
+				current = next;
+			}
+		}
+
+		path.clear();
+		path.addAll(fixed);
+		// There's probably a more memory-conscious way of doing that.
 	}
 
 	/*

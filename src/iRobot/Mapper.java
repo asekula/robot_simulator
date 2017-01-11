@@ -208,8 +208,6 @@ public class Mapper {
 		for (int i = 0; i < Constants.MAZE_WIDTH; i++) {
 			for (int j = 0; j < Constants.MAZE_WIDTH; j++) {
 				if (map.stringGraph.edgesOf(i + "," + j).size() == 1) {
-					DefaultWeightedEdge e = map.stringGraph.edgesOf(i + "," + j)
-							.iterator().next();
 					setOpeningChain(map, new Point<Integer>(i, j));
 				}
 			}

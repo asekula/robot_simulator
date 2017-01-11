@@ -538,4 +538,19 @@ public class Map {
 		}
 		return false;
 	}
+
+	// Called when needsWallData() returned true.
+	public Point<Integer> someCellThatNeedsData() {
+		Point<Integer> cell;
+		for (int i = 0; i < Constants.MAZE_WIDTH; i++) {
+			for (int j = 0; j < Constants.MAZE_WIDTH; j++) {
+				cell = new Point<Integer>(i, j);
+				if (needsWallData(cell)) {
+					return cell;
+				}
+			}
+		}
+
+		return new Point<Integer>(-1, -1);
+	}
 }

@@ -5,9 +5,7 @@ Test results for exploration as of commit f04d06397f3e8f1ee0467404d02528d5245706
 **************
 
 Todo:
-	1. Fix that one Solver bug (when the path changes due to localization error).
-		(can do this by not removing the cell from the path until it reaches 2nd cell in path,
-		thus not relying on currentCell to get the goalLocation). 
-	2. Perfect localization.
-	3. Test on real robot (including converting to C++).
-	4. Optimize code if needed (a few places that we can do this).
+	1. Perfect localization.
+	2. Test on real robot (including converting to C++).
+	3. Optimize code if needed (a few places that we can do this).
+	(4. Speed the robot up on long stretches. Also preprocessing for Dijkstra's in the Solver.)
