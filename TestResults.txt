@@ -5,7 +5,10 @@ Test results for exploration as of commit f04d06397f3e8f1ee0467404d02528d5245706
 **************
 
 Todo:
-	1. Perfect localization.
-	2. Test on real robot (including converting to C++).
-	3. Optimize code if needed (a few places that we can do this).
-	(4. Speed the robot up on long stretches. Also preprocessing for Dijkstra's in the Solver.)
+	1. Calibration.
+	2. Alter sensor locations.
+	3. Collect new error variables, make them constants.
+	4. Perfect localization.
+	5. Test on real robot (including converting to C++).
+	6. Optimize code if needed (a few places that we can do this).
+	(7. Speed the robot up on long stretches. Also preprocessing for Dijkstra's in the Solver.)

@@ -109,7 +109,7 @@ public class InstructionGenerator {
 					curveFactor = (int) (rotate - 360);
 				}
 
-				curveFactor /= 4;
+				curveFactor /= 8;
 
 				return new MotorData(STRAIGHT_VALUE + (curveFactor * -1),
 						STRAIGHT_VALUE + curveFactor);

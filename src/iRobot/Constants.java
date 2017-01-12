@@ -22,12 +22,12 @@ public class Constants {
 	public static final double WHEEL_DIAMETER = 2;
 
 	// The center of the maze is at (CENTER_CELL, CENTER_CELL).
-	public static final int CENTER_CELL = 5;
+	public static final int CENTER_CELL = 4;
 
 	// The max cell in the maze is at (MAZE_WIDTH - 1, MAZE_WIDTH - 1).
-	public static final int MAZE_WIDTH = 10;
+	public static final int MAZE_WIDTH = 5;
 
-	public static final int NUM_REMOVED_WALLS = 0;
+	public static final int NUM_REMOVED_WALLS = 10;
 
 	// Todo: Figure these out.
 	public static final double IR_MAX = 15; // In cms.
@@ -38,7 +38,7 @@ public class Constants {
 	// Pertaining the applet:
 	public static final int SCALE_FACTOR = 3;
 
-	public static int APPLET_DELAY = 4;
+	public static int APPLET_DELAY = 20;
 
 	public static int EXTRA_ROBOT_DELAY = 0;
 
