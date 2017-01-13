@@ -249,33 +249,4 @@ public class Geometry {
 				&& (y <= Constants.CELL_WIDTH - dist) && (y >= dist));
 	}
 
-	// side2 hits the back corner.
-	public static double calculateOffset(double side1, double theta,
-			double side2) {
-
-		double angleAtCorner = getAngleAtCorner(side1, theta, side2);
-		double offset = (angleAtCorner + theta + 270) % 360;
-
-		return offset; // Should this be -offset?
-	}
-
-	// side2 hits the back corner.
-	public static Point<Double> calculateStartingLocation(double side1,
-			double theta, double side2) {
-		double angleAtCorner = getAngleAtCorner(side1, theta, side2);
-		return getRelativePoint(new Point<Double>(0.0, 0.0), 0, angleAtCorner,
-				side2);
-	}
-
-	private static double getAngleAtCorner(double side1, double theta,
-			double side2) {
-
-		double side3 = Math.sqrt((side1 * side1) + (side2 * side2)
-				- (2 * side1 * side2 * Math.cos(Math.toRadians(theta))));
-		double cosAngleAtCorner = ((side2 * side2) + (side3 * side3)
-				- (side1 * side1)) / (2 * side2 * side3);
-
-		return (Math.toDegrees(Math.acos(cosAngleAtCorner)) + 360) % 360;
-	}
-
 }

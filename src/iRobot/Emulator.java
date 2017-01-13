@@ -9,8 +9,7 @@ public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
 
-	// Orientation is the true orientation
-	private double orientation, accidentalOffset;
+	private double orientation;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
 	private double frontIR, leftIR, rightIR;
 	private int leftTacho;
@@ -19,8 +18,7 @@ public class Emulator implements Environment {
 	private Map map;
 
 	public Emulator() {
-		accidentalOffset = 360 + random(-20, -1); // Set random
-		orientation = accidentalOffset;
+		orientation = 0; // Set random
 		leftIR = -1;
 		rightIR = -1;
 		frontIR = -1;
@@ -28,17 +26,9 @@ public class Emulator implements Environment {
 		rightTacho = 0;
 		motorRSpeed = 0;
 		motorLSpeed = 0;
-		locationInMaze = new Point<Double>(
-				Constants.CELL_WIDTH / 2 + random(-3, 3),
-				Constants.CELL_WIDTH / 2 + random(-3, 3)); // Set random
-
-		System.out.println("Emulator offset: " + orientation);
-		System.out.println("Emulator location: " + locationInMaze);
+		locationInMaze = new Point<Double>(Constants.CELL_WIDTH / 2,
+				Constants.CELL_WIDTH / 2); // Set random
 		map = new Map(Map.generateRandomMaze());
-	}
-
-	private double random(double low, double high) {
-		return low + ((high - low) * Math.random());
 	}
 
 	/*
@@ -133,31 +123,30 @@ public class Emulator implements Environment {
 				(int) (locationInMaze.y / Constants.CELL_WIDTH));
 
 		// Draws the goal location as a yellow circle.
-		if (robotData != null) {
-			if (robotData.getPhase() == Phase.EXPLORING) {
-				drawGoalLocation(g, robotData.nextGoalLocation(true));
-			} else {
-				drawGoalLocation(g, robotData.nextGoalLocation(false));
-			}
-			drawPath(g, robotData.getPath());
+		if (robotData.getPhase() == Phase.EXPLORING) {
+			drawGoalLocation(g, robotData.nextGoalLocation(true));
+		} else {
+			drawGoalLocation(g, robotData.nextGoalLocation(false));
 		}
+		drawPath(g, robotData.getPath());
 
 		// map.drawTrueMaze(g);
 
-		drawSensors(g);
+		// drawSensors(g);
 
 		g2.setColor(Color.BLACK);
 		g2.drawString(currentCell.toString(), 10, 20);
 		drawRobot(g2, locationInMaze, orientation);
 
-		if (robotData != null) {
-			g2.setColor(Color.GREEN);
-			g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
+		g2.setColor(Color.GREEN);
+		g2.drawString(robotData.getCurrentCell().toString(), 10, 40);
 
-			// Draws the robot's perceived location.
-			drawRobot(g2, robotData.getLocationInMaze(),
-					robotData.getTrueOrientation());
-		}
+		// Draws the robot's perceived location.
+		drawRobot(g2, robotData.getLocationInMaze(),
+				robotData.getTrueOrientation());
+
+		// Draw orientation line.
+
 	}
 
 	private void drawSensors(Graphics g) {
@@ -273,7 +262,7 @@ public class Emulator implements Environment {
 	}
 
 	public int readIMU() {
-		return (int) ((orientation - accidentalOffset + 360) % 360);
+		return (int) orientation;
 	}
 
 	public int readLeftTacho() {

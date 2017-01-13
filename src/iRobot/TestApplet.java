@@ -22,6 +22,9 @@ public class TestApplet extends Applet {
 		emulator = new Emulator();
 		buffer = new DataBuffer(emulator);
 
+		robotData = buffer.calibrate();
+		brain = new Brain(robotData);
+
 		// Thread that runs the emulator.
 		new Thread() {
 			public void run() {
@@ -36,18 +39,12 @@ public class TestApplet extends Applet {
 		new Thread() {
 			public void run() {
 				delay();
-				delay();
-
-				robotData = buffer.calibrate();
-				brain = new Brain(robotData);
-
 				SensorData sensorData;
 				MotorData motorData;
 				do {
 					sensorData = buffer.getSensorData();
 					motorData = brain.computeMotorData(sensorData);
 					buffer.moveRobotMotors(motorData);
-
 					/*
 					 * Note: Assuming that the robot will not move too much in
 					 * between reading the sensor data and outputting the motor
@@ -98,8 +95,6 @@ public class TestApplet extends Applet {
 	 */
 	public void paint(Graphics g) {
 		emulator.drawEnvironment(g, robotData);
-		if (brain != null) {
-			brain.getMap().drawRobotMap(g, emulator.getMap());
-		}
+		brain.getMap().drawRobotMap(g, emulator.getMap());
 	}
 }
