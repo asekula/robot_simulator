@@ -1,5 +1,7 @@
 package iRobot;
 
+import java.util.LinkedList;
+
 /*
  * Collects the primary geometry-heavy methods that both robotData and the emulator use.
  */
@@ -249,4 +251,62 @@ public class Geometry {
 				&& (y <= Constants.CELL_WIDTH - dist) && (y >= dist));
 	}
 
+	// Calibration code below. We will probably redo this.
+
+	/*
+	 * Using a lot of data to be more precise. Watch out for the size of this,
+	 * especially when running on the arduino.
+	 * 
+	 * Todo: Spin it around the entire cell, and use *all* the data to get the
+	 * most precise offset. It is important that this value is as accurate as
+	 * possible. The math is correct, only the input data isn't very precise.
+	 */
+	public static double calculateOffset(
+			LinkedList<Point<Double>> angleDistPairs) {
+
+		double offsetTotal = 0;
+		int total = 0;
+		int size = angleDistPairs.size();
+
+		if (size >= 2) {
+			Point<Double> current, next;
+			for (int i = 0; i < 1; i++) {
+				current = angleDistPairs.get(0);
+				next = angleDistPairs.get(size - 1);
+
+				double side1 = current.y;
+				double side2 = next.y;
+				double theta = current.x - next.x;
+
+				double angleAtCorner = getAngleAtCorner(side1, theta, side2);
+				double offset = (angleAtCorner + theta + 270) % 360;
+
+				offsetTotal += offset;
+				total += 1;
+			}
+
+			return ((offsetTotal / total) + 360) % 360;
+		} else {
+			return 0;
+		}
+	}
+
+	// side2 hits the back corner.
+	public static Point<Double> calculateStartingLocation(double side1,
+			double theta, double side2) {
+		double angleAtCorner = getAngleAtCorner(side1, theta, side2);
+		return getRelativePoint(new Point<Double>(0.0, 0.0), 0, angleAtCorner,
+				side2);
+	}
+
+	private static double getAngleAtCorner(double side1, double theta,
+			double side2) {
+
+		double side3 = Math.sqrt((side1 * side1) + (side2 * side2)
+				- (2 * side1 * side2 * Math.cos(Math.toRadians(theta))));
+		double cosAngleAtCorner = ((side2 * side2) + (side3 * side3)
+				- (side1 * side1)) / (2 * side2 * side3);
+
+		return (Math.toDegrees(Math.acos(cosAngleAtCorner)) + 360) % 360;
+	}
 }
