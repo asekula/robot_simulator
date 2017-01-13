@@ -9,7 +9,7 @@ public class Emulator implements Environment {
 
 	// Todo: Figure out speeds/time and what should go here.
 
-	private double orientation;
+	private double orientation, accidentalOffset;
 	private int motorLSpeed, motorRSpeed; // Q: What speed unit?
 	private double frontIR, leftIR, rightIR;
 	private int leftTacho;
@@ -29,6 +29,7 @@ public class Emulator implements Environment {
 		locationInMaze = new Point<Double>(Constants.CELL_WIDTH / 2,
 				Constants.CELL_WIDTH / 2); // Set random
 		map = new Map(Map.generateRandomMaze());
+		accidentalOffset = Math.random() * 4 - 2;
 	}
 
 	/*
@@ -207,7 +208,6 @@ public class Emulator implements Environment {
 					current = next;
 				}
 			} catch (Exception e) {
-				System.out.println("Could not draw path.");
 			}
 
 		}
@@ -262,7 +262,7 @@ public class Emulator implements Environment {
 	}
 
 	public int readIMU() {
-		return (int) orientation;
+		return (int) ((orientation + accidentalOffset + 360) % 360);
 	}
 
 	public int readLeftTacho() {
