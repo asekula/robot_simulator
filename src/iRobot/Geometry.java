@@ -14,6 +14,25 @@ public class Geometry {
 			double orientationBefore, double orientationChange, double leftArc,
 			double rightArc) {
 
+		/*
+		 * Important: This is where the robot uses the fact that the motors are
+		 * not directly below the side sensors. Without the next three lines it
+		 * would treat the motors as having the same location as the side
+		 * sensors.
+		 */
+
+		Point<Double> pointBetweenMotors = getRelativePoint(location,
+				orientationBefore, 180, Constants.MOTOR_OFFSET);
+		Point<Double> curved = curveRobotHelper(pointBetweenMotors,
+				orientationBefore, orientationChange, leftArc, rightArc);
+		return getRelativePoint(curved, orientationBefore + orientationChange,
+				0, Constants.MOTOR_OFFSET);
+	}
+
+	public static Point<Double> curveRobotHelper(Point<Double> location,
+			double orientationBefore, double orientationChange, double leftArc,
+			double rightArc) {
+
 		if (orientationChange == 0) {
 			return getRelativePoint(location, orientationBefore, 0, leftArc);
 		}

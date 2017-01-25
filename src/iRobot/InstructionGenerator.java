@@ -2,8 +2,8 @@ package iRobot;
 
 public class InstructionGenerator {
 
-	public static int STRAIGHT_VALUE = 10; // Q: What to put here?
-	public static int ROTATION_VALUE = 2; // ^Same
+	private static int STRAIGHT_VALUE = Constants.STRAIGHT_VALUE;
+	private static int ROTATION_VALUE = Constants.ROTATION_VALUE;
 
 	public static MotorData generateExploringMotorData(RobotData robotData) {
 		/*
@@ -84,8 +84,6 @@ public class InstructionGenerator {
 	private static MotorData motorDataToCurveRobot(Point<Double> current,
 			Point<Double> goal, double theta) {
 
-		// double a = 0, b = 0;
-
 		double rotate = angleToRotate(current, goal, theta);
 
 		int rotatingMultiplier;// 1 if needs to rotate left, -1 if right.
@@ -118,17 +116,6 @@ public class InstructionGenerator {
 						ROTATION_VALUE * rotatingMultiplier);
 			}
 		}
-
-		// b is directly proportional with the difference between theta and
-		// desired theta. (and theta and angleToRotate)
-
-		// if the angle difference is too large, a is smaller.
-		// otherwise a is just a constant
-
-		// returns (a + b, a - b) where b depends on how much rotation is
-		// needed, and a depends on how much space needs to be covered.
-		// return new MotorData((int) Math.round(a + b), (int) Math.round(a -
-		// b));
 	}
 
 	/*

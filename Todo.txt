@@ -1,20 +1,16 @@
 
-Test results for exploration as of commit f04d06397f3e8f1ee0467404d02528d52457069e:
-	94 out of 100 (for a 16 by 16 maze)
-
-**************
-
-Todo, before we test on Robot:
+Before we test on robot:
 	- Localization.
-	- Fix motor locations (should be quick).
 	- Calibration (if we do this with code).
 	- Convert to C (if Java doesn't work).
-	
-Todo, after we test on Robot:
+		
+After we test on robot:
 	- Optimize if needed (i.e. save memory if running out on the Arduino, optimize speed
 	if the Arduino is too slow, and optimize code space if the Arduino cannot store the
 	code).
 	- Speed up robot on long stretches.
 	- Preprocessing for Dijkstras (i.e. adding extra edges for straight paths, to
 	let the solver know that straight paths are a little faster).
+	- Touch up InstructionGenerator if it's being wonky on the real robot.
+	(- If we still get the path error after redoing localization, fix it.)
 	

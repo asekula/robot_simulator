@@ -51,8 +51,8 @@ public class RobotData {
 	 * maze. Note that we can change the precision to be a smaller range.
 	 * 
 	 * Also note: locationInCell is the location of the *center* of the robot,
-	 * which we will say is the point on the line that goes through the two
-	 * motors, and is equidistant to the two motors.
+	 * which we will say is the intersection of the three sensor lines, given
+	 * that the sensor lines of the left and right sensors are equal.
 	 */
 	private Point<Double> locationInMaze;
 

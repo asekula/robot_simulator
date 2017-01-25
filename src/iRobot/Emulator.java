@@ -133,7 +133,7 @@ public class Emulator implements Environment {
 
 		// map.drawTrueMaze(g);
 
-		// drawSensors(g);
+		drawSensors(g);
 
 		g2.setColor(Color.BLACK);
 		g2.drawString(currentCell.toString(), 10, 20);

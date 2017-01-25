@@ -57,10 +57,9 @@ public class Localizer {
 		p2 = shiftAlongSensorLine(leftDist, thetaL, locationInMaze, map);
 		p3 = shiftAlongSensorLine(rightDist, thetaR, locationInMaze, map);
 
-		double LOCALIZATION_ERROR = 2;
 		Point<Double> avg = avgData(locationInMaze, p1, p2, p3);
 		if (Geometry.within(Geometry.distanceBetween(avg, locationInMaze), 0,
-				LOCALIZATION_ERROR)) {
+				Constants.LOCALIZATION_ERROR)) {
 			return avg;
 		} else {
 			return locationInMaze;

@@ -12,6 +12,9 @@ public class Constants {
 	// Distance from front IR to locationInCell.
 	public static final double FRONT_IR_TO_CENTER = 3;
 
+	// Distance between the center and the motor midpoint.
+	public static final double MOTOR_OFFSET = 1;
+
 	public static final double DISTANCE_BETWEEN_MOTORS = 7;
 
 	public static final double CELL_WIDTH = 20;
@@ -27,12 +30,12 @@ public class Constants {
 	// The max cell in the maze is at (MAZE_WIDTH - 1, MAZE_WIDTH - 1).
 	public static final int MAZE_WIDTH = 10;
 
-	public static final int NUM_REMOVED_WALLS = 0;
+	public static final int NUM_REMOVED_WALLS = 10;
 
 	// Todo: Figure these out.
 	public static final double IR_MAX = 15; // In cms.
 
-	// For the emulator.
+	// For the emulator. Only used to move motors.
 	public static double TIME_STEP = 0.05; // No idea what to put here.
 
 	// Pertaining the applet:
@@ -42,9 +45,16 @@ public class Constants {
 
 	public static int EXTRA_ROBOT_DELAY = 0;
 
+	// ********Instruction Generator*********
+	public static int STRAIGHT_VALUE = 10;
+	public static int ROTATION_VALUE = 2;
+
 	// *********Errors Variables Below*********
-	// (nothing tweakable outside of these)
 	// (set these to private to figure out where they're used)
+
+	// Used in localization. If new point is farther than this many
+	// cms away from input point, it doesn't update the input point.
+	public static double LOCALIZATION_ERROR = 2;
 
 	public static double MAX_SHIFT_DISTANCE = 3;
 
@@ -52,7 +62,7 @@ public class Constants {
 	// the goal location to say that the robot reached the goal.
 	public static double MAX_DISTANCE_TO_GOAL = 2;
 
-	// Mapper uses the following:
+	// ****Mapper error variables****
 
 	// Theta is within x degrees of a main direction to be used in mapper.
 	public static double CLOSE_TO_MAIN_DIRECTION = 10;
