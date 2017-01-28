@@ -13,7 +13,7 @@ public class Constants {
 	public static final double FRONT_IR_TO_CENTER = 3;
 
 	// Distance between the center and the motor midpoint.
-	public static final double MOTOR_OFFSET = 1;
+	public static final double MOTOR_OFFSET = 0;
 
 	public static final double DISTANCE_BETWEEN_MOTORS = 7;
 
@@ -25,12 +25,12 @@ public class Constants {
 	public static final double WHEEL_DIAMETER = 2;
 
 	// The center of the maze is at (CENTER_CELL, CENTER_CELL).
-	public static final int CENTER_CELL = 5;
+	public static final int CENTER_CELL = 8;
 
 	// The max cell in the maze is at (MAZE_WIDTH - 1, MAZE_WIDTH - 1).
-	public static final int MAZE_WIDTH = 10;
+	public static final int MAZE_WIDTH = 16;
 
-	public static final int NUM_REMOVED_WALLS = 10;
+	public static final int NUM_REMOVED_WALLS = 20;
 
 	// Todo: Figure these out.
 	public static final double IR_MAX = 15; // In cms.
@@ -39,7 +39,7 @@ public class Constants {
 	public static double TIME_STEP = 0.05; // No idea what to put here.
 
 	// Pertaining the applet:
-	public static final int SCALE_FACTOR = 3;
+	public static final int SCALE_FACTOR = 2;
 
 	public static int APPLET_DELAY = 4;
 

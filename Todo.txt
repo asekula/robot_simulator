@@ -1,10 +1,10 @@
 
 Before we test on robot:
 	- Localization.
-	- Calibration (if we do this with code).
-	- Convert to C (if Java doesn't work).
-		
+	- Get Java working on Arduino.
+	
 After we test on robot:
+	- Calibration (if we do this with code).
 	- Optimize if needed (i.e. save memory if running out on the Arduino, optimize speed
 	if the Arduino is too slow, and optimize code space if the Arduino cannot store the
 	code).
@@ -12,5 +12,6 @@ After we test on robot:
 	- Preprocessing for Dijkstras (i.e. adding extra edges for straight paths, to
 	let the solver know that straight paths are a little faster).
 	- Touch up InstructionGenerator if it's being wonky on the real robot.
+	- Fail-safe to stop the robot from hitting walls.
 	(- If we still get the path error after redoing localization, fix it.)
 	
