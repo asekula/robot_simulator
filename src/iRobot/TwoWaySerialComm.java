@@ -1,137 +1,153 @@
+
 package iRobot;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class TwoWaySerialComm implements Environment {
+  
+  PrintWriter pw;
+  BufferedReader br;
+  double frontIR, leftIR, rightIR;
+  double orientation;
+  int leftTacho, rightTacho;
 
-	void connect(String portName) throws Exception {
-		CommPortIdentifier portIdentifier = CommPortIdentifier
-				.getPortIdentifier(portName);
-		if (portIdentifier.isCurrentlyOwned()) {
-			System.out.println("Error: Port is currently in use");
-		} else {
-			CommPort commPort = portIdentifier.open(this.getClass().getName(),
-					2000);
+  void connect(String portName) throws Exception {
 
-			if (commPort instanceof SerialPort) {
-				SerialPort serialPort = (SerialPort) commPort;
-				serialPort.setSerialPortParams(57600, SerialPort.DATABITS_8,
-						SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+    CommPortIdentifier portIdentifier = CommPortIdentifier
+        .getPortIdentifier(portName);
+    if (portIdentifier.isCurrentlyOwned()) {
+      System.out.println("Error: Port is currently in use");
+    } else {
+      CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
 
-				InputStream in = serialPort.getInputStream();
-				OutputStream out = serialPort.getOutputStream();
+      if (commPort instanceof SerialPort) {
+        SerialPort serialPort = (SerialPort) commPort;
+        serialPort.setSerialPortParams(57600, SerialPort.DATABITS_8,
+            SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
-				(new Thread(new SerialReader(in))).start();
-				(new Thread(new SerialWriter(out))).start();
+        InputStream in = serialPort.getInputStream();
+        OutputStream out = serialPort.getOutputStream();
+        
+        PrintWriter pw = new PrintWriter(out);
+         br = new BufferedReader(new InputStreamReader(in));
 
-			} else {
-				System.out.println(
-						"Error: Only serial ports are handled by this example.");
-			}
-		}
-	}
+      } else {
+        System.out
+            .println("Error: Only serial ports are handled by this example.");
+      }
+    }
+  }
+  
+   void read() {
 
-	/** */
-	public static class SerialReader implements Runnable {
-		InputStream in;
+  
+    try {
+      String line;
+      while ((line = br.readLine()) != null) {
+        char c = line.charAt(0);
+        switch (c) {
 
-		public SerialReader(InputStream in) {
-			this.in = in;
-		}
 
-		public void run() {
-			byte[] buffer = new byte[1024];
-			int len = -1;
-			try {
-				while ((len = this.in.read(buffer)) > -1) {
-					System.out.print(new String(buffer, 0, len));
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        case 'l':
 
-	/** */
-	public static class SerialWriter implements Runnable {
-		OutputStream out;
+          leftIR = Double.parseDouble(line.substring(1));
+                      
+          break;
 
-		public SerialWriter(OutputStream out) {
-			this.out = out;
-		}
+        case 'r':
+          rightIR = Double.parseDouble(line.substring(1));
+          break;
 
-		public void run() {
-			try {
-				int c = 0;
-				while ((c = System.in.read()) > -1) {
-					this.out.write(c);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        case 'f':
+          frontIR =  Double.parseDouble(line.substring(1));
+          break;
+          
+        case 'i':
+          orientation =  Double.parseDouble(line.substring(1));
+          break;
+          
+        case 't':
+          if (line.substring(1, 2).equalsIgnoreCase("l")) {
+            leftTacho = Integer.parseInt(line.substring(2));
+          }
+          else {
+            rightTacho = Integer.parseInt(line.substring(2));
+          }
+          
+          break;
+        }
 
-	@Override
-	public double readLeftIR() {
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
 
-		// TODO Auto-generated method stub
-		return 0;
-	}
 
-	@Override
-	public double readRightIR() {
+  @Override
+  public double readLeftIR() {
 
-		// TODO Auto-generated method stub
-		return 0;
-	}
+    // TODO Auto-generated method stub
+    return leftIR;
+  }
+  
+  @Override
+  public double readRightIR() {
 
-	@Override
-	public double readFrontIR() {
+    // TODO Auto-generated method stub
+    return rightIR;
+  }
 
-		// TODO Auto-generated method stub
-		return 0;
-	}
+  @Override
+  public double readFrontIR() {
 
-	@Override
-	public int readIMU() {
+    // TODO Auto-generated method stub
+    return frontIR;
+  }
 
-		// TODO Auto-generated method stub
-		return 0;
-	}
+  @Override
+  public int readIMU() {
 
-	@Override
-	public int readLeftTacho() {
+    // TODO Auto-generated method stub
+    return (int)orientation;
+  }
 
-		// TODO Auto-generated method stub
-		return 0;
-	}
+  @Override
+  public int readLeftTacho() {
 
-	@Override
-	public int readRightTacho() {
+    // TODO Auto-generated method stub
+    return leftTacho;
+  }
 
-		// TODO Auto-generated method stub
-		return 0;
-	}
+  @Override
+  public int readRightTacho() {
 
-	@Override
-	public void setMotors(int left, int right) {
+    // TODO Auto-generated method stub
+    return rightTacho;
+  }
 
-		// TODO Auto-generated method stub
+  @Override
+  public void setMotors(int left, int right) {
+    
+    pw.println(left+" "+right+" "+1);
 
-	}
+    // TODO Auto-generated method stub
 
-	@Override
-	public void resetTachoCounts() {
+  }
 
-		// TODO Auto-generated method stub
+  @Override
+  public void resetTachoCounts() {
 
-	}
+    // TODO Auto-generated method stub
+
+  }
 }
