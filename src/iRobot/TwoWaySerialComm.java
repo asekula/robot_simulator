@@ -32,9 +32,12 @@ public class TwoWaySerialComm implements Environment {
 		// (b) matches the desired name.
 		//
 		CommPortIdentifier portIdentifier = null; // will be set if port found
+		System.out.println("Starting search.");
 		while (portIdentifiers.hasMoreElements()) {
 			CommPortIdentifier pid = (CommPortIdentifier) portIdentifiers
 					.nextElement();
+			System.out.println("Found: " + pid.getPortType() + " with name: " + pid.getName());
+
 			if (pid.getPortType() == CommPortIdentifier.PORT_SERIAL
 					&& pid.getName().equals(wantedPortName)) {
 				portIdentifier = pid;

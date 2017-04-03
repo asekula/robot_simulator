@@ -13,7 +13,8 @@ public class SerialCommRunner {
 	public static void main(String[] args) {
 		TwoWaySerialComm comm = new TwoWaySerialComm();
 		try {
-			comm.connect("COM3");
+			// comm.connect("usb-Teensyduino_USB_Serial_2331800-if00");
+			comm.connect("/dev/ttyACM0");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;

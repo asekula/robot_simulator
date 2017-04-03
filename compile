@@ -1,0 +1,2 @@
+javac src/iRobot/*.java -classpath jgrapht-core-1.0.0.jar:RXTXcomm.jar:comm.jar -d bin
+
