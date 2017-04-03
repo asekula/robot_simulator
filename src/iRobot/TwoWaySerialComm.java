@@ -10,144 +10,163 @@ import java.io.PrintWriter;
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
-
+import javax.comm.*;
+import java.util.*;
 
 public class TwoWaySerialComm implements Environment {
-  
-  PrintWriter pw;
-  BufferedReader br;
-  double frontIR, leftIR, rightIR;
-  double orientation;
-  int leftTacho, rightTacho;
 
-  void connect(String portName) throws Exception {
+	PrintWriter pw;
+	BufferedReader br;
+	double frontIR, leftIR, rightIR;
+	double orientation;
+	int leftTacho, rightTacho;
 
-    CommPortIdentifier portIdentifier = CommPortIdentifier
-        .getPortIdentifier(portName);
-    if (portIdentifier.isCurrentlyOwned()) {
-      System.out.println("Error: Port is currently in use");
-    } else {
-      CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
+	void connect(String portName) throws Exception {
 
-      if (commPort instanceof SerialPort) {
-        SerialPort serialPort = (SerialPort) commPort;
-        serialPort.setSerialPortParams(57600, SerialPort.DATABITS_8,
-            SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+		String wantedPortName = portName;
 
-        InputStream in = serialPort.getInputStream();
-        OutputStream out = serialPort.getOutputStream();
-        
-        PrintWriter pw = new PrintWriter(out);
-         br = new BufferedReader(new InputStreamReader(in));
+		Enumeration portIdentifiers = CommPortIdentifier.getPortIdentifiers();
+		//
+		// Check each port identifier if
+		// (a) it indicates a serial (not a parallel) port, and
+		// (b) matches the desired name.
+		//
+		CommPortIdentifier portIdentifier = null; // will be set if port found
+		while (portIdentifiers.hasMoreElements()) {
+			CommPortIdentifier pid = (CommPortIdentifier) portIdentifiers
+					.nextElement();
+			if (pid.getPortType() == CommPortIdentifier.PORT_SERIAL
+					&& pid.getName().equals(wantedPortName)) {
+				portIdentifier = pid;
+				break;
+			}
+		}
+		if (portIdentifier == null) {
+			System.err.println("Could not find serial port " + wantedPortName);
+			System.exit(1);
+		}
 
-      } else {
-        System.out
-            .println("Error: Only serial ports are handled by this example.");
-      }
-    }
-  }
-  
-   void read() {
+		if (portIdentifier.isCurrentlyOwned()) {
+			System.out.println("Error: Port is currently in use");
+		} else {
+			CommPort commPort = portIdentifier.open(this.getClass().getName(),
+					2000);
 
-  
-    try {
-      String line;
-      while ((line = br.readLine()) != null) {
-        char c = line.charAt(0);
-        switch (c) {
+			if (commPort instanceof SerialPort) {
+				SerialPort serialPort = (SerialPort) commPort;
+				serialPort.setSerialPortParams(57600, SerialPort.DATABITS_8,
+						SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
+				InputStream in = serialPort.getInputStream();
+				OutputStream out = serialPort.getOutputStream();
 
-        case 'l':
+				PrintWriter pw = new PrintWriter(out);
+				br = new BufferedReader(new InputStreamReader(in));
 
-          leftIR = Double.parseDouble(line.substring(1));
-                      
-          break;
+			} else {
+				System.out.println(
+						"Error: Only serial ports are handled by this example.");
+			}
+		}
+	}
 
-        case 'r':
-          rightIR = Double.parseDouble(line.substring(1));
-          break;
+	void read() {
 
-        case 'f':
-          frontIR =  Double.parseDouble(line.substring(1));
-          break;
-          
-        case 'i':
-          orientation =  Double.parseDouble(line.substring(1));
-          break;
-          
-        case 't':
-          if (line.substring(1, 2).equalsIgnoreCase("l")) {
-            leftTacho = Integer.parseInt(line.substring(2));
-          }
-          else {
-            rightTacho = Integer.parseInt(line.substring(2));
-          }
-          
-          break;
-        }
+		try {
+			String line;
+			while ((line = br.readLine()) != null) {
+				char c = line.charAt(0);
+				switch (c) {
 
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
+					case 'l' :
 
+						leftIR = Double.parseDouble(line.substring(1));
 
-  @Override
-  public double readLeftIR() {
+						break;
 
-    // TODO Auto-generated method stub
-    return leftIR;
-  }
-  
-  @Override
-  public double readRightIR() {
+					case 'r' :
+						rightIR = Double.parseDouble(line.substring(1));
+						break;
 
-    // TODO Auto-generated method stub
-    return rightIR;
-  }
+					case 'f' :
+						frontIR = Double.parseDouble(line.substring(1));
+						break;
 
-  @Override
-  public double readFrontIR() {
+					case 'i' :
+						orientation = Double.parseDouble(line.substring(1));
+						break;
 
-    // TODO Auto-generated method stub
-    return frontIR;
-  }
+					case 't' :
+						if (line.substring(1, 2).equalsIgnoreCase("l")) {
+							leftTacho = Integer.parseInt(line.substring(2));
+						} else {
+							rightTacho = Integer.parseInt(line.substring(2));
+						}
 
-  @Override
-  public int readIMU() {
+						break;
+				}
 
-    // TODO Auto-generated method stub
-    return (int)orientation;
-  }
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-  @Override
-  public int readLeftTacho() {
+	@Override
+	public double readLeftIR() {
 
-    // TODO Auto-generated method stub
-    return leftTacho;
-  }
+		// TODO Auto-generated method stub
+		return leftIR;
+	}
 
-  @Override
-  public int readRightTacho() {
+	@Override
+	public double readRightIR() {
 
-    // TODO Auto-generated method stub
-    return rightTacho;
-  }
+		// TODO Auto-generated method stub
+		return rightIR;
+	}
 
-  @Override
-  public void setMotors(int left, int right) {
-    
-    pw.println(left+" "+right+" "+1);
+	@Override
+	public double readFrontIR() {
 
-    // TODO Auto-generated method stub
+		// TODO Auto-generated method stub
+		return frontIR;
+	}
 
-  }
+	@Override
+	public int readIMU() {
 
-  @Override
-  public void resetTachoCounts() {
+		// TODO Auto-generated method stub
+		return (int) orientation;
+	}
 
-    // TODO Auto-generated method stub
+	@Override
+	public int readLeftTacho() {
 
-  }
+		// TODO Auto-generated method stub
+		return leftTacho;
+	}
+
+	@Override
+	public int readRightTacho() {
+
+		// TODO Auto-generated method stub
+		return rightTacho;
+	}
+
+	@Override
+	public void setMotors(int left, int right) {
+
+		pw.println(left + " " + right + " " + 1);
+
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void resetTachoCounts() {
+
+		// TODO Auto-generated method stub
+
+	}
 }
