@@ -7,7 +7,7 @@ public class GoStraightController implements Controller {
 	@Override
 	public MotorData computeMotorData(SensorData sensorData) {
 		count += 1;
-		return new MotorData(50, 50);
+		return new MotorData(10, 10);
 	}
 
 	@Override

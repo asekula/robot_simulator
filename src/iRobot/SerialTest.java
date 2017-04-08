@@ -218,6 +218,7 @@ public class SerialTest implements SerialPortEventListener, Environment {
 			motorData = controller.computeMotorData(sensorData);
 			System.out.println("Motor data: " + motorData);
 			buffer.moveRobotMotors(motorData);
+			Thread.sleep(1000);
 		} while (!controller.isFinished());
 
 		t.join();
