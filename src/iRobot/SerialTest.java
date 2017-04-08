@@ -271,7 +271,9 @@ public class SerialTest implements SerialPortEventListener, Environment {
 
 		// pw.println(left + " " + right + " " + 1);
 		try {
-			bw.write("" + left + " " + right + " " + 1);
+			String sending = "" + left + " " + right + " " + 1;
+			System.out.println(sending);
+			bw.write(sending);
 			bw.flush();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
