@@ -26,4 +26,10 @@ public class SensorData {
 		this.leftTachoCount = leftTacho;
 		this.rightTachoCount = rightTacho;
 	}
+
+	@Override
+	public String toString() {
+		return leftIR + "," + rightIR + "," + frontIR + "," + IMU + ","
+				+ leftTachoCount + "," + rightTachoCount;
+	}
 }

@@ -9,4 +9,9 @@ public class MotorData {
 		this.leftMotorValue = left;
 		this.rightMotorValue = right;
 	}
+
+	@Override
+	public String toString() {
+		return leftMotorValue + "," + rightMotorValue;
+	}
 }

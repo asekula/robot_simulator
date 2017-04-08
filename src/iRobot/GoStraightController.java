@@ -12,7 +12,7 @@ public class GoStraightController implements Controller {
 
 	@Override
 	public boolean isFinished() {
-		return (count > 10);
+		return (count > 1000);
 	}
 
 }
