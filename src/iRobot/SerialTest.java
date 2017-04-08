@@ -1,8 +1,11 @@
 package iRobot;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.Enumeration;
 
@@ -35,7 +38,7 @@ public class SerialTest implements SerialPortEventListener, Environment {
 	/** The output stream to the port */
 	private OutputStream output;
 	
-	//BufferedWriter bw;
+	BufferedWriter bw;
 
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 2000;
@@ -79,9 +82,9 @@ public class SerialTest implements SerialPortEventListener, Environment {
 			// open the streams
 			input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 			output = serialPort.getOutputStream();
-			 pw = new PrintWriter(output);
+			// pw = new PrintWriter(output);
 			
-		//	bw = new BufferedWriter(new OutputStreamWriter(output));
+			bw = new BufferedWriter(new OutputStreamWriter(output));
 
 			// add event listeners
 			serialPort.addEventListener(this);
@@ -239,7 +242,15 @@ public class SerialTest implements SerialPortEventListener, Environment {
   @Override
   public void setMotors(int left, int right) {
 
-    pw.println(left + " " + right + " " + 1);
+   // pw.println(left + " " + right + " " + 1);
+    try {
+      bw.write(""+left+" "+right+" "+1);
+      bw.flush();
+    } catch (IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+   
     
   }
 
