@@ -5,7 +5,7 @@ package iRobot;
  * robotData, and uses the mapper, the explorer/solver, and the instruction
  * generator.
  */
-public class Brain {
+public class Brain implements Controller {
 
 	/*
 	 * robotData: Represents the data that the robot has about itself, e.g.
