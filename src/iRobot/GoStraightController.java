@@ -7,12 +7,16 @@ public class GoStraightController implements Controller {
 	@Override
 	public MotorData computeMotorData(SensorData sensorData) {
 		count += 1;
-		return new MotorData(50, 50);
+		if ((count % 1000) < 500) {
+			return new MotorData(100, 100);
+		} else {
+			return new MotorData(-100, -100);
+		}
 	}
 
 	@Override
 	public boolean isFinished() {
-		return (count > 1000);
+		return false;
 	}
 
 }

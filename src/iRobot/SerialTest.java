@@ -105,7 +105,7 @@ public class SerialTest implements SerialPortEventListener, Environment {
 			try {
 				bw.close();
 				input.close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -189,7 +189,7 @@ public class SerialTest implements SerialPortEventListener, Environment {
 
 		SensorData sensorData;
 		MotorData motorData;
-		Controller controller = new GoStraightController();
+		Controller controller = new TurnIfWallController();
 		// Change this to change the controller used.
 
 		DataBuffer buffer = new DataBuffer(main);
@@ -199,7 +199,7 @@ public class SerialTest implements SerialPortEventListener, Environment {
 			motorData = controller.computeMotorData(sensorData);
 			System.out.println("Motor data: " + motorData);
 			buffer.moveRobotMotors(motorData);
-			Thread.sleep(1000);
+			//buffer.moveRobotMotors(new MotorData(0,0));
 		} while (!controller.isFinished());
 
 		t.join();
@@ -253,11 +253,11 @@ public class SerialTest implements SerialPortEventListener, Environment {
 
 		// pw.println(left + " " + right + " " + 1);
 		try {
-			String sending = "" + left + " " + right + " " + 1;
+			String sending = "S" + left + "|" + right + "|" + 1 + "E";
 			System.out.println(sending);
 			bw.write(sending);
 			bw.flush();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
