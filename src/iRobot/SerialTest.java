@@ -179,25 +179,6 @@ public class SerialTest implements SerialPortEventListener, Environment {
 		t.start();
 		Thread.sleep(3000);
 		System.out.println("Started");
-		// main.bw.write("100 100 1");
-		// main.bw.flush();
-
-		main.setMotors(100, 100);
-
-		Thread.sleep(3000);
-		System.out.println("Round 2");
-
-		// main.bw.write("-100 -100 1");
-		// main.bw.flush();
-		main.setMotors(-100, -100);
-
-		Thread.sleep(3000);
-		System.out.println("Round 2");
-
-		// main.bw.write("0 0 1");
-		// main.bw.flush();
-
-		main.setMotors(0, 0);
 
 		System.out.println("Reads -");
 		System.out.println("Left IR " + main.readLeftIR());
