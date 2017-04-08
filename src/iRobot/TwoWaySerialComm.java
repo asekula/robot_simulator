@@ -16,7 +16,7 @@ import java.util.*;
 public class TwoWaySerialComm implements Environment {
 
 	PrintWriter pw;
-	BufferedReader br;
+	BufferedReader input;
 	double frontIR, leftIR, rightIR;
 	double orientation;
 	int leftTacho, rightTacho;
@@ -64,7 +64,7 @@ public class TwoWaySerialComm implements Environment {
 				OutputStream out = serialPort.getOutputStream();
 
 				PrintWriter pw = new PrintWriter(out);
-				br = new BufferedReader(new InputStreamReader(in));
+				input = new BufferedReader(new InputStreamReader(in));
 
 			} else {
 				System.out.println(
@@ -77,7 +77,7 @@ public class TwoWaySerialComm implements Environment {
 
 		try {
 			String line;
-			while ((line = br.readLine()) != null) {
+			while ((line = input.readLine()) != null) {
 				char c = line.charAt(0);
 				switch (c) {
 

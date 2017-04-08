@@ -1,19 +1,24 @@
 package iRobot;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import gnu.io.CommPortIdentifier; 
-import gnu.io.SerialPort;
-import gnu.io.SerialPortEvent; 
-import gnu.io.SerialPortEventListener; 
+import java.io.PrintWriter;
 import java.util.Enumeration;
 
+import gnu.io.CommPortIdentifier;
+import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
 
-public class SerialTest implements SerialPortEventListener {
+
+public class SerialTest implements SerialPortEventListener, Environment {
 	SerialPort serialPort;
+	double frontIR, leftIR, rightIR;
+  double orientation;
+  int leftTacho, rightTacho;
+  PrintWriter pw;
+  
         /** The port we're normally going to use. */
 	private static final String PORT_NAMES[] = { 
 			"/dev/tty.usbserial-A9007UX1", // Mac OS X
@@ -30,7 +35,7 @@ public class SerialTest implements SerialPortEventListener {
 	/** The output stream to the port */
 	private OutputStream output;
 	
-	BufferedWriter bw;
+	//BufferedWriter bw;
 
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 2000;
@@ -74,7 +79,9 @@ public class SerialTest implements SerialPortEventListener {
 			// open the streams
 			input = new BufferedReader(new InputStreamReader(serialPort.getInputStream()));
 			output = serialPort.getOutputStream();
-			bw = new BufferedWriter(new OutputStreamWriter(output));
+			 pw = new PrintWriter(output);
+			
+		//	bw = new BufferedWriter(new OutputStreamWriter(output));
 
 			// add event listeners
 			serialPort.addEventListener(this);
@@ -101,21 +108,49 @@ public class SerialTest implements SerialPortEventListener {
 	public synchronized void serialEvent(SerialPortEvent oEvent) {
 		if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			try {
-				String inputLine=input.readLine();
-				System.out.println(inputLine);
-				inputLine=input.readLine();
-				System.out.println(inputLine);
-				inputLine=input.readLine();
-				System.out.println(inputLine);
-				inputLine=input.readLine();
-				System.out.println(inputLine);
-				inputLine=input.readLine();
-				System.out.println(inputLine);
+			  
+			  String line;
+	      while ((line = input.readLine()) != null) {
+	        char c = line.charAt(0);
+	        switch (c) {
+
+	          case 'l' :
+
+	            leftIR = Double.parseDouble(line.substring(1));
+
+	            break;
+
+	          case 'r' :
+	            rightIR = Double.parseDouble(line.substring(1));
+	            break;
+
+	          case 'f' :
+	            frontIR = Double.parseDouble(line.substring(1));
+	            break;
+
+	          case 'i' :
+	            orientation = Double.parseDouble(line.substring(1));
+	            break;
+
+	          case 't' :
+	            if (line.substring(1, 2).equalsIgnoreCase("l")) {
+	              leftTacho = Integer.parseInt(line.substring(2));
+	            } else {
+	              rightTacho = Integer.parseInt(line.substring(2));
+	            }
+
+	            break;
+	        }
+
+	      }	
 			} catch (Exception e) {
 				System.err.println(e.toString());
 			}
 		}
 		// Ignore all the other eventTypes, but you should consider the other ones.
+	
+	
+	
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -131,15 +166,87 @@ public class SerialTest implements SerialPortEventListener {
 		t.start();
 		Thread.sleep(3000);
 		System.out.println("Started");
-		main.bw.write("100 100 1");
-		main.bw.flush();
+//		main.bw.write("100 100 1");
+//		main.bw.flush();
+		
+		main.setMotors(100,100);
+		
 		Thread.sleep(3000);
 		System.out.println("Round 2");
-		main.bw.write("-100 -100 1");
-		main.bw.flush();
+		
+//		main.bw.write("-100 -100 1");
+//		main.bw.flush();
+		  main.setMotors(-100, -100);
+		
 		Thread.sleep(3000);
 		System.out.println("Round 2");
-		main.bw.write("0 0 1");
-		main.bw.flush();
+		
+//		main.bw.write("0 0 1");
+//		main.bw.flush();
+		  
+		  main.setMotors(0, 0);
+		
+		  System.out.println("Reads -");
+		  System.out.println("Left IR "+main.readLeftIR());
+      System.out.println("Right IR "+main.readRightIR());
+      System.out.println("Front IR "+main.readFrontIR());
+
+		  
 	}
+
+
+  @Override
+  public double readLeftIR() {
+
+    // TODO Auto-generated method stub
+    return leftIR;
+  }
+
+  @Override
+  public double readRightIR() {
+
+    // TODO Auto-generated method stub
+    return rightIR;
+  }
+
+  @Override
+  public double readFrontIR() {
+
+    // TODO Auto-generated method stub
+    return frontIR;
+  }
+
+  @Override
+  public int readIMU() {
+
+    // TODO Auto-generated method stub
+    return (int) orientation;
+  }
+
+  @Override
+  public int readLeftTacho() {
+
+    // TODO Auto-generated method stub
+    return leftTacho;
+  }
+
+  @Override
+  public int readRightTacho() {
+
+    // TODO Auto-generated method stub
+    return rightTacho;
+  }
+  @Override
+  public void setMotors(int left, int right) {
+
+    pw.println(left + " " + right + " " + 1);
+    
+  }
+
+  @Override
+  public void resetTachoCounts() {
+
+    // TODO Auto-generated method stub
+    
+  }
 }
